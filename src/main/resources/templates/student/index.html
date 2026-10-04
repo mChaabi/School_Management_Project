@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Dashboard', ~{::main}, 'home')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Welcome back 👋</h1>
+            <div class="breadcrumb">Here is what is happening in your school today.</div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-icon primary"><i class="bi bi-people-fill"></i></div>
+            <div><h3 th:text="${studentCount}">0</h3><p>Students</p></div>
+        </div>
+        <div class="stat">
+            <div class="stat-icon success"><i class="bi bi-person-workspace"></i></div>
+            <div><h3 th:text="${teacherCount}">0</h3><p>Teachers</p></div>
+        </div>
+        <div class="stat">
+            <div class="stat-icon warning"><i class="bi bi-journal-bookmark-fill"></i></div>
+            <div><h3 th:text="${courseCount}">0</h3><p>Courses</p></div>
+        </div>
+        <div class="stat">
+            <div class="stat-icon info"><i class="bi bi-card-checklist"></i></div>
+            <div><h3 th:text="${enrollmentCount}">0</h3><p>Enrollments</p></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3>Quick actions</h3></div>
+        <div class="card-body actions">
+            <a th:href="@{/students/new}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Student</a>
+            <a th:href="@{/teachers/new}" class="btn btn-light"><i class="bi bi-plus-lg"></i> Teacher</a>
+            <a th:href="@{/courses/new}" class="btn btn-light"><i class="bi bi-plus-lg"></i> Course</a>
+            <a th:href="@{/attendance}" class="btn btn-light"><i class="bi bi-calendar-check"></i> Take attendance</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

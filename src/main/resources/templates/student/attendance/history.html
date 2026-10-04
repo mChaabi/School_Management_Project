@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Attendance history</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; }
+        .cards { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: .75rem 1.25rem; text-align: center; }
+        .card strong { display: block; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+<h1>Attendance history - student <span th:text="${studentId}"></span></h1>
+<p><a th:href="@{/attendances}">&larr; Back to sheet</a></p>
+
+<div class="cards">
+    <div class="card"><strong th:text="${summary.present()}"></strong>Present</div>
+    <div class="card"><strong th:text="${summary.absent()}"></strong>Absent</div>
+    <div class="card"><strong th:text="${summary.late()}"></strong>Late</div>
+    <div class="card"><strong th:text="${summary.excused()}"></strong>Excused</div>
+    <div class="card"><strong th:text="${#numbers.formatDecimal(summary.percentage(), 1, 1)} + '%'"></strong>Attendance</div>
+</div>
+
+<table>
+    <thead>
+    <tr><th>Date</th><th>Status</th><th>Remark</th><th></th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${attendances}">
+        <td th:text="${a.date()}"></td>
+        <td th:text="${a.status()}"></td>
+        <td th:text="${a.remark()}"></td>
+        <td><a th:href="@{/attendances/delete/{id}(id=${a.id()}, studentId=${studentId})}"
+               onclick="return confirm('Delete this record?')">Delete</a></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(attendances)}"><td colspan="4">No attendance records yet.</td></tr>
+    </tbody>
+</table>
+</body>
+</html>

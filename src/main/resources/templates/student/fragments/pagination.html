@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="pagination" th:fragment="pagination(page, url, keyword)"
+     th:if="${page.totalPages > 1}">
+    <a th:classappend="${page.first} ? 'disabled'"
+       th:href="@{${url}(page=${page.number - 1}, keyword=${keyword})}">
+        <i class="bi bi-chevron-left"></i></a>
+
+    <a th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+       th:href="@{${url}(page=${i}, keyword=${keyword})}"
+       th:text="${i + 1}"
+       th:classappend="${i == page.number} ? 'active'"></a>
+
+    <a th:classappend="${page.last} ? 'disabled'"
+       th:href="@{${url}(page=${page.number + 1}, keyword=${keyword})}">
+        <i class="bi bi-chevron-right"></i></a>
+</nav>
+</body>
+</html>

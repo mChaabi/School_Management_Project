@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer class="footer" th:fragment="footer">
+    <span>&copy; <span th:text="${#temporals.createNow().year}">2026</span>
+          <strong>EduManage</strong>. All rights reserved.</span>
+    <span class="footer-links">
+        <a href="#">Help</a>
+        <a href="#">Privacy</a>
+        <a href="#">Contact</a>
+    </span>
+</footer>
+</body>
+</html>

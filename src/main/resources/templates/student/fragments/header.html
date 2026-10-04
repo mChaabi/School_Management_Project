@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="topbar" th:fragment="topbar(title)">
+    <div class="topbar-left">
+        <button class="icon-btn" id="menuToggle" aria-label="Toggle menu">
+            <i class="bi bi-list"></i>
+        </button>
+        <h2 class="topbar-title" th:text="${title}">Title</h2>
+    </div>
+
+    <div class="topbar-right">
+        <button class="icon-btn" aria-label="Notifications">
+            <i class="bi bi-bell"></i><span class="dot"></span>
+        </button>
+        <div class="user">
+            <div class="avatar">A</div>
+            <div class="user-info">
+                <strong>Admin</strong>
+                <small>Administrator</small>
+            </div>
+        </div>
+    </div>
+</header>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Student List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+
+<h2>Students Management</h2>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form th:action="@{/students}" method="get" class="d-flex">
+            <input type="text" name="keyword" class="form-control me-2" placeholder="Search by name..." th:value="${keyword}">
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+        </form>
+    </div>
+    <div class="col-md-6 text-end">
+        <a th:href="@{/students/new}" class="btn btn-primary">Add New Student</a>
+    </div>
+</div>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+    <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Gender</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="student : ${students.content}">
+        <td th:text="${student.id}"></td>
+        <td th:text="${student.firstName}"></td>
+        <td th:text="${student.lastName}"></td>
+        <td th:text="${student.email}"></td>
+        <td th:text="${student.phone}"></td>
+        <td th:text="${student.gender}"></td>
+        <td>
+            <a th:href="@{/students/edit/{id}(id=${student.id})}" class="btn btn-sm btn-warning">Edit</a>
+            <a th:href="@{/students/delete/{id}(id=${student.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+    </tr>
+    <tr th:if="${students.empty}">
+        <td colspan="7" class="text-center">No students found</td>
+    </tr>
+    </tbody>
+</table>
+
+<nav th:if="${students.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${students.first} ? 'disabled'">
+            <a class="page-link" th:href="@{/students(page=${students.number - 1}, keyword=${keyword})}">Previous</a>
+        </li>
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, students.totalPages - 1)}" th:classappend="${i == students.number} ? 'active'">
+            <a class="page-link" th:href="@{/students(page=${i}, keyword=${keyword})}" th:text="${i + 1}"></a>
+        </li>
+        <li class="page-item" th:classappend="${students.last} ? 'disabled'">
+            <a class="page-link" th:href="@{/students(page=${students.number + 1}, keyword=${keyword})}">Next</a>
+        </li>
+    </ul>
+</nav>
+
+</body>
+</html>

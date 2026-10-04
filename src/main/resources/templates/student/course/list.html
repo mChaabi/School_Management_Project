@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Courses', ~{::main}, 'courses')}">
+<body>
+<main>
+
+    <div class="page-header">
+        <div>
+            <h1>Courses</h1>
+            <div class="breadcrumb">Home / Courses</div>
+        </div>
+        <a th:href="@{/courses/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Course
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>All courses <span class="badge badge-primary" th:text="${courses.totalElements}">0</span></h3>
+            <form th:action="@{/courses}" method="get" class="search">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search course...">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th><th>Title</th><th>Description</th>
+                    <th>Credits</th><th>Teacher</th><th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${courses.content}">
+                    <td th:text="${c.id}"></td>
+                    <td><strong th:text="${c.title}"></strong></td>
+                    <td th:text="${c.description}"></td>
+                    <td><span class="badge badge-info" th:text="${c.credits} + ' cr.'"></span></td>
+                    <td th:text="${c.teacherName}"></td>
+                    <td>
+                        <div class="actions">
+                            <a th:href="@{/courses/edit/{id}(id=${c.id})}" class="btn btn-icon edit" title="Edit">
+                                <i class="bi bi-pencil-fill"></i></a>
+                            <form th:action="@{/courses/delete/{id}(id=${c.id})}" method="post"
+                                  data-confirm="Delete this course?">
+                                <button type="submit" class="btn btn-icon delete" title="Delete">
+                                    <i class="bi bi-trash-fill"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${courses.empty}">
+                    <td colspan="6" class="empty">
+                        <i class="bi bi-inbox"></i> No courses found.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:replace="~{fragments/pagination :: pagination(${courses}, '/courses', ${keyword})}"></div>
+    </div>
+
+</main>
+</body>
+</html>

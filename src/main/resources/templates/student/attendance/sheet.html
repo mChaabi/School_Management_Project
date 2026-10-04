@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Attendance</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; }
+        .filter { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
+        .ok { background: #e6f7e9; padding: .5rem 1rem; border-radius: 6px; }
+        .err { background: #fdeaea; padding: .5rem 1rem; border-radius: 6px; color: #b00020; }
+    </style>
+</head>
+<body>
+<h1>Attendance</h1>
+
+<p class="ok" th:if="${message}" th:text="${message}"></p>
+
+<form class="filter" th:action="@{/attendances}" method="get">
+    <label>Classroom<br>
+        <select name="classroomId" required>
+            <option value="">-- select --</option>
+            <option th:each="c : ${classrooms}" th:value="${c.id()}" th:text="${c.name()}"
+                    th:selected="${c.id() == sheet.classroomId}"></option>
+        </select>
+    </label>
+    <label>Date<br>
+        <input type="date" name="date" th:value="${sheet.date}">
+    </label>
+    <button type="submit">Load</button>
+</form>
+
+<form th:if="${sheet.classroomId != null}" th:action="@{/attendances/save}" th:object="${sheet}" method="post">
+    <input type="hidden" th:field="*{classroomId}">
+    <input type="hidden" th:field="*{date}">
+
+    <div class="err" th:if="${#fields.hasErrors('*')}">
+        <p th:each="e : ${#fields.errors('*')}" th:text="${e}"></p>
+    </div>
+
+    <table>
+        <thead>
+        <tr><th>#</th><th>Student</th><th>Status</th><th>Remark</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="row, i : *{rows}">
+            <td th:text="${i.count}"></td>
+            <td>
+                <input type="hidden" th:field="*{rows[__${i.index}__].studentId}">
+                <input type="hidden" th:field="*{rows[__${i.index}__].studentName}">
+                <a th:href="@{/attendances/student/{id}(id=${row.studentId})}" th:text="${row.studentName}"></a>
+            </td>
+            <td>
+                <select th:field="*{rows[__${i.index}__].status}">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+                </select>
+            </td>
+            <td><input type="text" th:field="*{rows[__${i.index}__].remark}"></td>
+        </tr>
+        <tr th:if="*{rows.isEmpty()}">
+            <td colspan="4">No students in this classroom.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <button type="submit" th:disabled="*{rows.isEmpty()}">Save attendance</button>
+</form>
+</body>
+</html>
