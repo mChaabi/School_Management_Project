@@ -9,7 +9,7 @@
 
     <nav class="menu">
         <span class="menu-title">Main</span>
-        <a th:href="@{/}" th:classappend="${menu == 'home'} ? 'active'">
+        <a th:href="@{/static}" th:classappend="${menu == 'home'} ? 'active'">
             <i class="bi bi-speedometer2"></i> Dashboard</a>
 
         <span class="menu-title">Academic</span>
@@ -25,7 +25,7 @@
             <i class="bi bi-card-checklist"></i> Enrollments</a>
 
         <span class="menu-title">Daily</span>
-        <a th:href="@{/attendance}" th:classappend="${menu == 'attendance'} ? 'active'">
+        <a th:href="@{/templates/attendance}" th:classappend="${menu == 'attendance'} ? 'active'">
             <i class="bi bi-calendar-check-fill"></i> Attendance</a>
     </nav>
 

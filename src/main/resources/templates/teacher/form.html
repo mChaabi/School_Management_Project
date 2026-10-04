@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Student Form', ~{::main}, 'students')}">
+      th:replace="~{layout/base :: layout('Teacher Form', ~{::main}, 'teachers')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1 th:text="${studentDto.id == null} ? 'New Student' : 'Edit Student'"></h1>
-            <div class="breadcrumb">Home / Students / Form</div>
+            <h1 th:text="${teacherDto.id == null} ? 'New Teacher' : 'Edit Teacher'"></h1>
+            <div class="breadcrumb">Home / Teachers / Form</div>
         </div>
     </div>
 
     <div class="card">
         <div class="card-body">
-            <form th:object="${studentDto}"
-                  th:action="${studentDto.id == null} ? @{/students} : @{/students/update/{id}(id=${studentDto.id})}"
+            <form th:object="${teacherDto}"
+                  th:action="${teacherDto.id == null} ? @{/teachers} : @{/teachers/update/{id}(id=${teacherDto.id})}"
                   method="post">
 
                 <div class="form-grid">
@@ -46,35 +46,22 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Birth date</label>
-                        <input type="date" th:field="*{birthDate}"
-                               th:classappend="${#fields.hasErrors('birthDate')} ? 'is-invalid'">
-                        <span class="error-text" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></span>
+                        <label>Specialty</label>
+                        <input type="text" th:field="*{specialty}"
+                               th:classappend="${#fields.hasErrors('specialty')} ? 'is-invalid'">
+                        <span class="error-text" th:if="${#fields.hasErrors('specialty')}" th:errors="*{specialty}"></span>
                     </div>
 
                     <div class="form-group">
-                        <label>Gender</label>
-                        <select th:field="*{gender}"
-                                th:classappend="${#fields.hasErrors('gender')} ? 'is-invalid'">
-                            <option value="">-- Select --</option>
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                        </select>
-                        <span class="error-text" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Classroom</label>
-                        <select th:field="*{classroomId}">
-                            <option value="">-- No classroom --</option>
-                            <option th:each="c : ${classrooms}" th:value="${c.id}" th:text="${c.name}"></option>
-                        </select>
-                        <span class="error-text" th:if="${#fields.hasErrors('classroomId')}" th:errors="*{classroomId}"></span>
+                        <label>Hire date</label>
+                        <input type="date" th:field="*{hireDate}"
+                               th:classappend="${#fields.hasErrors('hireDate')} ? 'is-invalid'">
+                        <span class="error-text" th:if="${#fields.hasErrors('hireDate')}" th:errors="*{hireDate}"></span>
                     </div>
                 </div>
 
                 <div class="form-actions">
-                    <a th:href="@{/students}" class="btn btn-light">Cancel</a>
+                    <a th:href="@{/teachers}" class="btn btn-light">Cancel</a>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save</button>
                 </div>
             </form>

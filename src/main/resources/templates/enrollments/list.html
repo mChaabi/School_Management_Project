@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Enrollments', ~{::main}, 'enrollments')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Enrollments</h1>
+            <div class="breadcrumb">Home / Enrollments</div>
+        </div>
+        <a th:href="@{/enrollments/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Enrollment
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>All enrollments <span class="badge badge-primary" th:text="${#lists.size(enrollments)}">0</span></h3>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr><th>#</th><th>Student ID</th><th>Course ID</th><th>Date</th><th>Grade</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="e : ${enrollments}">
+                    <td th:text="${e.id}"></td>
+                    <td th:text="${e.studentId}"></td>
+                    <td th:text="${e.courseId}"></td>
+                    <td th:text="${e.enrollmentDate != null} ? ${#temporals.format(e.enrollmentDate, 'dd/MM/yyyy')} : '-'"></td>
+                    <td><span class="badge badge-success" th:text="${e.grade != null} ? ${e.grade} : '-'"></span></td>
+                    <td>
+                        <div class="actions">
+                            <a th:href="@{/enrollments/{id}(id=${e.id})}" class="btn btn-icon edit" title="Details">
+                                <i class="bi bi-eye-fill"></i></a>
+                            <a th:href="@{/enrollments/edit/{id}(id=${e.id})}" class="btn btn-icon edit" title="Edit">
+                                <i class="bi bi-pencil-fill"></i></a>
+                            <form th:action="@{/enrollments/delete/{id}(id=${e.id})}" method="post"
+                                  data-confirm="Delete this enrollment?">
+                                <button type="submit" class="btn btn-icon delete" title="Delete">
+                                    <i class="bi bi-trash-fill"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(enrollments)}">
+                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No enrollments found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>
