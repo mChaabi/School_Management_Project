@@ -18,7 +18,7 @@ public class HomeController {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
 
-    @GetMapping("/")
+    @GetMapping({"/", "/dashboard"})
     public String home(Model model) {
         model.addAttribute("studentCount", studentRepository.count());
         model.addAttribute("teacherCount", teacherRepository.count());

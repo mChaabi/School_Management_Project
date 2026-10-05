@@ -46,17 +46,21 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Specialty</label>
-                        <input type="text" th:field="*{specialty}"
-                               th:classappend="${#fields.hasErrors('specialty')} ? 'is-invalid'">
-                        <span class="error-text" th:if="${#fields.hasErrors('specialty')}" th:errors="*{specialty}"></span>
+                        <label>Specialization</label>
+                        <input type="text" th:field="*{specialization}"
+                               th:classappend="${#fields.hasErrors('specialization')} ? 'is-invalid'">
+                        <span class="error-text" th:if="${#fields.hasErrors('specialization')}" th:errors="*{specialization}"></span>
                     </div>
 
                     <div class="form-group">
-                        <label>Hire date</label>
-                        <input type="date" th:field="*{hireDate}"
-                               th:classappend="${#fields.hasErrors('hireDate')} ? 'is-invalid'">
-                        <span class="error-text" th:if="${#fields.hasErrors('hireDate')}" th:errors="*{hireDate}"></span>
+                        <label>Gender <span class="req">*</span></label>
+                        <select th:field="*{gender}"
+                                th:classappend="${#fields.hasErrors('gender')} ? 'is-invalid'">
+                            <option value="">-- Select --</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                        </select>
+                        <span class="error-text" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></span>
                     </div>
                 </div>
 

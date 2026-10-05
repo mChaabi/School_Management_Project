@@ -37,7 +37,7 @@
                     <td><strong th:text="${c.title}"></strong></td>
                     <td th:text="${c.description}"></td>
                     <td><span class="badge badge-info" th:text="${c.credits} + ' cr.'"></span></td>
-                    <td th:text="${c.teacherName}"></td>
+                    <td th:text="${c.teacherId}"></td>
                     <td>
                         <div class="actions">
                             <a th:href="@{/courses/edit/{id}(id=${c.id})}" class="btn btn-icon edit" title="Edit">

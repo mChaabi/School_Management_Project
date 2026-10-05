@@ -25,7 +25,8 @@
         <div class="table-wrap">
             <table>
                 <thead>
-                <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Specialty</th><th>Actions</th></tr>
+                <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th>
+                    <th>Specialization</th><th>Gender</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="t : ${teachers.content}">
@@ -33,7 +34,8 @@
                     <td><strong th:text="${t.firstName + ' ' + t.lastName}"></strong></td>
                     <td th:text="${t.email}"></td>
                     <td th:text="${t.phone}"></td>
-                    <td><span class="badge badge-info" th:text="${t.specialty}"></span></td>
+                    <td><span class="badge badge-info" th:text="${t.specialization}"></span></td>
+                    <td><span class="badge badge-primary" th:text="${t.gender}"></span></td>
                     <td>
                         <div class="actions">
                             <a th:href="@{/teachers/edit/{id}(id=${t.id})}" class="btn btn-icon edit" title="Edit">
@@ -47,7 +49,7 @@
                     </td>
                 </tr>
                 <tr th:if="${teachers.empty}">
-                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No teachers found.</td>
+                    <td colspan="7" class="empty"><i class="bi bi-inbox"></i> No teachers found.</td>
                 </tr>
                 </tbody>
             </table>

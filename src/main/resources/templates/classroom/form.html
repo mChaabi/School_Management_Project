@@ -1,38 +1,413 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Classroom Form</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EduManage - Classroom Form</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-text-hover: #ffffff;
+            --sidebar-active: #4f46e5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-menu {
+            padding: 1.5rem 1rem;
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .menu-category {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+            margin-top: 1.25rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu li a:hover {
+            color: var(--sidebar-text-hover);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-menu li.active a {
+            background-color: var(--sidebar-active);
+            color: #ffffff;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Main Content Layout */
+        .main-content {
+            margin-left: 260px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header Styles */
+        .header {
+            height: 70px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-title {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification-icon {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-info .name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        .user-info .role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Content Body Container */
+        .content-body {
+            padding: 2rem;
+            flex-grow: 1;
+            max-width: 800px;
+        }
+
+        .page-header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .breadcrumb {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .container-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 2rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.25rem;
+        }
+
+        label.form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        input.form-control {
+            width: 100%;
+            padding: 0.65rem 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        input.form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        input.is-invalid {
+            border-color: #ef4444;
+        }
+
+        .invalid-feedback {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-success-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .btn-success-custom:hover {
+            background-color: var(--primary-hover);
+            color: white;
+        }
+
+        .btn-secondary-custom {
+            background-color: #f1f5f9;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 0.65rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 1.5rem 2rem;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+    </style>
 </head>
-<body class="container mt-5">
+<body>
 
-<div class="card shadow">
-    <div class="card-header bg-primary text-white">
-        <h3 th:text="${classroomDto.id == null} ? 'Add New Classroom' : 'Edit Classroom'">Classroom Form</h3>
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <i class="bi bi-mortarboard-fill" style="color: var(--primary-color);"></i> EduManage
     </div>
-    <div class="card-body">
+    <ul class="sidebar-menu">
+        <li class="menu-category">Main</li>
+        <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
 
-        <form th:action="${classroomDto.id == null} ? @{/classrooms} : @{/classrooms/update/{id}(id=${classroomDto.id})}"
-              th:object="${classroomDto}" method="post">
+        <li class="menu-category">Academic</li>
+        <li><a href="/students"><i class="bi bi-people"></i> Students</a></li>
+        <li><a href="/teachers"><i class="bi bi-person-badge"></i> Teachers</a></li>
+        <li><a href="/courses"><i class="bi bi-journal-text"></i> Courses</a></li>
+        <li class="active"><a href="/classrooms"><i class="bi bi-door-open"></i> Classrooms</a></li>
+        <li><a href="/enrollments"><i class="bi bi-card-checklist"></i> Enrollments</a></li>
 
-            <div class="mb-3">
-                <label class="form-label">Classroom Name</label>
-                <input type="text" th:field="*{name}" class="form-control" th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
-                <div class="invalid-feedback" th:errors="*{name}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Capacity</label>
-                <input type="number" th:field="*{capacity}" class="form-control" th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid'">
-                <div class="invalid-feedback" th:errors="*{capacity}"></div>
-            </div>
-
-            <button type="submit" class="btn btn-success">Save</button>
-            <a th:href="@{/classrooms}" class="btn btn-secondary">Cancel</a>
-        </form>
-
+        <li class="menu-category">Daily</li>
+        <li><a href="/attendances"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+    </ul>
+    <div class="sidebar-footer">
+        v1.0.0
     </div>
+</aside>
+
+<!-- Main Content Area -->
+<div class="main-content">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-title">Classrooms Management</div>
+        <div class="header-user">
+            <i class="bi bi-bell notification-icon"></i>
+            <div class="user-profile">
+                <div class="avatar">A</div>
+                <div class="user-info">
+                    <div class="name">Admin</div>
+                    <div class="role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Body -->
+    <div class="content-body">
+        <h1 class="page-header-title" th:text="${classroomDto.id == null} ? 'Add New Classroom' : 'Edit Classroom'">Classroom Form</h1>
+        <div class="breadcrumb">Home / Classrooms / Form</div>
+
+        <div class="container-box">
+            <form th:action="${classroomDto.id == null} ? @{/classrooms} : @{/classrooms/update/{id}(id=${classroomDto.id})}"
+                  th:object="${classroomDto}" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label">Classroom Name</label>
+                    <input type="text" th:field="*{name}" class="form-control" th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" placeholder="e.g., Room 101">
+                    <div class="invalid-feedback" th:errors="*{name}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Capacity</label>
+                    <input type="number" th:field="*{capacity}" class="form-control" th:classappend="${#fields.hasErrors('capacity')} ? 'is-invalid'" placeholder="e.g., 30">
+                    <div class="invalid-feedback" th:errors="*{capacity}"></div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn-success-custom"><i class="bi bi-check-lg"></i> Save Classroom</button>
+                    <a th:href="@{/classrooms}" class="btn-secondary-custom"><i class="bi bi-x-lg"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>© 2026 <strong>EduManage</strong>. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="#">Help</a>
+            <a href="#">Privacy</a>
+            <a href="#">Contact</a>
+        </div>
+    </footer>
 </div>
 
 </body>

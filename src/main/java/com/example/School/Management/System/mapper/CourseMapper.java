@@ -17,7 +17,10 @@ public class CourseMapper {
                 course.getTitle(),
                 course.getDescription(),
                 course.getCredits(),
-                course.getTeacher() != null ? course.getTeacher().getId() : null
+                course.getTeacher() != null ? course.getTeacher().getId() : null,
+                course.getTeacher() != null
+                        ? course.getTeacher().getFirstName() + " " + course.getTeacher().getLastName()
+                        : null
         );
     }
 

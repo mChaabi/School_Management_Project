@@ -41,7 +41,7 @@ public class CourseController {
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("courseDto", new CourseDto(null, "", "", 3, null));
+        model.addAttribute("courseDto", new CourseDto(null, "", "", 3, null,null));
         model.addAttribute("teachers", teacherService.getAllTeachers(Pageable.unpaged()).getContent());
         return "course/form";
     }

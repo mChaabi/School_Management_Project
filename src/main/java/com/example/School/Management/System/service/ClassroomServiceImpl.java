@@ -3,9 +3,11 @@ package com.example.School.Management.System.service;
 
 import com.example.School.Management.System.dto.ClassroomDto;
 import com.example.School.Management.System.entity.Classroom;
+import com.example.School.Management.System.entity.Student;
 import com.example.School.Management.System.exception.ResourceNotFoundException;
 import com.example.School.Management.System.mapper.ClassroomMapper;
 import com.example.School.Management.System.repository.ClassroomRepository;
+import com.example.School.Management.System.repository.StudentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClassroomServiceImpl implements ClassroomService {
 
     private final ClassroomRepository classroomRepository;
+    private final StudentRepository studentRepository;
 
-    public ClassroomServiceImpl(ClassroomRepository classroomRepository) {
+    public ClassroomServiceImpl(ClassroomRepository classroomRepository , StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
         this.classroomRepository = classroomRepository;
     }
 
@@ -65,11 +69,17 @@ public class ClassroomServiceImpl implements ClassroomService {
         return classroomRepository.findAll(pageable).map(ClassroomMapper::toDto);
     }
 
-    @Override
+    @Transactional
     public void deleteClassroom(Long id) {
-        if (!classroomRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Classroom not found with id: " + id);
+        Classroom classroom = classroomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Classroom not found"));
+
+        // Desvincular los estudiantes antes de borrar para evitar la excepción de llave foránea
+        for (Student student : classroom.getStudents()) {
+            student.setClassroom(null);
+            studentRepository.save(student);
         }
-        classroomRepository.deleteById(id);
+
+        classroomRepository.delete(classroom);
     }
 }

@@ -33,6 +33,20 @@ public class EnrollmentController {
         return "enrollments/form";
     }
 
+    // LISTE : GET /enrollments
+    @GetMapping
+    public String findAll(Model model) {
+        model.addAttribute("enrollments", enrollmentService.findAll());
+        return "enrollments/list";
+    }
+
+    // DÉTAIL : GET /enrollments/{id}
+    @GetMapping("/{id}")
+    public String findById(@PathVariable Long id, Model model) {
+        model.addAttribute("enrollment", enrollmentService.findById(id));
+        return "enrollments/detail";
+    }
+
     @PostMapping
     public String create(@Valid @ModelAttribute("enrollmentDto") EnrollmentDto dto,
                          BindingResult result, Model model) {

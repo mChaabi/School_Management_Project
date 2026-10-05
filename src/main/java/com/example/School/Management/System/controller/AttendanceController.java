@@ -2,6 +2,7 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.AttendanceSheetDto;
 import com.example.School.Management.System.enums.AttendanceStatus;
+import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.service.AttendanceService;
 import com.example.School.Management.System.service.ClassroomService;
 import jakarta.validation.Valid;
@@ -21,10 +22,12 @@ public class AttendanceController {
 
     private final AttendanceService attendanceService;
     private final ClassroomService classroomService;
+    private final ClassroomRepository classroomRepository;
 
-    public AttendanceController(AttendanceService attendanceService, ClassroomService classroomService) {
+    public AttendanceController(AttendanceService attendanceService, ClassroomService classroomService , ClassroomRepository classroomRepository) {
         this.attendanceService = attendanceService;
         this.classroomService = classroomService;
+        this.classroomRepository = classroomRepository;
     }
 
     // Attendance sheet (pick classroom + date) -> templates/attendance/sheet.html

@@ -18,5 +18,6 @@ public record CourseDto(
         @Min(value = 1, message = "Credits must be at least 1")
         Integer credits,
 
-        Long teacherId // Optional: assign a teacher to this course
+        Long teacherId ,// Optional: assign a teacher to this course
+        String teacherName
 ) {}
