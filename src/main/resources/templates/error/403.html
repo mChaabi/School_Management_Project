@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Access denied', ~{::main}, '')}">
+<body>
+<main>
+    <div class="card"><div class="card-body" style="text-align:center">
+        <h1>403</h1>
+        <p>You do not have permission to view this page.</p>
+        <a th:href="@{/dashboard}" class="btn btn-primary">Back to dashboard</a>
+    </div></div>
+</main>
+</body>
+</html>

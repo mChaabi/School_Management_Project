@@ -12,6 +12,7 @@ import com.example.School.Management.System.repository.AttendanceRepository;
 import com.example.School.Management.System.repository.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,22 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final StudentRepository studentRepository;
     private final AttendanceMapper attendanceMapper;
 
+    /**
+     * Filters attendance records based on the currently logged-in user's role.
+     */
+    public List<AttendanceDto> findForCurrentUser(Authentication auth) {
+        if (hasRole(auth, "ADMIN") || hasRole(auth, "TEACHER")) {
+            return attendanceRepository.findAll().stream()
+                    .map(attendanceMapper::toDto)
+                    .toList();
+        }
+        if (hasRole(auth, "STUDENT")) {
+            Student student = studentRepository.findByUserUsername(auth.getName())
+                    .orElseThrow(() -> new EntityNotFoundException("Student profile not found for user: " + auth.getName()));
+            return findByStudentId(student.getId());
+        }
+        return List.of();
+    }
     /** Rows for every student of the classroom, filled with the attendance already saved that day. */
     @Override
     public AttendanceSheetDto getSheet(Long classroomId, LocalDate date) {
@@ -119,5 +136,11 @@ public class AttendanceServiceImpl implements AttendanceService {
     private Attendance getOrThrow(Long id) {
         return attendanceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Attendance not found with id: " + id));
+    }
+
+    private boolean hasRole(Authentication auth, String role) {
+        String targetRole = "ROLE_" + role;
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(targetRole));
     }
 }

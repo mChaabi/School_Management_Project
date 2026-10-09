@@ -1,6 +1,5 @@
 package com.example.School.Management.System.controller;
 
-import com.example.School.Management.System.dto.UserDto;
 import com.example.School.Management.System.dto.UserRegistrationDto;
 import com.example.School.Management.System.service.UserService;
 import jakarta.validation.Valid;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -20,22 +18,45 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Listar todos los usuarios
-    @GetMapping
+    // --- ENROLLMENT / INSCRIPTION PUBLIQUE ---
+    @GetMapping("/signup")
+    public String showSignupForm(Model model) {
+        model.addAttribute("userDto", new UserRegistrationDto("", "", "", null));
+        return "auth/signup"; // Pointe vers src/main/resources/templates/auth/signup.html
+    }
+
+    @PostMapping("/signup")
+    public String processSignup(@Valid @ModelAttribute("userDto") UserRegistrationDto userDto,
+                                BindingResult result,
+                                RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            return "auth/signup";
+        }
+        try {
+            userService.registerUser(userDto);
+            redirectAttributes.addFlashAttribute("message", "Inscription réussie ! Vous pouvez maintenant vous connecter.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "auth/signup";
+        }
+        return "redirect:/login";
+    }
+
+    // --- GESTION ADMINISTRATIVE DES UTILISATEURS ---
+
+    @GetMapping("/users")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
-        return "user/list"; // Ruta de tu template Thymeleaf para listar
+        return "user/list";
     }
 
-    // Mostrar formulario de registro
-    @GetMapping("/new")
+    @GetMapping("/users/new")
     public String showRegistrationForm(Model model) {
         model.addAttribute("userDto", new UserRegistrationDto("", "", "", null));
-        return "user/form"; // Ruta de tu template Thymeleaf de formulario
+        return "user/form";
     }
 
-    // Procesar el registro / creación de usuario
-    @PostMapping
+    @PostMapping("/users")
     public String registerUser(@Valid @ModelAttribute("userDto") UserRegistrationDto userDto,
                                BindingResult result,
                                RedirectAttributes redirectAttributes) {
@@ -52,8 +73,7 @@ public class UserController {
         return "redirect:/users";
     }
 
-    // Mostrar formulario de edición
-    @GetMapping("/edit/{id}")
+    @GetMapping("/users/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         return userService.getAllUsers().stream()
                 .filter(u -> u.id().equals(id))
@@ -69,8 +89,7 @@ public class UserController {
                 });
     }
 
-    // Procesar actualización de usuario
-    @PostMapping("/update/{id}")
+    @PostMapping("/users/update/{id}")
     public String updateUser(@PathVariable Long id,
                              @Valid @ModelAttribute("userDto") UserRegistrationDto updateDto,
                              BindingResult result,
@@ -87,8 +106,7 @@ public class UserController {
         return "redirect:/users";
     }
 
-    // Eliminar usuario
-    @GetMapping("/delete/{id}")
+    @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             userService.deleteUser(id);

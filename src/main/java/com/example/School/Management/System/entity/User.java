@@ -17,15 +17,19 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String username; // or email
+    private String username;
 
     @Column(nullable = false)
-    private String password; // Encrypted with BCrypt
+    private String password;
 
     private String email;
 
+    // Change @ManyToMany to @ElementCollection for Enums
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();

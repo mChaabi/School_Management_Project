@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <header class="topbar" th:fragment="topbar(title)">
     <div class="topbar-left">
@@ -13,13 +14,29 @@
         <button class="icon-btn" aria-label="Notifications">
             <i class="bi bi-bell"></i><span class="dot"></span>
         </button>
+
         <div class="user">
-            <div class="avatar">A</div>
+            <!-- First letter of the username -->
+            <div class="avatar"
+                 th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">A</div>
+
             <div class="user-info">
-                <strong>Admin</strong>
-                <small>Administrator</small>
+                <strong sec:authentication="name">username</strong>
+                <small>
+                    <span sec:authorize="hasRole('ADMIN')">Administrator</span>
+                    <span sec:authorize="hasRole('TEACHER')">Teacher</span>
+                    <span sec:authorize="hasRole('STUDENT')">Student</span>
+                    <span sec:authorize="hasRole('PARENT')">Parent</span>
+                </small>
             </div>
         </div>
+
+        <!-- Logout must be POST (CSRF is enabled) -->
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="icon-btn logout-btn" title="Logout" aria-label="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
     </div>
 </header>
 </body>

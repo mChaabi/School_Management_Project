@@ -20,4 +20,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
            group by a.status
            """)
     List<Object[]> countByStatus(@Param("studentId") Long studentId);
+
+    List<Attendance> findByStudentIdIn(List<Long> studentIds);
 }

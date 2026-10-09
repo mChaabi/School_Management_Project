@@ -1,37 +1,48 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-<aside class="sidebar" id="sidebar" th:fragment="sidebar(menu)">
-    <div class="brand">
-        <i class="bi bi-mortarboard-fill"></i>
-        <span>EduManage</span>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<aside class="sidebar" th:fragment="sidebar(currentMenu)">
+    <div class="sidebar-brand">
+        <i class="bi bi-mortarboard-fill"></i> EduManage
     </div>
 
-    <nav class="menu">
-        <span class="menu-title">Main</span>
-        <a th:href="@{/dashboard}" th:classappend="${menu == 'home'} ? 'active'">
-            <i class="bi bi-speedometer2"></i> Dashboard</a>
+    <ul class="sidebar-menu">
 
-        <span class="menu-title">Academic</span>
-        <a th:href="@{/students}" th:classappend="${menu == 'students'} ? 'active'">
-            <i class="bi bi-people-fill"></i> Students</a>
-        <a th:href="@{/teachers}" th:classappend="${menu == 'teachers'} ? 'active'">
-            <i class="bi bi-person-workspace"></i> Teachers</a>
-        <a th:href="@{/courses}" th:classappend="${menu == 'courses'} ? 'active'">
-            <i class="bi bi-journal-bookmark-fill"></i> Courses</a>
-        <a th:href="@{/classrooms}" th:classappend="${menu == 'classrooms'} ? 'active'">
-            <i class="bi bi-door-open-fill"></i> Classrooms</a>
-        <a th:href="@{/enrollments}" th:classappend="${menu == 'enrollments'} ? 'active'">
-            <i class="bi bi-card-checklist"></i> Enrollments</a>
+        <!-- Everyone -->
+        <li th:classappend="${currentMenu == 'home'} ? 'active'">
+            <a th:href="@{/dashboard}"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        </li>
 
-        <span class="menu-title">Daily</span>
-        <a th:href="@{/attendances}" th:classappend="${menu == 'attendance'} ? 'active'">
-            <i class="bi bi-calendar-check-fill"></i> Attendance</a>
-    </nav>
+        <!-- Admin + Teacher -->
+        <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'students'} ? 'active'">
+            <a th:href="@{/students}"><i class="bi bi-people-fill"></i> Students</a>
+        </li>
+        <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'teachers'} ? 'active'">
+            <a th:href="@{/teachers}"><i class="bi bi-person-workspace"></i> Teachers</a>
+        </li>
+        <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'classrooms'} ? 'active'">
+            <a th:href="@{/classrooms}"><i class="bi bi-door-open-fill"></i> Classrooms</a>
+        </li>
 
-    <div class="sidebar-footer">
-        <i class="bi bi-shield-check"></i> v1.0.0
-    </div>
+        <!-- Courses: everyone can see -->
+        <li th:classappend="${currentMenu == 'courses'} ? 'active'">
+            <a th:href="@{/courses}"><i class="bi bi-journal-bookmark-fill"></i> Courses</a>
+        </li>
+
+        <!-- Enrollments: everyone (data is filtered per role in the controller) -->
+        <li th:classappend="${currentMenu == 'enrollments'} ? 'active'">
+            <a th:href="@{/enrollments}"><i class="bi bi-card-checklist"></i> Enrollments</a>
+        </li>
+
+        <!-- Attendance: everyone (data is filtered per role) -->
+        <li th:classappend="${currentMenu == 'attendances'} ? 'active'">
+            <a th:href="@{/attendances}"><i class="bi bi-calendar-check-fill"></i> Attendance</a>
+        </li>
+
+        <!-- Admin only -->
+        <li sec:authorize="hasRole('ADMIN')" th:classappend="${currentMenu == 'users'} ? 'active'">
+            <a th:href="@{/users}"><i class="bi bi-shield-lock-fill"></i> Users Management</a>
+        </li>
+    </ul>
 </aside>
-</body>
 </html>

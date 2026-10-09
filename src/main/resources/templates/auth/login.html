@@ -77,29 +77,35 @@
 
 <div class="login-card">
     <div class="login-header">
-        <div class="app-icon"><i class="bi bi-mortarboard-fill"></i></div>
+        <div class="app-icon"><i class="bi bi-box-arrow-in-right"></i></div>
         <h2>Welcome Back</h2>
         <p>Sign in to School Management System</p>
     </div>
 
-    <!-- Alertas de Error o Logout -->
+    <!-- Error Alert -->
     <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
         <i class="bi bi-exclamation-circle-fill me-1"></i> Invalid username or password.
         <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
+    <!-- Logout Alert -->
     <div th:if="${param.logout}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
         <i class="bi bi-check-circle-fill me-1"></i> You have been logged out successfully.
         <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <!-- Formulario de Login -->
+    <!-- Signup Success Message -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
+        <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${message}"></span>
+        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <form th:action="@{/login}" method="post">
         <div class="mb-3">
             <label for="username" class="form-label text-muted small fw-bold">USERNAME</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" id="username" name="username" class="form-control with-icon" placeholder="Enter your username" required autofocus>
+                <input type="text" id="username" name="username" class="form-control with-icon" placeholder="Enter username" required autofocus>
             </div>
         </div>
 
@@ -107,13 +113,17 @@
             <label for="password" class="form-label text-muted small fw-bold">PASSWORD</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" id="password" name="password" class="form-control with-icon" placeholder="Enter your password" required>
+                <input type="password" id="password" name="password" class="form-control with-icon" placeholder="Enter password" required>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary shadow-sm">
+        <button type="submit" class="btn btn-primary shadow-sm mb-3">
             <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
         </button>
+
+        <div class="text-center">
+            <a th:href="@{/signup}" class="text-decoration-none small">Don't have an account? Sign up here</a>
+        </div>
     </form>
 </div>
 

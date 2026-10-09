@@ -1,4 +1,5 @@
 package com.example.School.Management.System.service;
+
 import com.example.School.Management.System.dto.EnrollmentDto;
 import com.example.School.Management.System.entity.Course;
 import com.example.School.Management.System.entity.Enrollment;
@@ -9,10 +10,12 @@ import com.example.School.Management.System.repository.EnrollmentRepository;
 import com.example.School.Management.System.repository.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +26,29 @@ public class EnrollmentService {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentMapper enrollmentMapper;
+    private final CurrentUserService currentUser;
+
+    // Inject your current user security helper component
+    // private final CurrentUserService currentUser;
+
+    /**
+     * Filters enrollments based on the currently logged-in user's role and visibility rules.
+     */
+    public List<EnrollmentDto> findForCurrentUser(Authentication auth) {
+        Set<Long> ids = currentUser.visibleStudentIds();
+
+        List<Enrollment> list = (ids == null)
+                ? enrollmentRepository.findAll()
+                : enrollmentRepository.findByStudentIdIn(ids.stream().toList()); // Converted Set to List here
+
+        return list.stream().map(enrollmentMapper::toDto).toList();
+    }
 
     @Transactional
     public EnrollmentDto create(EnrollmentDto dto) {
+        // Optional: Ensure user has permission to create enrollment for this student
+        // currentUser.assertCanSee(dto.studentId());
+
         if (enrollmentRepository.existsByStudentIdAndCourseId(dto.studentId(), dto.courseId())) {
             throw new IllegalStateException("The student is already enrolled in this course");
         }
@@ -46,10 +69,18 @@ public class EnrollmentService {
     }
 
     public EnrollmentDto findById(Long id) {
-        return enrollmentMapper.toDto(getEnrollmentOrThrow(id));
+        EnrollmentDto dto = enrollmentMapper.toDto(getEnrollmentOrThrow(id));
+
+        // Assert that the current user is authorized to view this student's enrollment
+        currentUser.assertCanSee(dto.studentId()); // Throws 403 / AccessDeniedException if not allowed
+
+        return dto;
     }
 
     public List<EnrollmentDto> findByStudentId(Long studentId) {
+        // Assert visibility for the requested student ID
+        currentUser.assertCanSee(studentId);
+
         return enrollmentRepository.findByStudentId(studentId).stream()
                 .map(enrollmentMapper::toDto)
                 .toList();
@@ -64,15 +95,21 @@ public class EnrollmentService {
     @Transactional
     public EnrollmentDto update(Long id, EnrollmentDto dto) {
         Enrollment enrollment = getEnrollmentOrThrow(id);
+
+        // Ensure user can see/modify the existing enrollment's student
+        currentUser.assertCanSee(enrollment.getStudent().getId());
+
         enrollmentMapper.updateEntity(enrollment, dto);
         return enrollmentMapper.toDto(enrollmentRepository.save(enrollment));
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!enrollmentRepository.existsById(id)) {
-            throw new EntityNotFoundException("Enrollment not found with id: " + id);
-        }
+        Enrollment enrollment = getEnrollmentOrThrow(id);
+
+        // Ensure user has permission over this student's record before deleting
+        currentUser.assertCanSee(enrollment.getStudent().getId());
+
         enrollmentRepository.deleteById(id);
     }
 
