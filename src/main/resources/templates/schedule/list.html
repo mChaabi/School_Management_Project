@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout('Timetable', ~{::main}, 'schedules')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Timetable</h1>
+            <div class="breadcrumb">Home / Timetable</div>
+        </div>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/schedules/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New lesson
+        </a>
+    </div>
+
+    <!-- Filter -->
+    <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-body">
+            <form th:action="@{/schedules}" method="get" class="actions" style="align-items:flex-end">
+                <div class="form-group">
+                    <label>Classroom</label>
+                    <select name="classroomId">
+                        <option value="">-- All --</option>
+                        <option th:each="c : ${classrooms}" th:value="${c.id}" th:text="${c.name}"
+                                th:selected="${c.id == classroomId}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Teacher</label>
+                    <select name="teacherId">
+                        <option value="">-- All --</option>
+                        <option th:each="t : ${teachers}" th:value="${t.id}"
+                                th:text="${t.firstName + ' ' + t.lastName}"
+                                th:selected="${t.id == teacherId}"></option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Show</button>
+                <a th:href="@{/schedules}" class="btn btn-light">Reset</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Weekly grid -->
+    <div class="timetable">
+        <div class="tt-day" th:each="day : ${days}">
+            <div class="tt-head" th:text="${#strings.capitalize(#strings.toLowerCase(day))}">Monday</div>
+
+            <div class="tt-lesson" th:each="l : ${grid.get(day)}">
+                <div class="tt-time"
+                     th:text="${#temporals.format(l.start,'HH:mm')} + ' - ' + ${#temporals.format(l.end,'HH:mm')}"></div>
+                <strong th:text="${l.courseTitle}"></strong>
+                <small><i class="bi bi-door-open-fill"></i> <span th:text="${l.classroomName}"></span></small>
+                <small><i class="bi bi-person-fill"></i> <span th:text="${l.teacherName}"></span></small>
+
+                <div class="actions" sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/schedules/edit/{id}(id=${l.id})}" class="btn btn-icon edit" title="Edit">
+                        <i class="bi bi-pencil-fill"></i></a>
+                    <form th:action="@{/schedules/delete/{id}(id=${l.id})}" method="post"
+                          data-confirm="Delete this lesson?">
+                        <button type="submit" class="btn btn-icon delete" title="Delete">
+                            <i class="bi bi-trash-fill"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="tt-empty" th:if="${grid.get(day) == null}">No lessons</div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

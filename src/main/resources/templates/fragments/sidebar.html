@@ -39,6 +39,10 @@
             <a th:href="@{/attendances}"><i class="bi bi-calendar-check-fill"></i> Attendance</a>
         </li>
 
+        <li th:classappend="${currentMenu == 'schedules'} ? 'active'">
+            <a th:href="@{/schedules}"><i class="bi bi-calendar-week-fill"></i> Timetable</a>
+        </li>
+
         <!-- Admin only -->
         <li sec:authorize="hasRole('ADMIN')" th:classappend="${currentMenu == 'users'} ? 'active'">
             <a th:href="@{/users}"><i class="bi bi-shield-lock-fill"></i> Users Management</a>

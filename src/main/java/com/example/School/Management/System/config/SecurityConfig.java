@@ -56,6 +56,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/enrollments/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.GET, "/enrollments/**").authenticated()
 
+                        // Timetable: everyone views, only ADMIN edits
+                        .requestMatchers("/schedules/new", "/schedules/edit/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/schedules/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/schedules/**").authenticated()
+
                         // 5. Attendance: "my" and "student/{id}" are for everyone (filtered), the rest is staff only
                         .requestMatchers("/attendances/my", "/attendances/student/**").authenticated()
                         .requestMatchers("/attendances/**").hasAnyRole("ADMIN", "TEACHER")
