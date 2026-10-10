@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout('Student Details', ~{::main}, 'students')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="${student.fullName}">Student</h1>
+            <div class="breadcrumb">Home / Students / Details</div>
+        </div>
+        <div class="actions">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/students/edit/{id}(id=${student.id})}"
+               class="btn btn-primary"><i class="bi bi-pencil-fill"></i> Edit</a>
+            <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/students}"
+               class="btn btn-light">Back</a>
+        </div>
+    </div>
+
+    <!-- Profile + classroom -->
+    <div class="stats">
+        <div class="card"><div class="card-body">
+            <h3>Profile</h3>
+            <p><strong>Email:</strong> <span th:text="${student.email}"></span></p>
+            <p><strong>Phone:</strong> <span th:text="${student.phone ?: '-'}"></span></p>
+            <p><strong>Gender:</strong> <span th:text="${student.gender}"></span></p>
+            <p><strong>Birth date:</strong>
+                <span th:text="${student.birthDate != null} ? ${#temporals.format(student.birthDate,'dd/MM/yyyy')} : '-'"></span></p>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+            <h3>Classroom</h3>
+            <p th:if="${student.classroomName == null}">Not assigned</p>
+            <div th:if="${student.classroomName != null}">
+                <p><strong th:text="${student.classroomName}"></strong></p>
+                <p>Capacity: <span th:text="${student.classroomCapacity}"></span></p>
+            </div>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+            <h3>Average grade</h3>
+            <p style="font-size:2rem;font-weight:700"
+               th:text="${student.average != null} ? ${#numbers.formatDecimal(student.average,1,2)} + ' / 20' : '-'">-</p>
+        </div></div>
+    </div>
+
+    <!-- Courses + teachers -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Courses and teachers
+                <span class="badge badge-primary" th:text="${#lists.size(student.courses)}">0</span></h3>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr><th>Course</th><th>Credits</th><th>Teacher</th>
+                    <th>Enrolled on</th><th>Grade</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${student.courses}">
+                    <td><strong th:text="${c.courseTitle}"></strong></td>
+                    <td><span class="badge badge-info" th:text="${c.credits} + ' cr.'"></span></td>
+                    <td>
+                        <span th:text="${c.teacherName}"></span>
+                        <small th:if="${c.specialization != null}" th:text="' (' + ${c.specialization} + ')'"></small>
+                    </td>
+                    <td th:text="${c.enrollmentDate != null} ? ${#temporals.format(c.enrollmentDate,'dd/MM/yyyy')} : '-'"></td>
+                    <td><span class="badge badge-success" th:text="${c.grade != null} ? ${c.grade} : '-'"></span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(student.courses)}">
+                    <td colspan="5" class="empty"><i class="bi bi-inbox"></i> Not enrolled in any course.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

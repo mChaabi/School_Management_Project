@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Grades', ~{::main}, 'courses')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Grades: <span th:text="${sheet.courseTitle}"></span></h1>
+            <div class="breadcrumb">Home / Courses / Grades</div>
+        </div>
+        <a th:href="@{/courses}" class="btn btn-light">Back</a>
+    </div>
+
+    <div class="card">
+        <form th:action="@{/courses/{id}/grades(id=${sheet.courseId})}" th:object="${sheet}" method="post">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>#</th><th>Student</th><th>Grade (/20)</th></tr></thead>
+                    <tbody>
+                    <tr th:each="row, i : *{rows}">
+                        <td th:text="${i.count}"></td>
+                        <td>
+                            <input type="hidden" th:field="*{rows[__${i.index}__].enrollmentId}">
+                            <strong th:text="${row.studentName}"></strong>
+                        </td>
+                        <td>
+                            <input type="number" step="0.25" min="0" max="20"
+                                   th:field="*{rows[__${i.index}__].grade}"
+                                   th:classappend="${#fields.hasErrors('rows[' + i.index + '].grade')} ? 'is-invalid'">
+                        </td>
+                    </tr>
+                    <tr th:if="*{rows.isEmpty()}">
+                        <td colspan="3" class="empty">No students enrolled in this course.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="padding:1rem">
+                <button type="submit" class="btn btn-primary" th:disabled="*{rows.isEmpty()}">
+                    <i class="bi bi-check-lg"></i> Save grades
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>

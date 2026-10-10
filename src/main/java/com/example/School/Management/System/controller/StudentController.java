@@ -1,7 +1,9 @@
 package com.example.School.Management.System.controller;
 
+import com.example.School.Management.System.dto.StudentDetailDto;
 import com.example.School.Management.System.dto.StudentDto;
 import com.example.School.Management.System.service.ClassroomService;
+import com.example.School.Management.System.service.StudentDetailService;
 import com.example.School.Management.System.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -18,8 +20,10 @@ public class StudentController {
 
     private final StudentService studentService;
     private final ClassroomService classroomService;
+    private final StudentDetailService studentDetailService;
 
-    public StudentController(StudentService studentService, ClassroomService classroomService) {
+    public StudentController(StudentService studentService, ClassroomService classroomService , StudentDetailService studentDetailService) {
+        this.studentDetailService = studentDetailService;
         this.studentService = studentService;
         this.classroomService = classroomService;
     }
@@ -80,6 +84,13 @@ public class StudentController {
         }
         studentService.updateStudent(id, studentDto);
         return "redirect:/students";
+    }
+
+    @GetMapping("/{id}")
+    public String getStudentDetails(@PathVariable Long id, Model model) {
+        StudentDetailDto student = studentDetailService.getDetail(id); // Use the correct service & method name
+        model.addAttribute("student", student);
+        return "student/details"; // Matches templates/student/details.html
     }
 
     // Delete student

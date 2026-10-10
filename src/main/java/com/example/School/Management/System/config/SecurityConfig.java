@@ -33,9 +33,10 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
                         // Students / Teachers / Classrooms: ADMIN writes, TEACHER only views
-                        .requestMatchers("/students/new", "/students/edit/**",
-                                "/teachers/new", "/teachers/edit/**",
+                        .requestMatchers("/students/new", "/students/edit/**","/students/{id}",
+                                "/teachers/new", "/teachers/edit/**","/teachers/**",
                                 "/classrooms/new", "/classrooms/edit/**", "/classrooms/delete/**")
+
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/students/**", "/teachers/**", "/classrooms/**")
                         .hasRole("ADMIN")
@@ -46,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/courses/new", "/courses/edit/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.POST, "/courses/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.GET, "/courses/**").authenticated()
+                        .requestMatchers("/courses/*/grades/**").hasAnyRole("ADMIN", "TEACHER")
 
                         // 4. Enrollments: staff writes, everyone reads (filtered in the service)
                         .requestMatchers("/enrollments/new", "/enrollments/edit/**",

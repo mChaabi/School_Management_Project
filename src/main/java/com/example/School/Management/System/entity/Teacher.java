@@ -36,6 +36,10 @@ public class Teacher {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Course> courses = new ArrayList<>();

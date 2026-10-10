@@ -1,6 +1,8 @@
 package com.example.School.Management.System.controller;
 
+import com.example.School.Management.System.dto.TeacherDetailDto;
 import com.example.School.Management.System.dto.TeacherDto;
+import com.example.School.Management.System.service.TeacherDetailService;
 import com.example.School.Management.System.service.TeacherService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -16,8 +18,10 @@ import org.springframework.web.bind.annotation.*;
 public class TeacherController {
 
     private final TeacherService teacherService;
+    private final TeacherDetailService teacherDetailService;
 
-    public TeacherController(TeacherService teacherService) {
+    public TeacherController(TeacherService teacherService , TeacherDetailService teacherDetailService) {
+        this.teacherDetailService = teacherDetailService;
         this.teacherService = teacherService;
     }
 
@@ -68,6 +72,13 @@ public class TeacherController {
         }
         teacherService.updateTeacher(id, teacherDto);
         return "redirect:/teachers";
+    }
+
+    @GetMapping("/{id}")
+    public String getTeacherDetails(@PathVariable Long id, Model model) {
+        TeacherDetailDto teacher = teacherDetailService.getDetail(id); // Use the correct service & method
+        model.addAttribute("teacher", teacher);
+        return "teacher/details"; // Matches templates/teacher/details.html
     }
 
     @GetMapping("/delete/{id}")

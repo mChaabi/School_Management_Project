@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
       th:replace="~{layout/base :: layout('Teachers', ~{::main}, 'teachers')}">
 <body>
 <main>
@@ -31,17 +31,26 @@
                 <tbody>
                 <tr th:each="t : ${teachers.content}">
                     <td th:text="${t.id}"></td>
-                    <td><strong th:text="${t.firstName + ' ' + t.lastName}"></strong></td>
+                    <td>
+                        <a th:href="@{/teachers/{id}(id=${t.id})}">
+                            <strong th:text="${t.firstName + ' ' + t.lastName}"></strong></a>
+                    </td>
                     <td th:text="${t.email}"></td>
                     <td th:text="${t.phone}"></td>
-                    <td><span class="badge badge-info" th:text="${t.specialization}"></span></td>
+                    <td>
+        <span th:if="${t.specialization != null and !#strings.isEmpty(t.specialization)}"
+              class="badge badge-info" th:text="${t.specialization}"></span>
+                        <span th:unless="${t.specialization != null and !#strings.isEmpty(t.specialization)}">-</span>
+                    </td>
                     <td><span class="badge badge-primary" th:text="${t.gender}"></span></td>
                     <td>
                         <div class="actions">
-                            <a th:href="@{/teachers/edit/{id}(id=${t.id})}" class="btn btn-icon edit" title="Edit">
-                                <i class="bi bi-pencil-fill"></i></a>
-                            <form th:action="@{/teachers/delete/{id}(id=${t.id})}" method="post"
-                                  data-confirm="Delete this teacher?">
+                            <a th:href="@{/teachers/{id}(id=${t.id})}" class="btn btn-icon edit" title="Details">
+                                <i class="bi bi-eye-fill"></i></a>
+                            <a sec:authorize="hasRole('ADMIN')" th:href="@{/teachers/edit/{id}(id=${t.id})}"
+                               class="btn btn-icon edit" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+                            <form sec:authorize="hasRole('ADMIN')" th:action="@{/teachers/delete/{id}(id=${t.id})}"
+                                  method="post" data-confirm="Delete this teacher?">
                                 <button type="submit" class="btn btn-icon delete" title="Delete">
                                     <i class="bi bi-trash-fill"></i></button>
                             </form>
