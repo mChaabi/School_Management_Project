@@ -3,12 +3,17 @@ package com.example.School.Management.System.controller;
 import com.example.School.Management.System.dto.StudentDetailDto;
 import com.example.School.Management.System.dto.StudentDto;
 import com.example.School.Management.System.service.ClassroomService;
+import com.example.School.Management.System.service.ReportCardPdfService;
 import com.example.School.Management.System.service.StudentDetailService;
 import com.example.School.Management.System.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,8 +26,10 @@ public class StudentController {
     private final StudentService studentService;
     private final ClassroomService classroomService;
     private final StudentDetailService studentDetailService;
+    private final ReportCardPdfService reportCardPdfService;
 
-    public StudentController(StudentService studentService, ClassroomService classroomService , StudentDetailService studentDetailService) {
+    public StudentController(StudentService studentService, ClassroomService classroomService , StudentDetailService studentDetailService , ReportCardPdfService reportCardPdfService) {
+        this.reportCardPdfService = reportCardPdfService;
         this.studentDetailService = studentDetailService;
         this.studentService = studentService;
         this.classroomService = classroomService;
@@ -91,6 +98,19 @@ public class StudentController {
         StudentDetailDto student = studentDetailService.getDetail(id); // Use the correct service & method name
         model.addAttribute("student", student);
         return "student/details"; // Matches templates/student/details.html
+    }
+
+    @GetMapping("/{id}/report-card")
+    public ResponseEntity<byte[]> reportCard(@PathVariable Long id) {
+        byte[] pdf = reportCardPdfService.generate(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment()
+                                .filename("report-card-" + id + ".pdf")
+                                .build().toString())
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     // Delete student

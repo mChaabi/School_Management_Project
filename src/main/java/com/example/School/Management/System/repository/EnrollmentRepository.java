@@ -31,4 +31,16 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query("select count(distinct e.student.id) from Enrollment e where e.course.teacher.id = :teacherId")
     long countDistinctStudentsByTeacher(@Param("teacherId") Long teacherId);
+
+    @Query("SELECT e.grade FROM Enrollment e WHERE e.grade IS NOT NULL")
+    List<Double> findAllGrades();
+
+    @Query("""
+       select e from Enrollment e
+       join fetch e.student
+       join fetch e.course c
+       left join fetch c.teacher
+       order by c.title, e.student.lastName
+       """)
+    List<Enrollment> findAllForExport();
 }

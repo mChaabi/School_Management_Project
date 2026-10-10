@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/base :: layout('Dashboard', ~{::main}, 'home')}">
 <body>
 <main>
@@ -10,35 +11,108 @@
         </div>
     </div>
 
+    <!-- KPI cards -->
     <div class="stats">
         <div class="stat">
             <div class="stat-icon primary"><i class="bi bi-people-fill"></i></div>
-            <div><h3 th:text="${studentCount}">0</h3><p>Students</p></div>
+            <div><h3 th:text="${d.students}">0</h3><p>Students</p></div>
         </div>
         <div class="stat">
             <div class="stat-icon success"><i class="bi bi-person-workspace"></i></div>
-            <div><h3 th:text="${teacherCount}">0</h3><p>Teachers</p></div>
+            <div><h3 th:text="${d.teachers}">0</h3><p>Teachers</p></div>
         </div>
         <div class="stat">
             <div class="stat-icon warning"><i class="bi bi-journal-bookmark-fill"></i></div>
-            <div><h3 th:text="${courseCount}">0</h3><p>Courses</p></div>
+            <div><h3 th:text="${d.courses}">0</h3><p>Courses</p></div>
         </div>
         <div class="stat">
             <div class="stat-icon info"><i class="bi bi-card-checklist"></i></div>
-            <div><h3 th:text="${enrollmentCount}">0</h3><p>Enrollments</p></div>
+            <div><h3 th:text="${d.enrollments}">0</h3><p>Enrollments</p></div>
+        </div>
+        <div class="stat">
+            <div class="stat-icon success"><i class="bi bi-calendar-check-fill"></i></div>
+            <div>
+                <h3 th:text="${d.attendanceRateToday != null} ? ${#numbers.formatDecimal(d.attendanceRateToday,1,0)} + '%' : '-'">-</h3>
+                <p>Attendance today</p>
+            </div>
+        </div>
+        <div class="stat">
+            <div class="stat-icon primary"><i class="bi bi-graph-up"></i></div>
+            <div>
+                <h3 th:text="${d.schoolAverage != null} ? ${#numbers.formatDecimal(d.schoolAverage,1,2)} : '-'">-</h3>
+                <p>Average grade</p>
+            </div>
         </div>
     </div>
 
-    <div class="card" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-        <div class="card-header"><h3>Quick actions</h3></div>
-        <div class="card-body actions">
-            <!-- تظهر غير لـ Admin و Teacher -->
-            <a sec:authorize="hasAnyRole('ADMIN', 'TEACHER')" th:href="@{/students/new}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Student</a>
-            <a sec:authorize="hasAnyRole('ADMIN', 'TEACHER')" th:href="@{/teachers/new}" class="btn btn-light"><i class="bi bi-plus-lg"></i> Teacher</a>
-            <a sec:authorize="hasAnyRole('ADMIN', 'TEACHER')" th:href="@{/courses/new}" class="btn btn-light"><i class="bi bi-plus-lg"></i> Course</a>
-            <a sec:authorize="hasAnyRole('ADMIN', 'TEACHER')" th:href="@{/attendances}" class="btn btn-light"><i class="bi bi-calendar-check"></i> Take attendance</a>
+    <!-- Charts -->
+    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+        <div class="card"><div class="card-header"><h3>Students per classroom</h3></div>
+            <div class="card-body"><canvas id="classChart" height="200"></canvas></div></div>
+        <div class="card"><div class="card-header"><h3>Attendance (last 7 days)</h3></div>
+            <div class="card-body"><canvas id="attChart" height="200"></canvas></div></div>
+        <div class="card"><div class="card-header"><h3>Grade distribution</h3></div>
+            <div class="card-body"><canvas id="gradeChart" height="200"></canvas></div></div>
+    </div>
+
+    <!-- Alerts (staff only) -->
+    <div class="card" sec:authorize="hasAnyRole('ADMIN','TEACHER')" style="margin-top:1.5rem">
+        <div class="card-header"><h3>Needs attention</h3></div>
+        <div class="card-body">
+            <p th:if="${d.frequentAbsentees > 0}">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <strong th:text="${d.frequentAbsentees}"></strong> student(s) with 3+ absences in the last 30 days.
+            </p>
+            <p th:each="c : ${d.coursesWithoutTeacher}">
+                <i class="bi bi-person-x-fill"></i> Course <strong th:text="${c}"></strong> has no teacher.
+            </p>
+            <p th:each="s : ${d.studentsWithoutClassroom}">
+                <i class="bi bi-door-closed-fill"></i> Student <strong th:text="${s}"></strong> has no classroom.
+            </p>
+            <p th:if="${d.frequentAbsentees == 0 and #lists.isEmpty(d.coursesWithoutTeacher) and #lists.isEmpty(d.studentsWithoutClassroom)}">
+                <i class="bi bi-check-circle-fill"></i> Everything looks good.
+            </p>
         </div>
     </div>
+
+    <!-- Quick actions (your existing block) -->
+    <div class="card" style="margin-top:1.5rem">
+        <div class="card-header"><h3>Quick actions</h3></div>
+        <div class="card-body actions">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/students/new}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Student</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/teachers/new}" class="btn btn-light"><i class="bi bi-plus-lg"></i> Teacher</a>
+            <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/courses/new}" class="btn btn-light"><i class="bi bi-plus-lg"></i> Course</a>
+            <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/attendances}" class="btn btn-light"><i class="bi bi-calendar-check"></i> Take attendance</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        const d = /*[[${d}]]*/ {};
+
+        new Chart(document.getElementById('classChart'), {
+            type: 'bar',
+            data: { labels: d.classroomLabels,
+                datasets: [{ label: 'Students', data: d.classroomCounts, backgroundColor: '#4f46e5' }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+        });
+
+        new Chart(document.getElementById('attChart'), {
+            type: 'bar',
+            data: { labels: d.days, datasets: [
+                    { label: 'Present', data: d.present, backgroundColor: '#22c55e' },
+                    { label: 'Absent',  data: d.absent,  backgroundColor: '#ef4444' },
+                    { label: 'Late',    data: d.late,    backgroundColor: '#f59e0b' } ] },
+            options: { scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } }
+        });
+
+        new Chart(document.getElementById('gradeChart'), {
+            type: 'doughnut',
+            data: { labels: ['< 10', '10 - 13.99', '14 - 16.99', '17+'],
+                datasets: [{ data: d.gradeBuckets,
+                    backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'] }] }
+        });
+    </script>
 </main>
 </body>
 </html>

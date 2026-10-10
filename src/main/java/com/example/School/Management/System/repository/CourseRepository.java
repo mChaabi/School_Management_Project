@@ -15,6 +15,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     boolean existsByTitle(String title);
     boolean existsByTitleAndIdNot(String title, Long id);
     Page<Course> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    List<Course> findByTeacherIsNull();
 
     public interface CourseStats {
         Long getCourseId();

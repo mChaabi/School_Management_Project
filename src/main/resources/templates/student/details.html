@@ -10,6 +10,9 @@
             <div class="breadcrumb">Home / Students / Details</div>
         </div>
         <div class="actions">
+            <a th:href="@{/students/{id}/report-card(id=${student.id})}" class="btn btn-primary">
+                <i class="bi bi-file-earmark-pdf-fill"></i> Report card
+            </a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/students/edit/{id}(id=${student.id})}"
                class="btn btn-primary"><i class="bi bi-pencil-fill"></i> Edit</a>
             <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/students}"

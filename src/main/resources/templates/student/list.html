@@ -9,6 +9,10 @@
             <h1>Students</h1>
             <div class="breadcrumb">Home / Students</div>
         </div>
+        <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/export/students.xlsx}" class="btn btn-light">
+            <i class="bi bi-file-earmark-excel-fill"></i> Excel</a>
+        <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/export/students.csv}" class="btn btn-light">
+            <i class="bi bi-filetype-csv"></i> CSV</a>
         <a sec:authorize="hasRole('ADMIN')" th:href="@{/students/new}" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> New Student
         </a>
@@ -50,6 +54,10 @@
                             <!-- NEW: details button -->
                             <a th:href="@{/students/{id}(id=${s.id})}" class="btn btn-icon edit" title="Details">
                                 <i class="bi bi-eye-fill"></i></a>
+
+                            <!-- NEW: report card (PDF) -->
+                            <a th:href="@{/students/{id}/report-card(id=${s.id})}" class="btn btn-icon edit" title="Report card (PDF)">
+                                <i class="bi bi-file-earmark-pdf-fill"></i></a>
 
                             <!-- FIXED: /attendance/... became /attendances/... -->
                             <a th:href="@{/attendances/student/{id}(id=${s.id})}" class="btn btn-icon edit"

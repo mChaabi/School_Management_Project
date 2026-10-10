@@ -375,3 +375,4 @@ textarea { min-height: 100px; resize: vertical; }
     background: #4f46e5;
     color: #fff;
 }
+.actions { flex-wrap: nowrap; }

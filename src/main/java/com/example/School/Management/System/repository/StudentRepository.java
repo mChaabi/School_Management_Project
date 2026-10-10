@@ -20,11 +20,14 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             String firstName, String lastName, Pageable pageable);
 
     List<Student> findByClassroomId(Long classroomId);
+    List<Student> findByClassroomIsNull();
 
     @Query("SELECT s FROM Student s WHERE s.email = :username")
     Optional<Student> findByUserUsername(@Param("username") String username);
 
     Optional<Student> findByUser_Username(String username);
 
-    // REMOVE findByParent_Username entirely because 'parent' does not exist on Student
+    @Query("select s from Student s left join fetch s.classroom order by s.lastName, s.firstName")
+    List<Student> findAllForExport();
+
 }

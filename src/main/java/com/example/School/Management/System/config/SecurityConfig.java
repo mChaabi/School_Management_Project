@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
                         // Students / Teachers / Classrooms: ADMIN writes, TEACHER only views
-                        .requestMatchers("/students/new", "/students/edit/**","/students/{id}",
+                        .requestMatchers("/students/new", "/students/edit/**","/students/{id}", "/students/*/report-card",
                                 "/teachers/new", "/teachers/edit/**","/teachers/**",
                                 "/classrooms/new", "/classrooms/edit/**", "/classrooms/delete/**")
 
@@ -59,7 +59,7 @@ public class SecurityConfig {
                         // 5. Attendance: "my" and "student/{id}" are for everyone (filtered), the rest is staff only
                         .requestMatchers("/attendances/my", "/attendances/student/**").authenticated()
                         .requestMatchers("/attendances/**").hasAnyRole("ADMIN", "TEACHER")
-
+                        .requestMatchers("/export/**").hasAnyRole("ADMIN", "TEACHER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
