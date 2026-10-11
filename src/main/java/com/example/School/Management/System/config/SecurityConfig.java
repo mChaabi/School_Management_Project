@@ -19,14 +19,16 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
 
-                        // 1. Public
+                        // 0. Allow public access to REST APIs (or change to authenticated() if using Basic Auth)
+                        .requestMatchers("/api/**").permitAll()
+
+                        // 1. Public web pages
                         .requestMatchers("/login", "/signup", "/css/**", "/js/**", "/error/**").permitAll()
 
                         // 2. Admin only
@@ -60,6 +62,10 @@ public class SecurityConfig {
                         .requestMatchers("/schedules/new", "/schedules/edit/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/schedules/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/schedules/**").authenticated()
+
+                        .requestMatchers("/dev/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/notifications/dev/**").hasRole("ADMIN")
 
                         // 5. Attendance: "my" and "student/{id}" are for everyone (filtered), the rest is staff only
                         .requestMatchers("/attendances/my", "/attendances/student/**").authenticated()

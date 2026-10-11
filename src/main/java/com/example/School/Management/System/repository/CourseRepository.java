@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
@@ -34,4 +35,10 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
        order by c.title
        """)
     List<CourseStats> findStatsByTeacherId(@Param("teacherId") Long teacherId);
+
+
+    // CourseRepository
+    @Query("select c from Course c left join fetch c.teacher t left join fetch t.user where c.id = :id")
+    Optional<Course> findForNotification(@Param("id") Long id);
+
 }

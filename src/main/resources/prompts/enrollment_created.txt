@@ -1,0 +1,9 @@
+Event: a student was enrolled in a course.
+Audience: the student, the parents and the course teacher.
+
+FACTS
+- Student: {student}
+- Course: {course}
+- Teacher: {teacher}
+
+Task: confirm the enrollment and mention who teaches the course.{student} has been successfully enrolled in {course}, taught by {teacher}.

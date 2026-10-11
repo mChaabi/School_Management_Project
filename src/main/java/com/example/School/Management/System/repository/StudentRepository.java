@@ -30,4 +30,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("select s from Student s left join fetch s.classroom order by s.lastName, s.firstName")
     List<Student> findAllForExport();
 
+    // StudentRepository
+    @Query("select s from Student s left join fetch s.classroom left join fetch s.user left join fetch s.parent where s.id = :id")
+    Optional<Student> findForNotification(@Param("id") Long id);
+
+    @Query("select s from Student s left join fetch s.user left join fetch s.parent where s.classroom.id = :classroomId")
+    List<Student> findByClassroomForNotification(@Param("classroomId") Long classroomId);
+
+
 }

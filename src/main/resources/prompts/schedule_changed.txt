@@ -1,0 +1,11 @@
+Event: the timetable changed.
+Audience: students, parents and the teacher.
+
+FACTS
+- Change: {action}
+- Course: {course}
+- Classroom: {classroom}
+- Day: {day}
+- Time: {time}
+
+Task: state clearly what changed and when.

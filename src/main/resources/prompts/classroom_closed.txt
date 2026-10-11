@@ -1,0 +1,8 @@
+Event: a classroom was closed.
+Audience: administrators, students and parents.
+
+FACTS
+- Classroom: {classroom}
+- Number of students concerned: {students}
+
+Task: inform the reader the classroom is closed and that the school will communicate the next steps. Do not promise any specific action.

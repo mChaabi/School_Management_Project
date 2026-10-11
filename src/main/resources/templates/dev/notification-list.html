@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Notifications', ~{::main}, 'notifications')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Notifications</h1>
+            <div class="breadcrumb">Home / Notifications</div>
+        </div>
+        <form th:action="@{/notifications/read-all}" method="post" th:if="${unreadCount > 0}">
+            <button type="submit" class="btn btn-light">
+                <i class="bi bi-check2-all"></i> Mark all as read</button>
+        </form>
+    </div>
+
+    <div class="notif-grid">
+        <a class="notif-card" th:each="n : ${page.content}"
+           th:classappend="'notif-' + ${n.type.color} + (${n.seen} ? '' : ' notif-unread')"
+           th:href="@{/notifications/{id}/open(id=${n.id}, to=${n.link != null ? n.link : '/notifications'})}">
+            <div class="notif-icon"><i class="bi" th:classappend="${n.type.bellIcon}"></i></div>
+            <div class="notif-body">
+                <div class="notif-top">
+                    <strong th:text="${n.type.emoji + ' ' + n.type.title}">Absence</strong>
+                    <span class="notif-badge notif-new" th:unless="${n.seen}">New</span>
+                    <span class="notif-badge" th:if="${n.aiGenerated}"><i class="bi bi-stars"></i> AI</span>
+                </div>
+                <p th:text="${n.message}">Message</p>
+                <small><i class="bi bi-clock"></i>
+                    <span th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}"></span></small>
+            </div>
+        </a>
+    </div>
+
+    <div class="card" th:if="${page.empty}">
+        <div class="card-body empty"><i class="bi bi-bell-slash"></i> You have no notifications.</div>
+    </div>
+
+    <div class="actions" style="margin-top:1rem" th:if="${page.totalPages > 1}">
+        <a class="btn btn-light" th:if="${page.hasPrevious()}" th:href="@{/notifications(page=${page.number - 1})}">Previous</a>
+        <span style="align-self:center" th:text="${page.number + 1} + ' / ' + ${page.totalPages}"></span>
+        <a class="btn btn-light" th:if="${page.hasNext()}" th:href="@{/notifications(page=${page.number + 1})}">Next</a>
+    </div>
+</main>
+</body>
+</html>

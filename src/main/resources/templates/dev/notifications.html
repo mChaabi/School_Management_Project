@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Notifications test', ~{::main}, '')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Notifications (test)</h1>
+            <div class="breadcrumb">Home / Dev / Notifications</div>
+        </div>
+        <a th:href="@{/dev/notifications}" class="btn btn-light">
+            <i class="bi bi-arrow-clockwise"></i> Refresh</a>
+    </div>
+
+    <!-- Simulate an attendance save -->
+    <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header"><h3>Simulate an attendance event</h3></div>
+        <div class="card-body">
+            <form th:action="@{/dev/notify-test}" method="post" class="actions" style="align-items:flex-end">
+                <div class="form-group">
+                    <label>Student</label>
+                    <select name="studentId" required>
+                        <option th:each="s : ${students}" th:value="${s.id}"
+                                th:text="${s.firstName + ' ' + s.lastName}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="ABSENT">ABSENT</option>
+                        <option value="LATE">LATE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" th:value="${today}" required>
+                </div>
+                <div class="form-group">
+                    <label>Remark</label>
+                    <input type="text" name="remark" placeholder="Optional remark...">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send-fill"></i> Send</button>
+            </form>
+            <small style="color:#64748b">
+                Same student + same status + same date is sent only once (anti-duplicate).
+                Change the date to test again.
+            </small>
+        </div>
+    </div>
+
+    <!-- Notification cards -->
+    <div class="notif-grid">
+        <div class="notif-card" th:each="n : ${notifications}" th:classappend="'notif-' + ${n.type.color}">
+            <div class="notif-icon">
+                <i class="bi" th:classappend="${n.type.bellIcon}"></i>
+            </div>
+            <div class="notif-body">
+                <div class="notif-top">
+                    <strong th:text="${n.type.emoji + ' ' + n.type.title}">Absence</strong>
+                    <span class="notif-badge" th:if="${n.aiGenerated}"><i class="bi bi-stars"></i> AI</span>
+                    <span class="notif-badge notif-badge-grey" th:unless="${n.aiGenerated}">
+                        <i class="bi bi-file-text"></i> Template</span>
+                    <span class="notif-badge notif-new" th:unless="${n.seen}">New</span>
+                </div>
+                <p th:text="${n.message}">Message</p>
+                <small>
+                    <i class="bi bi-person-fill"></i> <span th:text="${n.recipient.username}"></span>
+                    &nbsp;&middot;&nbsp;
+                    <i class="bi bi-clock"></i>
+                    <span th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(notifications)}">
+        <div class="card-body empty"><i class="bi bi-bell-slash"></i> No notifications yet.</div>
+    </div>
+
+    <!-- After sending, reload once so the async result shows up -->
+    <script th:if="${justSent}">
+        setTimeout(function () { location.replace('/dev/notifications'); }, 2500);
+    </script>
+
+    <style>
+        .notif-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem}
+        .notif-card{display:flex;gap:.9rem;background:#fff;border:1px solid #e2e8f0;border-left:5px solid #94a3b8;
+            border-radius:12px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+        .notif-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;
+            justify-content:center;font-size:1.2rem;background:#f1f5f9;color:#475569;flex-shrink:0}
+        .notif-body p{margin:.35rem 0;color:#1e293b;font-size:.92rem}
+        .notif-body small{color:#64748b}
+        .notif-top{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+        .notif-badge{font-size:.7rem;font-weight:600;padding:.1rem .5rem;border-radius:99px;
+            background:#e0e7ff;color:#4338ca}
+        .notif-badge-grey{background:#f1f5f9;color:#64748b}
+        .notif-new{background:#fee2e2;color:#b91c1c}
+        .notif-danger{border-left-color:#ef4444}  .notif-danger .notif-icon{background:#fee2e2;color:#dc2626}
+        .notif-warning{border-left-color:#f59e0b} .notif-warning .notif-icon{background:#fef3c7;color:#d97706}
+        .notif-success{border-left-color:#22c55e} .notif-success .notif-icon{background:#dcfce7;color:#16a34a}
+        .notif-info{border-left-color:#0ea5e9}    .notif-info .notif-icon{background:#e0f2fe;color:#0284c7}
+        .notif-primary{border-left-color:#4f46e5} .notif-primary .notif-icon{background:#e0e7ff;color:#4f46e5}
+    </style>
+</main>
+</body>
+</html>
