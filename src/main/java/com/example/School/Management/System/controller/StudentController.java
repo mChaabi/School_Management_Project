@@ -2,10 +2,7 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.StudentDetailDto;
 import com.example.School.Management.System.dto.StudentDto;
-import com.example.School.Management.System.service.ClassroomService;
-import com.example.School.Management.System.service.ReportCardPdfService;
-import com.example.School.Management.System.service.StudentDetailService;
-import com.example.School.Management.System.service.StudentService;
+import com.example.School.Management.System.service.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +24,16 @@ public class StudentController {
     private final ClassroomService classroomService;
     private final StudentDetailService studentDetailService;
     private final ReportCardPdfService reportCardPdfService;
+    private final NotificationService notificationService; // <-- ADD THIS
 
-    public StudentController(StudentService studentService, ClassroomService classroomService , StudentDetailService studentDetailService , ReportCardPdfService reportCardPdfService) {
+    public StudentController(StudentService studentService, ClassroomService classroomService,
+                             StudentDetailService studentDetailService, ReportCardPdfService reportCardPdfService,
+                             NotificationService notificationService) { // <-- ADD THIS
         this.reportCardPdfService = reportCardPdfService;
         this.studentDetailService = studentDetailService;
         this.studentService = studentService;
         this.classroomService = classroomService;
+        this.notificationService = notificationService; // <-- ADD THIS
     }
 
     // List all students -> returns templates/student/list.html
@@ -67,7 +68,15 @@ public class StudentController {
             model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
             return "student/form";
         }
-        studentService.createStudent(studentDto);
+        // Save student
+        var saved = studentService.createStudent(studentDto);
+
+        notificationService.onStudentCreated(
+                saved.id(), // Change from saved.getId() to saved.id()
+                saved.firstName() + " " + saved.lastName(),
+                null
+        );
+
         return "redirect:/students";
     }
 

@@ -1,0 +1,8 @@
+Event: a new student was registered.
+Audience: school administrators.
+
+FACTS
+- Student: {student}
+- Classroom: {classroom}
+
+Task: inform staff of the new registration. If the classroom is not provided, remind them to assign one.

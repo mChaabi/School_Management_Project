@@ -2,6 +2,7 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.CourseDto;
 import com.example.School.Management.System.service.CourseService;
+import com.example.School.Management.System.service.NotificationService;
 import com.example.School.Management.System.service.TeacherService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,12 @@ public class CourseController {
 
     private final CourseService courseService;
     private final TeacherService teacherService;
+    private final NotificationService notificationService; // <-- ADD THIS
 
-    public CourseController(CourseService courseService, TeacherService teacherService) {
+    public CourseController(CourseService courseService, TeacherService teacherService, NotificationService notificationService) {
         this.courseService = courseService;
         this.teacherService = teacherService;
+        this.notificationService = notificationService; // <-- ADD THIS
     }
 
     @GetMapping
@@ -53,7 +56,9 @@ public class CourseController {
             model.addAttribute("teachers", teacherService.getAllTeachers(Pageable.unpaged()).getContent());
             return "course/form";
         }
-        courseService.createCourse(courseDto);
+        var saved = courseService.createCourse(courseDto);
+        notificationService.onCourseCreated(saved.id()); // Change .getId() to .id() if it's a record
+
         return "redirect:/courses";
     }
 

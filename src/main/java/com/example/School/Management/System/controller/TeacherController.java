@@ -2,6 +2,9 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.TeacherDetailDto;
 import com.example.School.Management.System.dto.TeacherDto;
+import com.example.School.Management.System.entity.Teacher;
+import com.example.School.Management.System.repository.TeacherRepository;
+import com.example.School.Management.System.service.NotificationService;
 import com.example.School.Management.System.service.TeacherDetailService;
 import com.example.School.Management.System.service.TeacherService;
 import jakarta.validation.Valid;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/teachers")
@@ -19,8 +23,12 @@ public class TeacherController {
 
     private final TeacherService teacherService;
     private final TeacherDetailService teacherDetailService;
+    private final TeacherRepository teacherRepository;
+    private final NotificationService notificationService;
 
-    public TeacherController(TeacherService teacherService , TeacherDetailService teacherDetailService) {
+    public TeacherController(TeacherService teacherService , TeacherDetailService teacherDetailService , TeacherRepository teacherRepository, NotificationService notificationService) {
+        this.teacherRepository = teacherRepository;
+        this.notificationService = notificationService;
         this.teacherDetailService = teacherDetailService;
         this.teacherService = teacherService;
     }
@@ -52,7 +60,17 @@ public class TeacherController {
         if (result.hasErrors()) {
             return "teacher/form";
         }
-        teacherService.createTeacher(teacherDto);
+
+        // 1. Save the teacher
+        TeacherDto savedTeacher = teacherService.createTeacher(teacherDto);
+
+        // 2. Trigger the AI notification right here!
+        notificationService.onTeacherCreated(
+                savedTeacher.id(),
+                savedTeacher.firstName() + " " + savedTeacher.lastName(),
+                savedTeacher.specialization()
+        );
+
         return "redirect:/teachers";
     }
 

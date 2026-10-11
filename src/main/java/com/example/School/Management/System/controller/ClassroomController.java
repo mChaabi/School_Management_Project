@@ -2,6 +2,7 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.ClassroomDto;
 import com.example.School.Management.System.service.ClassroomService;
+import com.example.School.Management.System.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class ClassroomController {
 
     private final ClassroomService classroomService;
+    private final NotificationService notificationService; // <-- ADD THIS
 
-    public ClassroomController(ClassroomService classroomService) {
+    public ClassroomController(ClassroomService classroomService, NotificationService notificationService) {
         this.classroomService = classroomService;
+        this.notificationService = notificationService; // <-- ADD THIS
     }
 
     // List all classrooms -> returns templates/classroom/list.html
@@ -70,6 +73,14 @@ public class ClassroomController {
     // Delete classroom
     @GetMapping("/delete/{id}")
     public String deleteClassroom(@PathVariable Long id) {
+        // Fetch classroom details before deleting so we have the name
+        var classroomDto = classroomService.getClassroomById(id);
+
+        // <-- ADD AI NOTIFICATION TRIGGER HERE (Must be called BEFORE deletion) -->
+        if (classroomDto != null) {
+            notificationService.onClassroomClosed(id, classroomDto.name()); // Use .name() or .getName() depending on your DTO definition
+        }
+
         classroomService.deleteClassroom(id);
         return "redirect:/classrooms";
     }

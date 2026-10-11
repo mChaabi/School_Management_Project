@@ -2,6 +2,7 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.GradeSheetDto;
 import com.example.School.Management.System.service.GradeService;
+import com.example.School.Management.System.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class GradeController {
 
     private final GradeService service;
+    private final NotificationService notificationService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
@@ -35,6 +37,17 @@ public class GradeController {
             return "course/grades";
         }
         service.save(courseId, sheet);
+
+        // <-- ADD AI NOTIFICATION TRIGGER HERE -->
+        // Loop through the grades in the sheet and trigger notification for each student
+        if (sheet.getRows() != null) {
+            for (var row : sheet.getRows()) {
+                if (row.getGrade() != null) {
+                    notificationService.onGradeAdded(row.getStudentId(), courseId, row.getGrade());
+                }
+            }
+        }
+
         ra.addFlashAttribute("success", "Grades saved successfully.");
         return "redirect:/courses/" + courseId + "/grades";
     }

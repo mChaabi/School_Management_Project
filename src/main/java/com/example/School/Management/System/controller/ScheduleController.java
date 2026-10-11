@@ -4,6 +4,7 @@ import com.example.School.Management.System.dto.ScheduleDto;
 import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.repository.CourseRepository;
 import com.example.School.Management.System.repository.TeacherRepository;
+import com.example.School.Management.System.service.NotificationService;
 import com.example.School.Management.System.service.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class ScheduleController {
     private final CourseRepository courseRepo;
     private final ClassroomRepository classroomRepo;
     private final TeacherRepository teacherRepo;
+    private final NotificationService notificationService;
 
     // ---------- weekly grid ----------
     @GetMapping
@@ -89,6 +91,21 @@ public class ScheduleController {
             try {
                 service.save(id, dto.getCourseId(), dto.getClassroomId(),
                         dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime());
+
+                // <-- ADD AI NOTIFICATION TRIGGER HERE -->
+                var classroom = classroomRepo.findById(dto.getClassroomId()).orElse(null);
+                String classroomName = (classroom != null) ? classroom.getName() : "Unknown";
+                String action = (id == null) ? "added" : "updated";
+
+                notificationService.onScheduleChanged(
+                        dto.getCourseId(),
+                        dto.getClassroomId(),
+                        classroomName,
+                        action,
+                        dto.getDayOfWeek().name(),
+                        dto.getStartTime().toString()
+                );
+
                 ra.addFlashAttribute("success", okMessage);
                 return "redirect:/schedules?classroomId=" + dto.getClassroomId();
             } catch (IllegalArgumentException | IllegalStateException e) {
@@ -96,7 +113,7 @@ public class ScheduleController {
             }
         }
         fillForm(model);
-        return "schedule/form"; // <-- Change from "schedules/form" to "schedule/form"
+        return "schedule/form";
     }
 
     private void fillForm(Model model) {

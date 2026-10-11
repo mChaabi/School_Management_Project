@@ -5,6 +5,7 @@ import com.example.School.Management.System.enums.AttendanceStatus;
 import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.service.AttendanceService;
 import com.example.School.Management.System.service.ClassroomService;
+import com.example.School.Management.System.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,11 +24,14 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
     private final ClassroomService classroomService;
     private final ClassroomRepository classroomRepository;
+    private final NotificationService notificationService; // <-- ADD THIS
 
-    public AttendanceController(AttendanceService attendanceService, ClassroomService classroomService , ClassroomRepository classroomRepository) {
+    public AttendanceController(AttendanceService attendanceService, ClassroomService classroomService,
+                                ClassroomRepository classroomRepository, NotificationService notificationService) {
         this.attendanceService = attendanceService;
         this.classroomService = classroomService;
         this.classroomRepository = classroomRepository;
+        this.notificationService = notificationService; // <-- ADD THIS
     }
 
     // Attendance sheet (pick classroom + date) -> templates/attendance/sheet.html
@@ -54,6 +58,16 @@ public class AttendanceController {
             return "attendance/sheet";
         }
         attendanceService.saveSheet(sheet);
+
+        // <-- ADD AI NOTIFICATION TRIGGER HERE -->
+        if (sheet.getRows() != null) {
+            for (var row : sheet.getRows()) {
+                if (row.getStatus() != null) {
+                    notificationService.onAttendance(row.getStudentId(), sheet.getDate(), row.getStatus(), row.getRemark());
+                }
+            }
+        }
+
         redirect.addFlashAttribute("message", "Attendance saved successfully");
         return "redirect:/attendances?classroomId=" + sheet.getClassroomId() + "&date=" + sheet.getDate();
     }

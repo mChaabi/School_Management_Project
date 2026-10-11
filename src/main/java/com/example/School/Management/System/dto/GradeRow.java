@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class GradeRow {
+    private Long studentId;
     private Long enrollmentId;
     private String studentName;
 

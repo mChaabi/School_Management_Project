@@ -3,6 +3,7 @@ package com.example.School.Management.System.controller;
 import com.example.School.Management.System.dto.EnrollmentDto;
 import com.example.School.Management.System.service.CourseService;
 import com.example.School.Management.System.service.EnrollmentService;
+import com.example.School.Management.System.service.NotificationService;
 import com.example.School.Management.System.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
     private final StudentService studentService;
     private final CourseService courseService;
+    private final NotificationService notificationService;
 
     private void addFormData(Model model) {
         model.addAttribute("students", studentService.getAllStudents(Pageable.unpaged()).getContent());
@@ -51,10 +53,14 @@ public class EnrollmentController {
     public String create(@Valid @ModelAttribute("enrollmentDto") EnrollmentDto dto,
                          BindingResult result, Model model) {
         if (result.hasErrors()) {
-            addFormData(model);          // required, otherwise the page crashes
+            addFormData(model);
             return "enrollments/form";
         }
         enrollmentService.create(dto);
+
+        // <-- ADD AI NOTIFICATION TRIGGER HERE -->
+        notificationService.onEnrollment(dto.studentId(), dto.courseId());
+
         return "redirect:/enrollments";
     }
 

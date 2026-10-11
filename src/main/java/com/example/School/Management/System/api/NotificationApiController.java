@@ -37,20 +37,25 @@ public class NotificationApiController {
     @GetMapping
     public List<NotificationView> mine(@RequestParam(defaultValue = "0") int page,
                                        Principal principal) {
-        return repo.findByRecipientUsernameOrderByCreatedAtDesc(principal.getName(), PageRequest.of(page, 20))
+        // If no one is logged in, use a default test username so it doesn't crash
+        String username = (principal != null) ? principal.getName() : "admin"; // Change "admin" to an existing username in your DB
+
+        return repo.findByRecipientUsernameOrderByCreatedAtDesc(username, PageRequest.of(page, 20))
                 .map(NotificationView::of).getContent();
     }
 
     // 2. Unread counter
     @GetMapping("/unread-count")
     public Map<String, Long> unread(Principal principal) {
-        return Map.of("unread", repo.countByRecipientUsernameAndSeenFalse(principal.getName()));
+        String username = (principal != null) ? principal.getName() : "admin";
+        return Map.of("unread", repo.countByRecipientUsernameAndSeenFalse(username));
     }
 
     // 3. Mark one as read
     @PatchMapping("/{id}/read")
     public ResponseEntity<Map<String, Object>> read(@PathVariable Long id, Principal principal) {
-        int updated = repo.markSeen(id, principal.getName());
+        String username = (principal != null) ? principal.getName() : "admin";
+        int updated = repo.markSeen(id, username);
         return updated == 0
                 ? ResponseEntity.notFound().build()
                 : ResponseEntity.ok(Map.of("id", id, "seen", true));
@@ -59,7 +64,8 @@ public class NotificationApiController {
     // 4. Mark all as read
     @PatchMapping("/read-all")
     public Map<String, Integer> readAll(Principal principal) {
-        return Map.of("updated", repo.markAllSeen(principal.getName()));
+        String username = (principal != null) ? principal.getName() : "admin";
+        return Map.of("updated", repo.markAllSeen(username));
     }
 
     // 5. Simulate an attendance event (admin only, see security rule below)
