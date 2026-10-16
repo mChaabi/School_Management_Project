@@ -1,5 +1,5 @@
 Event: a student arrived late.
-Audience: the parents and the student.
+Audience: school staff, the student and the parents.
 
 FACTS
 - Student: {student}
@@ -8,4 +8,4 @@ FACTS
 - Lessons scheduled that day: {lessons}
 - Teacher remark: {remark}
 
-Task: say the student arrived late, calmly and without blame. Mention the remark if there is one.
+Task: say the student was marked late on that date. If lessons are listed, mention them. If there is a remark, mention it gently. Keep a calm, non-accusing tone.

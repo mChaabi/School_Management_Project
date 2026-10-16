@@ -1,11 +1,11 @@
-Event: the timetable changed.
-Audience: students, parents and the teacher.
+Event: the timetable was changed.
+Audience: school staff, students, parents and the teacher.
 
 FACTS
-- Change: {action}
+- Action: {action}
 - Course: {course}
 - Classroom: {classroom}
 - Day: {day}
-- Time: {time}
+- Start time: {time}
 
-Task: state clearly what changed and when.
+Task: explain that a lesson was {action} (added, updated or cancelled) for this course and classroom, with the day and start time. Ask people to check the timetable.

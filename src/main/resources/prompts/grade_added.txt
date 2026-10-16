@@ -1,10 +1,10 @@
-Event: a teacher recorded a grade.
-Audience: the student and the parents.
+Event: a new grade was recorded.
+Audience: school staff, the student and the parents.
 
 FACTS
 - Student: {student}
 - Course: {course}
-- Grade: {grade} out of 20
+- Grade: {grade}
 - Teacher: {teacher}
 
-Task: announce the new grade. Encouraging if 14 or more, neutral from 10 to 13.99, supportive and never harsh below 10.
+Task: announce the new grade for the course. Mention the teacher if provided. Be encouraging and neutral, do not judge the result.

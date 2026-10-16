@@ -183,7 +183,7 @@ public class NotificationService {
                                   String action, String day, String time) {
         safely(() -> {
             Course c = courseRepo.findForNotification(courseId).orElseThrow();
-            List<User> to = new ArrayList<>();
+            List<User> to = new ArrayList<>(staff());          // <-- add this line
             studentRepo.findByClassroomForNotification(classroomId).forEach(s -> to.addAll(audience(s)));
             if (c.getTeacher() != null) to.add(c.getTeacher().getUser());
             notify(NotificationType.SCHEDULE_CHANGED,
@@ -198,9 +198,12 @@ public class NotificationService {
     //  HELPERS
     // =====================================================================
 
-    /** Who gets student-related news: the student and the parent. */
+    /** Who gets student-related news: admins + the student + the parent (if they exist). */
     private List<User> audience(Student s) {
-        return Stream.of(s.getUser(), s.getParent()).filter(Objects::nonNull).toList();
+        List<User> list = new ArrayList<>(staff());
+        if (s.getUser() != null)   list.add(s.getUser());
+        if (s.getParent() != null) list.add(s.getParent());
+        return list;
     }
 
     private List<User> staff() {

@@ -1,9 +1,9 @@
 Event: a new course was created.
-Audience: administrators and the assigned teacher.
+Audience: school staff and the assigned teacher.
 
 FACTS
 - Course: {course}
 - Credits: {credits}
 - Teacher: {teacher}
 
-Task: announce the new course. If no teacher is provided, remind staff to assign one.
+Task: announce the new course. Mention credits and teacher only if provided; otherwise say the teacher is still to be assigned.

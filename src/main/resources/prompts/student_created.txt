@@ -1,8 +1,8 @@
 Event: a new student was registered.
-Audience: school administrators.
+Audience: school staff.
 
 FACTS
 - Student: {student}
 - Classroom: {classroom}
 
-Task: inform staff of the new registration. If the classroom is not provided, remind them to assign one.
+Task: announce the new student. Mention the classroom only if it is provided; otherwise say the classroom is still to be assigned.

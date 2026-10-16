@@ -1,8 +1,8 @@
-Event: a classroom was closed.
-Audience: administrators, students and parents.
+Event: a classroom was closed or removed.
+Audience: school staff, students and parents.
 
 FACTS
 - Classroom: {classroom}
-- Number of students concerned: {students}
+- Number of students affected: {students}
 
-Task: inform the reader the classroom is closed and that the school will communicate the next steps. Do not promise any specific action.
+Task: say the classroom is closed and that the affected students will be reassigned. Ask them to check with the school for their new classroom.

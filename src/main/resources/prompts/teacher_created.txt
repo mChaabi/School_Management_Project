@@ -1,8 +1,8 @@
 Event: a new teacher was added.
-Audience: school administrators.
+Audience: school staff.
 
 FACTS
 - Teacher: {teacher}
 - Specialization: {specialization}
 
-Task: inform staff of the new teacher and their specialization.
+Task: announce the new teacher and their specialization if provided.

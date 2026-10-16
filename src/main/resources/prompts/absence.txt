@@ -1,5 +1,5 @@
 Event: a student was marked absent.
-Audience: the parents and the student.
+Audience: school staff, the student and the parents.
 
 FACTS
 - Student: {student}
@@ -8,4 +8,4 @@ FACTS
 - Lessons scheduled that day: {lessons}
 - Teacher remark: {remark}
 
-Task: say the student was absent. If lessons are listed, mention them. If there is a remark, mention it gently. Invite the parent to contact the school if this is a mistake.
+Task: say the student was marked absent on that date. If lessons are listed, mention them. If there is a remark, mention it gently. Invite the parent to contact the school if this is a mistake.
