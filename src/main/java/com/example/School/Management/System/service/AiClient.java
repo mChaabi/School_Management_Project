@@ -25,9 +25,16 @@ public class AiClient {
 
     public AiClient(@Value("${app.ai.api-key:}") String apiKey,
                     @Value("${app.ai.enabled:true}") boolean enabled,
-                    @Value("${app.ai.model}") String model,
+                    @Value("${app.ai.model:gemini-2.5-flash}") String model,
                     @Value("${app.ai.max-tokens:200}") int maxTokens,
                     @Value("${app.ai.timeout-seconds:10}") int timeout) {
+
+        // Depuración para verificar si la clave está llegando bien desde secrets.properties
+        if (apiKey == null || apiKey.isBlank()) {
+            log.error("❌ [AI] API Key is EMPTY! Check if secrets.properties exists in src/main/resources/ and contains app.ai.api-key");
+        } else {
+            log.info("🔑 [AI] API Key loaded successfully (length: {})", apiKey.length());
+        }
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(timeout));
@@ -36,21 +43,26 @@ public class AiClient {
         this.http = RestClient.builder()
                 .baseUrl("https://generativelanguage.googleapis.com")
                 .requestFactory(factory)
-                .defaultHeader("x-goog-api-key", apiKey)
+                .defaultHeader("x-goog-api-key", apiKey != null ? apiKey.trim() : "")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
 
-        this.enabled = enabled && !apiKey.isBlank();
+        this.enabled = enabled && apiKey != null && !apiKey.isBlank();
         this.model = model;
         this.maxTokens = maxTokens;
 
         if (this.enabled) log.info("🤖 [AI] Gemini enabled, model={}", model);
-        else log.info("🤖 [AI] disabled (no key or turned off), fallback texts will be used");
+        else log.info("🤖 [AI] disabled (no key or turned off)");
+    }
+    public Optional<String> complete(String system, String user) {
+        return complete(system, user, maxTokens, 0.4);
     }
 
-    /** Returns the text, or empty if disabled or failed. Never throws. */
-    public Optional<String> complete(String system, String user) {
-        if (!enabled) return Optional.empty();
+    public Optional<String> complete(String system, String user, int maxOutputTokens, double temperature) {
+        if (!enabled) {
+            log.warn("⚠️ [AI] complete() skipped because AI is disabled.");
+            return Optional.empty();
+        }
         try {
             Map<String, Object> body = Map.of(
                     "systemInstruction", Map.of("parts", List.of(Map.of("text", system))),
@@ -58,8 +70,8 @@ public class AiClient {
                             "role", "user",
                             "parts", List.of(Map.of("text", user)))),
                     "generationConfig", Map.of(
-                            "maxOutputTokens", maxTokens,
-                            "temperature", 0.4));
+                            "maxOutputTokens", maxOutputTokens,
+                            "temperature", temperature));
 
             JsonNode res = http.post()
                     .uri("/v1beta/models/{model}:generateContent", model)
@@ -67,13 +79,22 @@ public class AiClient {
                     .retrieve()
                     .body(JsonNode.class);
 
-            String text = res == null ? "" : res.path("candidates").path(0)
+            if (res == null) {
+                log.warn("⚠️ [AI] Response body from Gemini was null.");
+                return Optional.empty();
+            }
+
+            String text = res.path("candidates").path(0)
                     .path("content").path("parts").path(0).path("text").asText("").trim();
 
-            return text.isBlank() ? Optional.empty() : Optional.of(text);
+            if (text.isBlank()) {
+                log.warn("⚠️ [AI] Gemini returned empty text. Full response: {}", res);
+                return Optional.empty();
+            }
+            return Optional.of(text);
 
         } catch (Exception e) {
-            log.warn("⚠️ [AI] Gemini call failed, using fallback: {}", e.getMessage());
+            log.error("❌ [AI] Gemini HTTP call failed with error: {}", e.getMessage(), e);
             return Optional.empty();
         }
     }

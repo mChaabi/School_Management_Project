@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('AI Assistant', ~{::main}, 'assistant')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>AI Assistant</h1>
+            <div class="breadcrumb">Home / AI Assistant</div>
+        </div>
+    </div>
+
+    <section class="as" id="as"
+             th:attr="data-url=@{/assistant/ask},data-csrf=${_csrf != null ? _csrf.token : ''},data-header=${_csrf != null ? _csrf.headerName : ''}">
+        <div class="as-log" id="asLog" aria-live="polite">
+            <div class="as-empty" id="asEmpty">
+                <i class="bi bi-stars"></i>
+                <h3>Ask about your school data</h3>
+                <p>Every number comes from your live database, not from a guess.</p>
+                <div class="as-chips">
+                    <button type="button" class="as-chip">How many students are there in total?</button>
+                    <button type="button" class="as-chip">Who is the youngest student in Java Programming for Adults?</button>
+                    <button type="button" class="as-chip">Who enrolled most recently?</button>
+                    <button type="button" class="as-chip">Give me statistics about the school</button>
+                    <button type="button" class="as-chip">What is missing in my application?</button>
+                    <button type="button" class="as-chip">Which classrooms are almost full?</button>
+                </div>
+            </div>
+        </div>
+
+        <form class="as-form" id="asForm" autocomplete="off">
+            <input id="asInput" type="text" maxlength="300" placeholder="Ask a question about your school..." required>
+            <button class="btn btn-primary" id="asSend" type="submit"><i class="bi bi-send-fill"></i> Send</button>
+        </form>
+    </section>
+
+    <style>
+        .as-table{overflow-x:auto;margin-top:.5rem}
+        .as-table table{border-collapse:collapse;font-size:.8rem;background:#fff;color:#1e293b}
+        .as-table th,.as-table td{border:1px solid #e2e8f0;padding:.3rem .6rem;text-align:left;white-space:nowrap}
+        .as-table th{background:#eef2ff}
+        .as-sql{display:block;margin-top:.5rem;padding:.5rem .7rem;background:#0f172a;color:#e2e8f0;border-radius:8px;
+            font-size:.75rem;white-space:pre-wrap;word-break:break-word}
+        .as{max-width:860px;margin:0 auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;
+            box-shadow:0 8px 24px rgba(15,23,42,.07);display:flex;flex-direction:column;height:68vh;min-height:460px}
+        .as-log{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:.9rem}
+        .as-empty{margin:auto;text-align:center;color:#64748b;max-width:560px}
+        .as-empty>i{font-size:2rem;color:#4f46e5}
+        .as-empty h3{margin:.4rem 0 .2rem;color:#0f172a}
+        .as-chips{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-top:1.1rem}
+        .as-chip{border:1px solid #c7d2fe;background:#eef2ff;color:#4338ca;border-radius:99px;padding:.45rem .9rem;
+            font-size:.85rem;cursor:pointer;transition:background .2s,color .2s}
+        .as-chip:hover{background:#4f46e5;color:#fff}
+        .as-msg{max-width:82%;padding:.8rem 1rem;border-radius:14px;line-height:1.55;white-space:pre-line;word-wrap:break-word}
+        .as-user{align-self:flex-end;background:#4f46e5;color:#fff;border-bottom-right-radius:4px}
+        .as-bot{align-self:flex-start;background:#f1f5f9;color:#1e293b;border-bottom-left-radius:4px}
+        .as-typing{color:#64748b;font-style:italic}
+        .as-facts{margin-top:.6rem;font-size:.8rem;color:#64748b;white-space:normal}
+        .as-facts summary{cursor:pointer;font-weight:600}
+        .as-facts ul{margin:.4rem 0 0 1.1rem;padding:0}
+        .as-form{display:flex;gap:.6rem;padding:1rem;border-top:1px solid #e2e8f0}
+        .as-form input{flex:1;padding:.7rem 1rem;border:1px solid #cbd5e1;border-radius:10px;font-size:.95rem}
+        .as-form input:focus{outline:3px solid #c7d2fe;border-color:#4f46e5}
+        @media (max-width:640px){.as-msg{max-width:94%}}
+    </style>
+
+    <script>
+        (function () {
+            var root = document.getElementById('as'), log = document.getElementById('asLog'),
+                empty = document.getElementById('asEmpty'), form = document.getElementById('asForm'),
+                input = document.getElementById('asInput'), send = document.getElementById('asSend');
+
+            function bubble(role) {
+                var d = document.createElement('div');
+                d.className = 'as-msg as-' + role;
+                log.appendChild(d);
+                log.scrollTop = log.scrollHeight;
+                return d;
+            }
+
+            function showData(bot, a) {
+                if (!a || !a.sql) return;
+                var det = document.createElement('details'); det.className = 'as-facts';
+                var sum = document.createElement('summary');
+                sum.textContent = 'Data used (' + (a.rows ? a.rows.length : 0) + (a.truncated ? '+' : '') + ' rows)';
+                det.appendChild(sum);
+
+                if (a.rows && a.rows.length) {
+                    var wrap = document.createElement('div'); wrap.className = 'as-table';
+                    var t = document.createElement('table'), tr = document.createElement('tr');
+                    if (a.columns) {
+                        a.columns.forEach(function (c) { var th = document.createElement('th'); th.textContent = c; tr.appendChild(th); });
+                        t.appendChild(tr);
+                    }
+                    a.rows.forEach(function (r) {
+                        var row = document.createElement('tr');
+                        r.forEach(function (v) { var td = document.createElement('td'); td.textContent = v; row.appendChild(td); });
+                        t.appendChild(row);
+                    });
+                    wrap.appendChild(t); det.appendChild(wrap);
+                }
+                var code = document.createElement('code'); code.className = 'as-sql'; code.textContent = a.sql;
+                det.appendChild(code);
+                bot.appendChild(det);
+            }
+
+            function ask(q) {
+                if (empty) empty.style.display = 'none';
+                bubble('user').textContent = q;
+                var bot = bubble('bot');
+                bot.classList.add('as-typing');
+                bot.textContent = 'Analyzing your data...';
+                send.disabled = true;
+
+                var headers = {'Content-Type': 'application/json'};
+                if (root.dataset.csrf) headers[root.dataset.header] = root.dataset.csrf;
+
+                fetch(root.dataset.url, {method: 'POST', headers: headers, body: JSON.stringify({question: q})})
+                    .then(function (r) {
+                        if (!r.ok) {
+                            return r.json().then(function(err) {
+                                throw new Error(err.message || 'Server error');
+                            }).catch(function() {
+                                throw new Error('Server error');
+                            });
+                        }
+                        return r.json();
+                    })
+                    .then(function (a) {
+                        bot.classList.remove('as-typing');
+                        bot.textContent = a.answer;
+                        showData(bot, a); // CORREGIDO: llamaba a showFacts en lugar de showData
+                    })
+                    .catch(function (err) {
+                        bot.classList.remove('as-typing');
+                        bot.textContent = 'Sorry, could not process your query. Please check your AI API key or connection.';
+                    })
+                    .finally(function () { send.disabled = false; input.focus(); log.scrollTop = log.scrollHeight; });
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var q = input.value.trim();
+                if (!q) return;
+                input.value = '';
+                ask(q);
+            });
+            document.querySelectorAll('.as-chip').forEach(function (c) {
+                c.addEventListener('click', function () { ask(c.textContent); });
+            });
+        })();
+    </script>
+</main>
+</body>
+</html>
