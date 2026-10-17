@@ -9,6 +9,8 @@ public record StudentDetailDto(
         Long id,
         String fullName,
         String email,
+        String city,
+        String country,
         String phone,
         Gender gender,
         LocalDate birthDate,

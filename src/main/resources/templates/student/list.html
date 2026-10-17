@@ -22,7 +22,7 @@
         <div class="card-header">
             <h3>All students <span class="badge badge-primary" th:text="${students.totalElements}">0</span></h3>
             <form th:action="@{/students}" method="get" class="search">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search student...">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by name, email, phone...">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
             </form>
         </div>

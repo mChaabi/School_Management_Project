@@ -44,6 +44,19 @@
                                th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
                         <span class="error-text" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
                     </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" th:field="*{city}"
+                               th:classappend="${#fields.hasErrors('city')} ? 'is-invalid'">
+                        <span class="error-text" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Country</label>
+                        <input type="text" th:field="*{country}"
+                               th:classappend="${#fields.hasErrors('country')} ? 'is-invalid'">
+                        <span class="error-text" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></span>
+                    </div>
 
                     <div class="form-group">
                         <label>Birth date</label>

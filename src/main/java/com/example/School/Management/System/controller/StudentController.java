@@ -2,6 +2,7 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.StudentDetailDto;
 import com.example.School.Management.System.dto.StudentDto;
+import com.example.School.Management.System.exception.FieldValidationException;
 import com.example.School.Management.System.service.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -55,7 +57,7 @@ public class StudentController {
     // Show form for creating a new student -> returns templates/student/form.html
     @GetMapping("/new")
     public String showCreateForm(Model model, Pageable pageable) {
-        model.addAttribute("studentDto", new StudentDto(null, "", "", "", "", null, null, null));
+        model.addAttribute("studentDto", new StudentDto(null, "", "", "","","", "", null, null, null));
         model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
         return "student/form";
     }
@@ -64,21 +66,20 @@ public class StudentController {
     @PostMapping
     public String createStudent(@Valid @ModelAttribute("studentDto") StudentDto studentDto,
                                 BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
-            return "student/form";
+        if (!result.hasErrors()) {
+            try {
+                var saved = studentService.createStudent(studentDto);
+                notificationService.onStudentCreated(saved.id(),
+                        saved.firstName() + " " + saved.lastName(), null);
+                return "redirect:/students";
+            } catch (FieldValidationException e) {
+                result.addError(new FieldError("studentDto", e.getField(), e.getMessage()));
+            }
         }
-        // Save student
-        var saved = studentService.createStudent(studentDto);
-
-        notificationService.onStudentCreated(
-                saved.id(), // Change from saved.getId() to saved.id()
-                saved.firstName() + " " + saved.lastName(),
-                null
-        );
-
-        return "redirect:/students";
+        model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
+        return "student/form";
     }
+
 
     // Show form for editing an existing student
     @GetMapping("/edit/{id}")
@@ -94,12 +95,16 @@ public class StudentController {
     public String updateStudent(@PathVariable Long id,
                                 @Valid @ModelAttribute("studentDto") StudentDto studentDto,
                                 BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
-            return "student/form";
+        if (!result.hasErrors()) {
+            try {
+                studentService.updateStudent(id, studentDto);
+                return "redirect:/students";
+            } catch (FieldValidationException e) {
+                result.addError(new FieldError("studentDto", e.getField(), e.getMessage()));
+            }
         }
-        studentService.updateStudent(id, studentDto);
-        return "redirect:/students";
+        model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
+        return "student/form";
     }
 
     @GetMapping("/{id}")

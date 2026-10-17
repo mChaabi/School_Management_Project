@@ -1,5 +1,6 @@
 package com.example.School.Management.System.api;
 
+import com.example.School.Management.System.exception.FieldValidationException;
 import com.example.School.Management.System.exception.ResourceNotFoundException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -14,17 +15,22 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@RestControllerAdvice(basePackages = "com.example.School.Management.System.api")
+@RestControllerAdvice(basePackages = "com.example.School.Management.System")
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> notFound(ResourceNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 
+    @ExceptionHandler(FieldValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleFieldValidation(FieldValidationException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), Map.of(ex.getField(), ex.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> validation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> fields = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(e -> fields.put(e.getField(), e.getDefaultMessage()));
@@ -32,7 +38,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> conflict(DataIntegrityViolationException ex) {
+    public ResponseEntity<Map<String, Object>> handleConflict(DataIntegrityViolationException ex) {
         return build(HttpStatus.CONFLICT,
                 "Data integrity violation (duplicate value or related records exist)", null);
     }

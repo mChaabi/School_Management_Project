@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,20 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByEmailAndIdNot(String email, Long id);
+
+    boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+    Page<Student> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
+            String firstName, String lastName, String email, String phone, Pageable pageable);
+
+    boolean existsByPhone(String phone);
+    boolean existsByPhoneAndIdNot(String phone, Long id);
+
+    boolean existsByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndBirthDate(String f, String l, LocalDate b);
+    boolean existsByFirstNameIgnoreCaseAndLastNameIgnoreCaseAndBirthDateAndIdNot(String f, String l, LocalDate b, Long id);
+
+    long countByClassroomId(Long classroomId);
 
     Page<Student> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
             String firstName, String lastName, Pageable pageable);

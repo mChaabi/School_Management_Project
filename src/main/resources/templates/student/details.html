@@ -26,6 +26,8 @@
             <h3>Profile</h3>
             <p><strong>Email:</strong> <span th:text="${student.email}"></span></p>
             <p><strong>Phone:</strong> <span th:text="${student.phone ?: '-'}"></span></p>
+            <p><strong>City:</strong> <span th:text="${student.city ?: '-'}"></span></p>
+            <p><strong>Country:</strong> <span th:text="${student.country ?: '-'}"></span></p>
             <p><strong>Gender:</strong> <span th:text="${student.gender}"></span></p>
             <p><strong>Birth date:</strong>
                 <span th:text="${student.birthDate != null} ? ${#temporals.format(student.birthDate,'dd/MM/yyyy')} : '-'"></span></p>

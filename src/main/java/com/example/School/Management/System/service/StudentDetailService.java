@@ -54,10 +54,18 @@ public class StudentDetailService {
         Classroom c = s.getClassroom();   // lazy, safe inside the transaction
 
         return new StudentDetailDto(
-                s.getId(), s.getFirstName() + " " + s.getLastName(),
-                s.getEmail(), s.getPhone(), s.getGender(), s.getBirthDate(),
+                s.getId(),
+                s.getFirstName() + " " + s.getLastName(),
+                s.getEmail(),
+                s.getPhone(),
+                s.getCity(),
+                s.getCountry(),
+                s.getGender(),
+                s.getBirthDate(),
                 c != null ? c.getName() : null,
                 c != null ? c.getCapacity() : null,
-                rows, avg);
+                rows,
+                avg
+        );
     }
 }

@@ -18,14 +18,19 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final ClassroomRepository classroomRepository; // Optional: if you want to link classrooms
+    private final StudentValidator validator;
 
-    public StudentServiceImpl(StudentRepository studentRepository, ClassroomRepository classroomRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository,
+                              ClassroomRepository classroomRepository,
+                              StudentValidator validator) {
         this.studentRepository = studentRepository;
         this.classroomRepository = classroomRepository;
+        this.validator = validator;
     }
 
     @Override
     public StudentDto createStudent(StudentDto studentDto) {
+        validator.validate(studentDto, null);
         // Validate unique email
         if (studentRepository.existsByEmail(studentDto.email())) {
             throw new IllegalArgumentException("Email already exists: " + studentDto.email());
@@ -40,6 +45,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDto updateStudent(Long id, StudentDto studentDto) {
+        validator.validate(studentDto, id);
         Student existingStudent = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
 
@@ -81,7 +87,8 @@ public class StudentServiceImpl implements StudentService {
     @Transactional(readOnly = true)
     public Page<StudentDto> searchStudents(String keyword, Pageable pageable) {
         return studentRepository
-                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(keyword, keyword, pageable)
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContainingIgnoreCase(
+                        keyword, keyword, keyword, keyword, pageable)
                 .map(StudentMapper::toDto);
     }
 
@@ -101,4 +108,6 @@ public class StudentServiceImpl implements StudentService {
         return classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found with id: " + classroomId));
     }
+
+
 }

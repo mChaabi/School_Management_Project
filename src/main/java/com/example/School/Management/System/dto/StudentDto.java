@@ -15,18 +15,27 @@ public record StudentDto(
 
         @NotBlank(message = "First name is mandatory")
         @Size(max = 50, message = "First name must not exceed 50 characters")
+        @Pattern(regexp = "^\\p{L}[\\p{L} '\\-]*$", message = "First name can contain only letters")
         String firstName,
 
         @NotBlank(message = "Last name is mandatory")
         @Size(max = 50, message = "Last name must not exceed 50 characters")
+        @Pattern(regexp = "^\\p{L}[\\p{L} '\\-]*$", message = "Last name can contain only letters")
         String lastName,
 
         @NotBlank(message = "Email is mandatory")
         @Email(message = "Email should be valid")
+        @Size(max = 100, message = "Email must not exceed 100 characters")
         String email,
 
-        @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Phone number is invalid")
+        @Pattern(regexp = "^$|^\\+?[0-9. ()-]{7,25}$", message = "Phone number is invalid")
         String phone,
+
+        @Size(max = 50, message = "City must not exceed 50 characters")
+        String city,
+
+        @Size(max = 50, message = "Country must not exceed 50 characters")
+        String country,
 
         @Past(message = "Birth date must be in the past")
         LocalDate birthDate,
