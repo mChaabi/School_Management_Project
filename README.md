@@ -12,7 +12,6 @@
 ![Gemini](https://img.shields.io/badge/Google_Gemini-AI-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-Build-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
 
-<img src="docs/screenshots/03-dashboard.png" alt="EduManage dashboard" width="900">
 
 </div>
 
@@ -83,6 +82,12 @@ Two things make it different from a classic CRUD project:
 <img width="960" height="479" alt="dashboard" src="https://github.com/user-attachments/assets/ce316fd3-1cae-4c62-99f3-eb0201c94387" />
 
 *Totals, students per classroom, attendance of the last 7 days and grade distribution.*
+
+### 🗄️ Database Architecture (EER Diagram)
+
+<img width="960" height="503" alt="Diagramme Database" src="https://github.com/user-attachments/assets/9db68189-c7d5-4cce-82e4-c4f079412301" />
+
+*Relational database schema and entity relationships designed in MySQL Workbench.*
 
 ### 👩‍🎓 Students
 
