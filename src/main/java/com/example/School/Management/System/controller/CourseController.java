@@ -1,7 +1,10 @@
 package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.CourseDto;
+import com.example.School.Management.System.dto.StudentExamResultDto;
+import com.example.School.Management.System.repository.ExamResultRepository;
 import com.example.School.Management.System.service.CourseService;
+import com.example.School.Management.System.service.ExamService;
 import com.example.School.Management.System.service.NotificationService;
 import com.example.School.Management.System.service.TeacherService;
 import jakarta.validation.Valid;
@@ -13,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/courses")
 public class CourseController {
@@ -20,11 +25,16 @@ public class CourseController {
     private final CourseService courseService;
     private final TeacherService teacherService;
     private final NotificationService notificationService; // <-- ADD THIS
+    private final ExamResultRepository examResultRepository;
+    private final ExamService examService;
 
-    public CourseController(CourseService courseService, TeacherService teacherService, NotificationService notificationService) {
+    public CourseController(CourseService courseService, TeacherService teacherService, NotificationService notificationService , ExamResultRepository examResultRepository,ExamService examService) {
         this.courseService = courseService;
         this.teacherService = teacherService;
         this.notificationService = notificationService; // <-- ADD THIS
+        this.examResultRepository = examResultRepository;
+        this.examService = examService;
+
     }
 
     @GetMapping
@@ -80,6 +90,14 @@ public class CourseController {
         }
         courseService.updateCourse(id, courseDto);
         return "redirect:/courses";
+    }
+
+    @GetMapping("/courses/{courseId}/grades")
+    public String viewCourseGrades(@PathVariable Long courseId, Model model) {
+        List<StudentExamResultDto> grades = examResultRepository.findGradesByCourseId(courseId);
+        model.addAttribute("grades", grades);
+        model.addAttribute("courseTitle", examService.courseTitle(courseId));
+        return "course/grades";
     }
 
     @GetMapping("/delete/{id}")

@@ -17,6 +17,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     List<Enrollment> findByCourseId(Long courseId);
 
+    long countByCourseId(Long courseId);
+
     // Add this to find enrollments for a list of student IDs
     List<Enrollment> findByStudentIdIn(List<Long> studentIds);
 
@@ -43,4 +45,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
        order by c.title, e.student.lastName
        """)
     List<Enrollment> findAllForExport();
+
 }

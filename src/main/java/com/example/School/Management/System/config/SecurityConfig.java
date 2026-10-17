@@ -31,6 +31,8 @@ public class SecurityConfig {
                         // 1. Public web pages
                         .requestMatchers("/login", "/signup", "/css/**", "/js/**", "/error/**").permitAll()
 
+                        .requestMatchers("/assistant/ask", "/api/test/**").permitAll()
+                        .requestMatchers("/api/assistant/**").permitAll()
                         // 2. Admin only
                         .requestMatchers("/users/**").hasRole("ADMIN")
 

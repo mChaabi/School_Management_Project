@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Exams', ~{::main}, 'courses')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="'Exams: ' + ${courseTitle}">Exams</h1>
+            <div class="breadcrumb">Home / Courses / Exams</div>
+        </div>
+        <div class="actions">
+            <a th:href="@{/courses}" class="btn btn-light">Back</a>
+            <a th:href="@{/courses/{id}/exams/new(id=${courseId})}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> New exam</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Exam</th><th>Date</th><th>Max score</th><th>Weight</th>
+                    <th>Scores entered</th><th>Actions</th></tr></thead>
+                <tbody>
+                <tr th:each="e : ${exams}">
+                    <td><strong th:text="${e.title}"></strong></td>
+                    <td th:text="${#temporals.format(e.date,'dd/MM/yyyy')}"></td>
+                    <td th:text="${e.maxScore}"></td>
+                    <td><span class="badge badge-info" th:text="${e.weight} + '%'"></span></td>
+                    <td><span class="badge badge-primary" th:text="${e.graded} + ' / ' + ${e.total}"></span></td>
+                    <td>
+                        <div class="actions">
+                            <a th:href="@{/exams/{id}/grades(id=${e.id})}" class="btn btn-icon edit" title="Enter scores">
+                                <i class="bi bi-pencil-square"></i></a>
+                            <form th:action="@{/exams/{id}/delete(id=${e.id})}" method="post"
+                                  data-confirm="Delete this exam and its scores?">
+                                <button type="submit" class="btn btn-icon delete" title="Delete">
+                                    <i class="bi bi-trash-fill"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(exams)}">
+                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No exams yet. Create the first one.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

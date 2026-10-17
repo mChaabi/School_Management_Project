@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Exam scores', ~{::main}, 'courses')}">
+<body>
+<main>
+  <div class="page-header">
+    <div>
+      <h1 th:text="${sheet.examTitle}">Exam</h1>
+      <div class="breadcrumb" th:text="'Home / Courses / ' + ${sheet.courseTitle} + ' / Scores'">Course</div>
+    </div>
+    <a th:href="@{/courses/{id}/exams(id=${sheet.courseId})}" class="btn btn-light">Back to exams</a>
+  </div>
+
+  <div class="alert alert-danger" th:if="${error != null}">
+    <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
+    <p>
+      <strong>Course:</strong> <span th:text="${sheet.courseTitle}"></span> &nbsp;|&nbsp;
+      <strong>Date:</strong> <span th:text="${#temporals.format(sheet.examDate,'dd/MM/yyyy')}"></span> &nbsp;|&nbsp;
+      <strong>Maximum score:</strong> <span th:text="${sheet.maxScore}"></span> &nbsp;|&nbsp;
+      <strong>Weight:</strong> <span th:text="${sheet.weight} + '%'"></span>
+    </p>
+    <small>Leave the score empty if the exam is not graded yet. Tick <em>Absent</em> if the student
+      did not take the exam: it counts as 0 in the final grade.</small>
+  </div></div>
+
+  <div class="card">
+    <form th:object="${sheet}" th:action="@{/exams/{id}/grades(id=${sheet.examId})}" method="post">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Student</th>
+            <th th:text="'Score (/ ' + ${sheet.maxScore} + ')'">Score</th><th>Absent</th></tr></thead>
+          <tbody>
+          <tr th:each="r, i : *{rows}">
+            <td th:text="${i.count}"></td>
+            <td>
+              <strong th:text="${r.studentName}"></strong>
+              <input type="hidden" th:field="*{rows[__${i.index}__].studentId}">
+            </td>
+            <td>
+              <input type="number" step="0.25" min="0" th:max="${sheet.maxScore}"
+                     class="score" style="max-width:120px"
+                     th:field="*{rows[__${i.index}__].score}">
+            </td>
+            <td><input type="checkbox" class="absent" th:field="*{rows[__${i.index}__].absent}"></td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(sheet.rows)}">
+            <td colspan="4" class="empty"><i class="bi bi-inbox"></i>
+              No student is enrolled in this course yet.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="form-actions" th:unless="${#lists.isEmpty(sheet.rows)}">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save scores</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // An absent student has no score: clear it and lock the field
+    document.querySelectorAll('tr').forEach(function (row) {
+      var box = row.querySelector('.absent'), score = row.querySelector('.score');
+      if (!box || !score) return;
+      function sync() { score.readOnly = box.checked; if (box.checked) score.value = ''; }
+      box.addEventListener('change', sync);
+      sync();
+    });
+  </script>
+</main>
+</body>
+</html>
