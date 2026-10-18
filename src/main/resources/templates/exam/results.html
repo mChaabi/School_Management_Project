@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Course Grades', ~{::main}, 'courses')}">
+      th:replace="~{layout/base :: layout(#{courses.grades.pageTitle}, ~{::main}, 'courses')}">
 <body>
 <main>
 
     <div class="page-header">
         <div>
-            <h1 th:text="'Grades: ' + ${courseTitle}">Course Grades</h1>
-            <div class="breadcrumb">Home / Courses / Grades</div>
+            <h1 th:text="#{courses.grades.heading} + ' ' + ${courseTitle}">Course Grades</h1>
+            <div class="breadcrumb" th:text="#{courses.grades.breadcrumb}">Home / Courses / Grades</div>
         </div>
     </div>
 
@@ -16,12 +16,12 @@
             <table>
                 <thead>
                 <tr>
-                    <th>Course</th>
-                    <th>Teacher</th>
-                    <th>Student</th>
-                    <th>Exam Title</th>
-                    <th>Note / Score</th>
-                    <th>Date</th>
+                    <th th:text="#{table.course}">Course</th>
+                    <th th:text="#{table.teacher}">Teacher</th>
+                    <th th:text="#{table.student}">Student</th>
+                    <th th:text="#{table.examTitle}">Exam Title</th>
+                    <th th:text="#{table.score}">Note / Score</th>
+                    <th th:text="#{table.date}">Date</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -31,16 +31,16 @@
                     <td th:text="${g.studentName}">John Doe</td>
                     <td th:text="${g.examTitle}">Midterm Exam</td>
                     <td>
-                        <span th:if="${g.absent}" class="badge badge-danger">Absent</span>
+                        <span th:if="${g.absent}" class="badge badge-danger" th:text="#{badge.absent}">Absent</span>
                         <strong th:if="${!g.absent}"
-                                th:text="${g.score != null ? g.score + ' / ' + g.maxScore : 'Not Graded Yet'}">
+                                th:text="${g.score != null ? g.score + ' / ' + g.maxScore : #{status.notGraded}}">
                             15.0 / 20.0
                         </strong>
                     </td>
                     <td th:text="${#temporals.format(g.examDate,'dd/MM/yyyy')}"></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(grades)}">
-                    <td colspan="6" class="empty">No grades or exam results found for this course.</td>
+                    <td colspan="6" class="empty" th:text="#{grades.empty}">No grades or exam results found for this course.</td>
                 </tr>
                 </tbody>
             </table>

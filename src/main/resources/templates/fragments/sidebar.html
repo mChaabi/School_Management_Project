@@ -10,50 +10,50 @@
 
         <!-- Everyone -->
         <li th:classappend="${currentMenu == 'home'} ? 'active'">
-            <a th:href="@{/dashboard}"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+            <a th:href="@{/dashboard}"><i class="bi bi-grid-1x2-fill"></i> <span th:text="#{nav.dashboard}">Dashboard</span></a>
         </li>
 
         <!-- Admin + Teacher -->
         <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'students'} ? 'active'">
-            <a th:href="@{/students}"><i class="bi bi-people-fill"></i> Students</a>
+            <a th:href="@{/students}"><i class="bi bi-people-fill"></i> <span th:text="#{nav.students}">Students</span></a>
         </li>
         <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'teachers'} ? 'active'">
-            <a th:href="@{/teachers}"><i class="bi bi-person-workspace"></i> Teachers</a>
+            <a th:href="@{/teachers}"><i class="bi bi-person-workspace"></i> <span th:text="#{nav.teachers}">Teachers</span></a>
         </li>
         <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'classrooms'} ? 'active'">
-            <a th:href="@{/classrooms}"><i class="bi bi-door-open-fill"></i> Classrooms</a>
+            <a th:href="@{/classrooms}"><i class="bi bi-door-open-fill"></i> <span th:text="#{nav.classrooms}">Classrooms</span></a>
         </li>
 
         <!-- Courses: everyone can see -->
         <li th:classappend="${currentMenu == 'courses'} ? 'active'">
-            <a th:href="@{/courses}"><i class="bi bi-journal-bookmark-fill"></i> Courses</a>
+            <a th:href="@{/courses}"><i class="bi bi-journal-bookmark-fill"></i> <span th:text="#{nav.courses}">Courses</span></a>
         </li>
 
         <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'exams'} ? 'active'">
-            <a th:href="@{/exams}"><i class="bi bi-journal-check"></i> Exams</a>
+            <a th:href="@{/exams}"><i class="bi bi-journal-check"></i> <span th:text="#{nav.exams}">Exams</span></a>
         </li>
 
         <li sec:authorize="hasAnyRole('ADMIN','TEACHER','STUDENT')" th:classappend="${currentMenu == 'quizzes'} ? 'active'">
-            <a th:href="@{/my-quizzes}"><i class="bi bi-ui-checks-grid"></i> Quizzes</a>
+            <a th:href="@{/my-quizzes}"><i class="bi bi-ui-checks-grid"></i> <span th:text="#{nav.quizzes}">Quizzes</span></a>
         </li>
 
         <!-- Enrollments: everyone (data is filtered per role in the controller) -->
         <li th:classappend="${currentMenu == 'enrollments'} ? 'active'">
-            <a th:href="@{/enrollments}"><i class="bi bi-card-checklist"></i> Enrollments</a>
+            <a th:href="@{/enrollments}"><i class="bi bi-card-checklist"></i> <span th:text="#{nav.enrollments}">Enrollments</span></a>
         </li>
 
         <!-- Attendance: everyone (data is filtered per role) -->
         <li th:classappend="${currentMenu == 'attendances'} ? 'active'">
-            <a th:href="@{/attendances}"><i class="bi bi-calendar-check-fill"></i> Attendance</a>
+            <a th:href="@{/attendances}"><i class="bi bi-calendar-check-fill"></i> <span th:text="#{nav.attendance}">Attendance</span></a>
         </li>
 
         <li th:classappend="${currentMenu == 'schedules'} ? 'active'">
-            <a th:href="@{/schedules}"><i class="bi bi-calendar-week-fill"></i> Timetable</a>
+            <a th:href="@{/schedules}"><i class="bi bi-calendar-week-fill"></i> <span th:text="#{nav.timetable}">Timetable</span></a>
         </li>
 
         <!-- Admin only -->
         <li sec:authorize="hasRole('ADMIN')" th:classappend="${currentMenu == 'users'} ? 'active'">
-            <a th:href="@{/users}"><i class="bi bi-shield-lock-fill"></i> Users Management</a>
+            <a th:href="@{/users}"><i class="bi bi-shield-lock-fill"></i> <span th:text="#{nav.users}">Users Management</span></a>
         </li>
     </ul>
 </aside>

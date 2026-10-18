@@ -3,11 +3,11 @@
 <body>
 <footer class="footer" th:fragment="footer">
     <span>&copy; <span th:text="${#temporals.createNow().year}">2026</span>
-          <strong>EduManage</strong>. All rights reserved.</span>
+          <strong>EduManage</strong>. <span th:text="#{footer.rights}">All rights reserved.</span></span>
     <span class="footer-links">
-        <a href="#">Help</a>
-        <a href="#">Privacy</a>
-        <a href="#">Contact</a>
+        <a href="#" th:text="#{footer.help}">Help</a>
+        <a href="#" th:text="#{footer.privacy}">Privacy</a>
+        <a href="#" th:text="#{footer.contact}">Contact</a>
     </span>
 </footer>
 </body>

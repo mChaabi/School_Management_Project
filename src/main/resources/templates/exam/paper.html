@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Exam paper', ~{::main}, 'exams')}">
+      th:replace="~{layout/base :: layout(#{exams.paper.pageTitle}, ~{::main}, 'exams')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1 th:text="'Exam paper: ' + ${exam.title}">Exam paper</h1>
-            <div class="breadcrumb" th:text="'Home / Exams / ' + ${exam.courseTitle}">Course</div>
+            <h1 th:text="#{exams.paper.heading} + ': ' + ${exam.title}">Exam paper</h1>
+            <div class="breadcrumb" th:text="#{breadcrumb.homeExams} + ' ' + ${exam.courseTitle}">Course</div>
         </div>
         <div class="actions">
             <a th:href="@{/exams/{id}/grades(id=${exam.id})}" class="btn btn-light">
-                <i class="bi bi-pencil-square"></i> Enter scores</a>
-            <a th:href="@{/exams}" class="btn btn-light">Back to exams</a>
+                <i class="bi bi-pencil-square"></i> <span th:text="#{btn.enterScores}">Enter scores</span></a>
+            <a th:href="@{/exams}" class="btn btn-light" th:text="#{btn.backToExams}">Back to exams</a>
         </div>
     </div>
 
@@ -19,14 +19,14 @@
         <div class="ex-chips">
             <span class="ex-chip"><i class="bi bi-journal-bookmark-fill"></i> <strong th:text="${exam.courseTitle}"></strong></span>
             <span class="ex-chip"><i class="bi bi-calendar-event"></i> <strong th:text="${#temporals.format(exam.date,'dd/MM/yyyy')}"></strong></span>
-            <span class="ex-chip"><i class="bi bi-trophy"></i> Max <strong th:text="${exam.maxScore}"></strong></span>
-            <span class="ex-chip"><i class="bi bi-percent"></i> Weight <strong th:text="${exam.weight} + '%'"></strong></span>
+            <span class="ex-chip"><i class="bi bi-trophy"></i> <span th:text="#{chip.max}">Max</span> <strong th:text="${exam.maxScore}"></strong></span>
+            <span class="ex-chip"><i class="bi bi-percent"></i> <span th:text="#{table.weight}">Weight</span> <strong th:text="${exam.weight} + '%'"></strong></span>
         </div>
     </div></div>
 
     <!-- Current file -->
     <div class="card" style="margin-bottom:1.5rem" th:if="${file != null}">
-        <div class="card-header"><h3>Current file</h3></div>
+        <div class="card-header"><h3 th:text="#{exams.paper.currentFile}">Current file</h3></div>
         <div class="card-body">
             <div class="ex-file">
                 <div class="ex-file-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
@@ -34,29 +34,29 @@
                     <strong th:text="${file.fileName}">exam.pdf</strong>
                     <small>
                         <span th:text="${#numbers.formatDecimal(file.size / 1024.0, 1, 1)} + ' KB'"></span> &middot;
-                        uploaded <span th:text="${#temporals.format(file.uploadedAt,'dd/MM/yyyy HH:mm')}"></span>
-                        by <span th:text="${file.uploadedBy}"></span>
+                        <span th:text="#{file.uploaded}">uploaded</span> <span th:text="${#temporals.format(file.uploadedAt,'dd/MM/yyyy HH:mm')}"></span>
+                        <span th:text="#{file.by}">by</span> <span th:text="${file.uploadedBy}"></span>
                     </small>
-                    <span class="badge badge-success" th:if="${file.published}">Visible to students</span>
-                    <span class="badge badge-info" th:unless="${file.published}">Hidden from students</span>
+                    <span class="badge badge-success" th:if="${file.published}" th:text="#{file.visibleToStudents}">Visible to students</span>
+                    <span class="badge badge-info" th:unless="${file.published}" th:text="#{file.hiddenFromStudents}">Hidden from students</span>
                 </div>
                 <div class="ex-file-actions">
                     <a th:href="@{/exams/{id}/paper/view(id=${exam.id})}" target="_blank" class="btn btn-light">
-                        <i class="bi bi-eye-fill"></i> Open</a>
+                        <i class="bi bi-eye-fill"></i> <span th:text="#{btn.open}">Open</span></a>
                     <a th:href="@{/exams/{id}/paper/download(id=${exam.id})}" class="btn btn-light">
-                        <i class="bi bi-download"></i> Download</a>
+                        <i class="bi bi-download"></i> <span th:text="#{btn.download}">Download</span></a>
 
                     <form th:action="@{/exams/{id}/paper/publish(id=${exam.id})}" method="post">
                         <input type="hidden" name="publish" th:value="${!file.published}">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi" th:classappend="${file.published} ? 'bi-eye-slash' : 'bi-send-fill'"></i>
-                            <span th:text="${file.published} ? 'Hide from students' : 'Publish to students'"></span>
+                            <span th:text="${file.published} ? #{btn.hideFromStudents} : #{btn.publishToStudents}"></span>
                         </button>
                     </form>
 
                     <form th:action="@{/exams/{id}/paper/delete(id=${exam.id})}" method="post"
-                          data-confirm="Delete this exam file?">
-                        <button type="submit" class="btn btn-icon delete" title="Delete">
+                          th:attr="data-confirm=#{exams.paper.delete.confirm}">
+                        <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                             <i class="bi bi-trash-fill"></i></button>
                     </form>
                 </div>
@@ -72,22 +72,22 @@
 
     <!-- Upload -->
     <div class="card">
-        <div class="card-header"><h3 th:text="${file == null} ? 'Upload the exam paper' : 'Replace the file'">Upload</h3></div>
+        <div class="card-header"><h3 th:text="${file == null} ? #{exams.paper.uploadHeading} : #{exams.paper.replaceHeading}">Upload</h3></div>
         <div class="card-body">
             <form th:action="@{/exams/{id}/paper(id=${exam.id})}" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label>File (PDF, Word, ODT, TXT, PNG, JPG, max 10 MB) <span class="req">*</span></label>
+                    <label><span th:text="#{exams.paper.fileLabel}">File (PDF, Word, ODT, TXT, PNG, JPG, max 10 MB)</span> <span class="req">*</span></label>
                     <input type="file" name="file" required
                            accept=".pdf,.doc,.docx,.odt,.txt,.png,.jpg,.jpeg">
                 </div>
                 <div class="form-group">
                     <label style="display:flex;gap:.5rem;align-items:center">
                         <input type="checkbox" name="publish" value="true" th:checked="${file != null and file.published}">
-                        Publish to the enrolled students now
+                        <span th:text="#{exams.paper.publishCheckbox}">Publish to the enrolled students now</span>
                     </label>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up-fill"></i> Upload</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up-fill"></i> <span th:text="#{btn.upload}">Upload</span></button>
                 </div>
             </form>
         </div>

@@ -1,48 +1,48 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Notifications test', ~{::main}, '')}">
+      th:replace="~{layout/base :: layout(#{dev.notif.title}, ~{::main}, '')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>Notifications (test)</h1>
-            <div class="breadcrumb">Home / Dev / Notifications</div>
+            <h1 th:text="#{dev.notif.heading}">Notifications (test)</h1>
+            <div class="breadcrumb" th:text="#{dev.notif.breadcrumb}">Home / Dev / Notifications</div>
         </div>
         <a th:href="@{/dev/notifications}" class="btn btn-light">
-            <i class="bi bi-arrow-clockwise"></i> Refresh</a>
+            <i class="bi bi-arrow-clockwise"></i> <span th:text="#{btn.refresh}">Refresh</span></a>
     </div>
 
     <!-- Simulate an attendance save -->
     <div class="card" style="margin-bottom:1.5rem">
-        <div class="card-header"><h3>Simulate an attendance event</h3></div>
+        <div class="card-header"><h3 th:text="#{dev.sim.heading}">Simulate an attendance event</h3></div>
         <div class="card-body">
             <form th:action="@{/dev/notify-test}" method="post" class="actions" style="align-items:flex-end">
                 <div class="form-group">
-                    <label>Student</label>
+                    <label th:text="#{table.student}">Student</label>
                     <select name="studentId" required>
                         <option th:each="s : ${students}" th:value="${s.id}"
                                 th:text="${s.firstName + ' ' + s.lastName}"></option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
+                    <label th:text="#{table.status}">Status</label>
                     <select name="status">
-                        <option value="ABSENT">ABSENT</option>
-                        <option value="LATE">LATE</option>
+                        <option value="ABSENT" th:text="#{status.absent}">ABSENT</option>
+                        <option value="LATE" th:text="#{status.late}">LATE</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Date</label>
+                    <label th:text="#{table.date}">Date</label>
                     <input type="date" name="date" th:value="${today}" required>
                 </div>
                 <div class="form-group">
-                    <label>Remark</label>
-                    <input type="text" name="remark" placeholder="Optional remark...">
+                    <label th:text="#{table.remark}">Remark</label>
+                    <input type="text" name="remark" th:placeholder="#{placeholder.remark}">
                 </div>
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-send-fill"></i> Send</button>
+                    <i class="bi bi-send-fill"></i> <span th:text="#{ai.btn.send}">Send</span></button>
             </form>
-            <small style="color:#64748b">
+            <small style="color:#64748b" th:text="#{dev.sim.note}">
                 Same student + same status + same date is sent only once (anti-duplicate).
                 Change the date to test again.
             </small>
@@ -58,10 +58,10 @@
             <div class="notif-body">
                 <div class="notif-top">
                     <strong th:text="${n.type.emoji + ' ' + n.type.title}">Absence</strong>
-                    <span class="notif-badge" th:if="${n.aiGenerated}"><i class="bi bi-stars"></i> AI</span>
+                    <span class="notif-badge" th:if="${n.aiGenerated}"><i class="bi bi-stars"></i> <span th:text="#{badge.ai}">AI</span></span>
                     <span class="notif-badge notif-badge-grey" th:unless="${n.aiGenerated}">
-                        <i class="bi bi-file-text"></i> Template</span>
-                    <span class="notif-badge notif-new" th:unless="${n.seen}">New</span>
+                        <i class="bi bi-file-text"></i> <span th:text="#{badge.template}">Template</span></span>
+                    <span class="notif-badge notif-new" th:unless="${n.seen}" th:text="#{badge.new}">New</span>
                 </div>
                 <p th:text="${n.message}">Message</p>
                 <small>
@@ -75,7 +75,7 @@
     </div>
 
     <div class="card" th:if="${#lists.isEmpty(notifications)}">
-        <div class="card-body empty"><i class="bi bi-bell-slash"></i> No notifications yet.</div>
+        <div class="card-body empty"><i class="bi bi-bell-slash"></i> <span th:text="#{notif.empty.dev}">No notifications yet.</span></div>
     </div>
 
     <!-- After sending, reload once so the async result shows up -->

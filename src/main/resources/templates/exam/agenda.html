@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Exams calendar', ~{::main}, 'exams')}">
+      th:replace="~{layout/base :: layout(#{exams.calendar.pageTitle}, ~{::main}, 'exams')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>Exams</h1>
-            <div class="breadcrumb">Home / Exams</div>
+            <h1 th:text="#{exams.title}">Exams</h1>
+            <div class="breadcrumb" th:text="#{exams.breadcrumb}">Home / Exams</div>
         </div>
     </div>
 
@@ -14,17 +14,17 @@
     <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
         <form th:action="@{/exams}" method="get" class="actions" style="align-items:flex-end">
             <div class="form-group">
-                <label>From</label>
+                <label th:text="#{filter.from}">From</label>
                 <input type="date" name="from" th:value="${from}">
             </div>
             <div class="form-group">
-                <label>To</label>
+                <label th:text="#{filter.to}">To</label>
                 <input type="date" name="to" th:value="${to}">
             </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Show</button>
-            <a th:href="@{/exams(from=${today},to=${today})}" class="btn btn-light">Today</a>
-            <a th:href="@{/exams(from=${weekStart},to=${weekEnd})}" class="btn btn-light">This week</a>
-            <a th:href="@{/exams}" class="btn btn-light">Next 30 days</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> <span th:text="#{btn.show}">Show</span></button>
+            <a th:href="@{/exams(from=${today},to=${today})}" class="btn btn-light" th:text="#{filter.today}">Today</a>
+            <a th:href="@{/exams(from=${weekStart},to=${weekEnd})}" class="btn btn-light" th:text="#{filter.thisWeek}">This week</a>
+            <a th:href="@{/exams}" class="btn btn-light" th:text="#{filter.next30Days}">Next 30 days</a>
         </form>
     </div></div>
 
@@ -41,8 +41,8 @@
                 <h3 th:text="${#temporals.format(d.key,'EEEE')}">Sunday</h3>
                 <small th:text="${#temporals.format(d.key,'dd/MM/yyyy')}">15/11/2026</small>
             </div>
-            <span class="ex-pill" th:if="${d.key.isEqual(today)}">Today</span>
-            <span class="ex-count" th:text="${#lists.size(d.value)} + ' exam(s)'">1 exam(s)</span>
+            <span class="ex-pill" th:if="${d.key.isEqual(today)}" th:text="#{badge.today}">Today</span>
+            <span class="ex-count" th:text="${#lists.size(d.value)} + ' ' + #{exams.countSuffix}">1 exam(s)</span>
         </header>
 
         <div class="ex-item" th:each="e : ${d.value}"
@@ -59,18 +59,18 @@
             </div>
 
             <div>
-                <span class="ex-label">Max score</span>
+                <span class="ex-label" th:text="#{table.maxScore}">Max score</span>
                 <strong th:text="${e.maxScore}">20.0</strong>
             </div>
 
             <div>
-                <span class="ex-label">Weight</span>
+                <span class="ex-label" th:text="#{table.weight}">Weight</span>
                 <span class="ex-weight" th:text="${e.weight} + '%'">40%</span>
             </div>
 
             <div>
                 <div class="ex-progress-text">
-                    <span>Scores entered</span>
+                    <span th:text="#{exams.scoresEntered}">Scores entered</span>
                     <strong th:text="${e.graded} + ' / ' + ${e.total}">0 / 1</strong>
                 </div>
                 <div class="ex-bar"
@@ -80,18 +80,18 @@
             </div>
 
             <div class="ex-actions">
-                <a th:href="@{/exams/{id}/paper(id=${e.examId})}" class="btn btn-icon edit" title="Exam paper">
+                <a th:href="@{/exams/{id}/paper(id=${e.examId})}" class="btn btn-icon edit" th:title="#{title.examPaper}">
                     <i class="bi bi-file-earmark-text-fill"></i></a>
-                <a th:href="@{/exams/{id}/grades(id=${e.examId})}" class="btn btn-icon edit" title="Enter scores">
+                <a th:href="@{/exams/{id}/grades(id=${e.examId})}" class="btn btn-icon edit" th:title="#{title.enterScores}">
                     <i class="bi bi-pencil-square"></i></a>
-                <a th:href="@{/courses/{id}/results(id=${e.courseId})}" class="btn btn-icon edit" title="View results">
+                <a th:href="@{/courses/{id}/results(id=${e.courseId})}" class="btn btn-icon edit" th:title="#{title.viewResults}">
                     <i class="bi bi-eye-fill"></i></a>
             </div>
         </div>
     </section>
 
     <div class="ex-none" th:if="${#maps.isEmpty(days)}">
-        <i class="bi bi-calendar-x"></i> No exams in this period.
+        <i class="bi bi-calendar-x"></i> <span th:text="#{exams.emptyPeriod}">No exams in this period.</span>
     </div>
 </main>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>EduManage - Attendance</title>
+    <title th:text="'EduManage - ' + #{attendance.title}">EduManage - Attendance</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -358,21 +358,21 @@
 <!-- Sidebar -->
 <aside class="sidebar">
     <div class="sidebar-brand">
-        <i class="bi bi-mortarboard-fill" style="color: var(--primary-color);"></i> EduManage
+        <i class="bi bi-mortarboard-fill" style="color: var(--primary-color);"></i> <span th:text="#{app.title}">EduManage</span>
     </div>
     <ul class="sidebar-menu">
-        <li class="menu-category">Main</li>
-        <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li class="menu-category" th:text="#{nav.main}">Main</li>
+        <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> <span th:text="#{nav.dashboard}">Dashboard</span></a></li>
 
-        <li class="menu-category">Academic</li>
-        <li><a href="/students"><i class="bi bi-people"></i> Students</a></li>
-        <li><a href="/teachers"><i class="bi bi-person-badge"></i> Teachers</a></li>
-        <li><a href="/courses"><i class="bi bi-journal-text"></i> Courses</a></li>
-        <li><a href="/classrooms"><i class="bi bi-door-open"></i> Classrooms</a></li>
-        <li><a href="/enrollments"><i class="bi bi-card-checklist"></i> Enrollments</a></li>
+        <li class="menu-category" th:text="#{nav.academic}">Academic</li>
+        <li><a href="/students"><i class="bi bi-people"></i> <span th:text="#{nav.students}">Students</span></a></li>
+        <li><a href="/teachers"><i class="bi bi-person-badge"></i> <span th:text="#{nav.teachers}">Teachers</span></a></li>
+        <li><a href="/courses"><i class="bi bi-journal-text"></i> <span th:text="#{nav.courses}">Courses</span></a></li>
+        <li><a href="/classrooms"><i class="bi bi-door-open"></i> <span th:text="#{nav.classrooms}">Classrooms</span></a></li>
+        <li><a href="/enrollments"><i class="bi bi-card-checklist"></i> <span th:text="#{nav.enrollments}">Enrollments</span></a></li>
 
-        <li class="menu-category">Daily</li>
-        <li class="active"><a href="/attendances"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+        <li class="menu-category" th:text="#{nav.daily}">Daily</li>
+        <li class="active"><a href="/attendances"><i class="bi bi-calendar-check"></i> <span th:text="#{nav.attendance}">Attendance</span></a></li>
     </ul>
     <div class="sidebar-footer">
         v1.0.0
@@ -383,14 +383,14 @@
 <div class="main-content">
     <!-- Header -->
     <header class="header">
-        <div class="header-title">Attendance</div>
+        <div class="header-title" th:text="#{attendance.title}">Attendance</div>
         <div class="header-user">
             <i class="bi bi-bell notification-icon"></i>
             <div class="user-profile">
                 <div class="avatar">A</div>
                 <div class="user-info">
                     <div class="name">Admin</div>
-                    <div class="role">Administrator</div>
+                    <div class="role" th:text="#{role.administrator}">Administrator</div>
                 </div>
             </div>
         </div>
@@ -398,24 +398,24 @@
 
     <!-- Content Body -->
     <div class="content-body">
-        <h1 class="page-header-title">Attendance Management</h1>
-        <div class="breadcrumb">Home / Attendance</div>
+        <h1 class="page-header-title" th:text="#{attendance.heading}">Attendance Management</h1>
+        <div class="breadcrumb" th:text="#{attendance.breadcrumb}">Home / Attendance</div>
 
         <div class="ok" th:if="${message}" th:text="${message}"></div>
 
         <div class="container-box">
             <form class="filter" th:action="@{/attendances}" method="get">
-                <label>Classroom
+                <label><span th:text="#{form.classroom}">Classroom</span>
                     <select name="classroomId" required>
-                        <option value="">-- select classroom --</option>
+                        <option value="" th:text="#{form.selectClassroom}">-- select classroom --</option>
                         <option th:each="c : ${classrooms}" th:value="${c.id()}" th:text="${c.name()}"
                                 th:selected="${sheet != null and c.id() == sheet.classroomId}"></option>
                     </select>
                 </label>
-                <label>Date
+                <label><span th:text="#{table.date}">Date</span>
                     <input type="date" name="date" th:value="${sheet != null ? sheet.date : ''}">
                 </label>
-                <button type="submit"><i class="bi bi-search"></i> Load</button>
+                <button type="submit"><i class="bi bi-search"></i> <span th:text="#{btn.load}">Load</span></button>
             </form>
         </div>
 
@@ -432,9 +432,9 @@
                     <thead>
                     <tr>
                         <th style="width: 60px;">#</th>
-                        <th>Student</th>
-                        <th>Status</th>
-                        <th>Remark</th>
+                        <th th:text="#{table.student}">Student</th>
+                        <th th:text="#{table.status}">Status</th>
+                        <th th:text="#{table.remark}">Remark</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -450,16 +450,16 @@
                                 <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
                             </select>
                         </td>
-                        <td><input type="text" th:field="*{rows[__${i.index}__].remark}" placeholder="Optional remark..."></td>
+                        <td><input type="text" th:field="*{rows[__${i.index}__].remark}" th:placeholder="#{placeholder.remark}"></td>
                     </tr>
                     <tr th:if="*{rows.isEmpty()}">
-                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">No students in this classroom.</td>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;" th:text="#{attendance.empty}">No students in this classroom.</td>
                     </tr>
                     </tbody>
                 </table>
 
                 <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-                    <button type="submit" th:disabled="*{rows.isEmpty()}"><i class="bi bi-check-lg"></i> Save Attendance</button>
+                    <button type="submit" th:disabled="*{rows.isEmpty()}"><i class="bi bi-check-lg"></i> <span th:text="#{btn.saveAttendance}">Save Attendance</span></button>
                 </div>
             </form>
         </div>
@@ -467,11 +467,11 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <div>© 2026 <strong>EduManage</strong>. All rights reserved.</div>
+        <div>© 2026 <strong>EduManage</strong>. <span th:text="#{footer.rights}">All rights reserved.</span></div>
         <div class="footer-links">
-            <a href="#">Help</a>
-            <a href="#">Privacy</a>
-            <a href="#">Contact</a>
+            <a href="#" th:text="#{footer.help}">Help</a>
+            <a href="#" th:text="#{footer.privacy}">Privacy</a>
+            <a href="#" th:text="#{footer.contact}">Contact</a>
         </div>
     </footer>
 </div>

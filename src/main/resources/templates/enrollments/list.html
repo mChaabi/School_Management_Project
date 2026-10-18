@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layout/base :: layout('Enrollments', ~{::main}, 'enrollments')}">
+      th:replace="~{layout/base :: layout(#{enrollments.title}, ~{::main}, 'enrollments')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>Enrollments</h1>
-            <div class="breadcrumb">Home / Enrollments</div>
+            <h1 th:text="#{enrollments.title}">Enrollments</h1>
+            <div class="breadcrumb" th:text="#{enrollments.breadcrumb}">Home / Enrollments</div>
         </div>
-        <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/enrollments/new}" class="btn btn-primary">
+        <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/enrollments/new}" class="btn btn-primary" th:text="#{enrollments.btn.new}">
             New Enrollment
         </a>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h3>All enrollments <span class="badge badge-primary" th:text="${#lists.size(enrollments)}">0</span></h3>
+            <h3><span th:text="#{enrollments.all}">All enrollments</span> <span class="badge badge-primary" th:text="${#lists.size(enrollments)}">0</span></h3>
         </div>
 
         <div class="table-wrap">
             <table>
                 <thead>
-                <tr><th>#</th><th>Student</th><th>Course</th><th>Date</th><th>Grade</th><th>Actions</th></tr>
+                <tr>
+                    <th>#</th>
+                    <th th:text="#{table.student}">Student</th>
+                    <th th:text="#{table.course}">Course</th>
+                    <th th:text="#{table.date}">Date</th>
+                    <th th:text="#{table.grade}">Grade</th>
+                    <th th:text="#{table.actions}">Actions</th>
+                </tr>
                 </thead>
                 <tbody>
                 <tr th:each="e : ${enrollments}">
@@ -34,20 +41,20 @@
                     <td><span class="badge badge-success" th:text="${e.grade != null} ? ${e.grade} : '-'"></span></td>
                     <td>
                         <div class="actions">
-                            <a th:href="@{/enrollments/{id}(id=${e.id})}" class="btn btn-icon edit" title="Details">
+                            <a th:href="@{/enrollments/{id}(id=${e.id})}" class="btn btn-icon edit" th:title="#{title.details}">
                                 <i class="bi bi-eye-fill"></i></a>
-                            <a th:href="@{/enrollments/edit/{id}(id=${e.id})}" class="btn btn-icon edit" title="Edit">
+                            <a th:href="@{/enrollments/edit/{id}(id=${e.id})}" class="btn btn-icon edit" th:title="#{title.edit}">
                                 <i class="bi bi-pencil-fill"></i></a>
                             <form th:action="@{/enrollments/delete/{id}(id=${e.id})}" method="post"
-                                  data-confirm="Delete this enrollment?">
-                                <button type="submit" class="btn btn-icon delete" title="Delete">
+                                  th:attr="data-confirm=#{enrollments.delete.confirm}">
+                                <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                                     <i class="bi bi-trash-fill"></i></button>
                             </form>
                         </div>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(enrollments)}">
-                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No enrollments found.</td>
+                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{enrollments.empty}">No enrollments found.</span></td>
                 </tr>
                 </tbody>
             </table>

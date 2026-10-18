@@ -30,8 +30,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuizService {
 
-    private static final long MAX_IMPORT = 5L * 1024 * 1024;
-    private static final long MAX_IMAGE = 2L * 1024 * 1024;
+    private static final long MAX_IMPORT = 5L * 1024 * 1024; // 5 MB
+    private static final long MAX_IMAGE = 2L * 1024 * 1024;  // 2 MB
 
     private final QuizRepository quizzes;
     private final QuizAttemptRepository attempts;
@@ -201,6 +201,17 @@ public class QuizService {
     // =============== student ===============
     @Transactional(readOnly = true)
     public List<MyQuizRow> myQuizzes(Authentication auth) {
+        boolean isStaff = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_TEACHER"));
+
+        if (isStaff) {
+            // Admins/Teachers see all quizzes as a preview
+            return quizzes.findAll().stream().map(q -> new MyQuizRow(
+                    q.getId(), q.getTitle(), q.getCourse().getTitle(), q.getDurationMinutes(),
+                    q.getQuestions().size(), "TODO", null, null
+            )).toList();
+        }
+
         Student s = me(auth);
         Map<Long, QuizAttempt> mine = attempts.findByStudentId(s.getId()).stream()
                 .collect(Collectors.toMap(a -> a.getQuiz().getId(), a -> a));
@@ -212,11 +223,23 @@ public class QuizService {
         }).toList();
     }
 
-    /** Starts (or resumes) the quiz. Returns null when the time is already over. */
+    /** Starts (or resumes) the quiz. Handles both students and testing staff. */
     @Transactional
     public TakeView start(Long quizId, Authentication auth) {
-        Student s = me(auth);
-        Quiz q = openFor(quizId, s);
+        Quiz q = quiz(quizId);
+        boolean isStaff = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_TEACHER"));
+
+        Student s = null;
+        if (!isStaff) {
+            s = me(auth);
+            openFor(quizId, s);
+        } else {
+            // For staff preview/testing, create a dummy or skip enrollment check
+            s = students.findAll().stream().findFirst().orElse(null);
+            if (s == null) throw new IllegalStateException("No student profile available in the system for testing.");
+        }
+
         QuizAttempt a = attempts.findByQuizIdAndStudentId(quizId, s.getId()).orElse(null);
         if (a != null && a.getSubmittedAt() != null) throw new IllegalStateException("You already completed this quiz.");
         if (a == null) {
@@ -224,10 +247,10 @@ public class QuizService {
             a.setQuiz(q); a.setStudent(s); a.setStartedAt(LocalDateTime.now());
             attempts.save(a);
         }
-        long left = q.getDurationMinutes() * 60L - Duration.between(a.getStartedAt(), LocalDateTime.now()).getSeconds();
+
+        long left = (q.getDurationMinutes() * 60L) - Duration.between(a.getStartedAt(), LocalDateTime.now()).getSeconds();
         if (left <= 0) { grade(a, q, Map.of()); return null; }
 
-        // the correct answers are NOT included
         return new TakeView(q.getId(), q.getTitle(), q.getCourse().getTitle(), left,
                 q.getQuestions().stream().map(qq -> new TakeQuestion(qq.getId(), qq.getText(), qq.getImage() != null,
                         qq.getOptions().stream().map(o -> new TakeOption(o.getId(), o.getText())).toList())).toList());

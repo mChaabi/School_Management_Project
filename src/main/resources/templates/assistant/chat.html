@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('AI Assistant', ~{::main}, 'assistant')}">
+      th:replace="~{layout/base :: layout(#{ai.title}, ~{::main}, 'assistant')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>AI Assistant</h1>
-            <div class="breadcrumb">Home / AI Assistant</div>
+            <h1 th:text="#{ai.heading}">AI Assistant</h1>
+            <div class="breadcrumb" th:text="#{ai.breadcrumb}">Home / AI Assistant</div>
         </div>
     </div>
 
@@ -15,24 +15,29 @@
         <div class="as-log" id="asLog" aria-live="polite">
             <div class="as-empty" id="asEmpty">
                 <i class="bi bi-stars"></i>
-                <h3>Ask about your school data</h3>
-                <p>Every number comes from your live database, not from a guess.</p>
+                <h3 th:text="#{ai.empty.title}">Ask about your school data</h3>
+                <p th:text="#{ai.empty.subtitle}">Every number comes from your live database, not from a guess.</p>
                 <div class="as-chips">
-                    <button type="button" class="as-chip">How many students are there in total?</button>
-                    <button type="button" class="as-chip">Who is the youngest student in Java Programming for Adults?</button>
-                    <button type="button" class="as-chip">Who enrolled most recently?</button>
-                    <button type="button" class="as-chip">Give me statistics about the school</button>
-                    <button type="button" class="as-chip">What is missing in my application?</button>
-                    <button type="button" class="as-chip">Which classrooms are almost full?</button>
+                    <button type="button" class="as-chip" th:text="#{ai.chip.1}">How many students are there in total?</button>
+                    <button type="button" class="as-chip" th:text="#{ai.chip.2}">Who is the youngest student in Java Programming for Adults?</button>
+                    <button type="button" class="as-chip" th:text="#{ai.chip.3}">Who enrolled most recently?</button>
+                    <button type="button" class="as-chip" th:text="#{ai.chip.4}">Give me statistics about the school</button>
+                    <button type="button" class="as-chip" th:text="#{ai.chip.5}">What is missing in my application?</button>
+                    <button type="button" class="as-chip" th:text="#{ai.chip.6}">Which classrooms are almost full?</button>
                 </div>
             </div>
         </div>
 
         <form class="as-form" id="asForm" autocomplete="off">
-            <input id="asInput" type="text" maxlength="300" placeholder="Ask a question about your school..." required>
-            <button class="btn btn-primary" id="asSend" type="submit"><i class="bi bi-send-fill"></i> Send</button>
+            <input id="asInput" type="text" maxlength="300" th:placeholder="#{ai.input.placeholder}" required>
+            <button class="btn btn-primary" id="asSend" type="submit"><i class="bi bi-send-fill"></i> <span th:text="#{ai.btn.send}">Send</span></button>
         </form>
     </section>
+
+    <!-- Elemento oculto para pasar texto traducido de JavaScript -->
+    <div id="i18n-data"
+         th:attr="data-analyzing=#{ai.msg.analyzing}, data-error=#{ai.msg.error}"
+         style="display:none;"></div>
 
     <style>
         .as-table{overflow-x:auto;margin-top:.5rem}
@@ -69,6 +74,10 @@
             var root = document.getElementById('as'), log = document.getElementById('asLog'),
                 empty = document.getElementById('asEmpty'), form = document.getElementById('asForm'),
                 input = document.getElementById('asInput'), send = document.getElementById('asSend');
+
+            var i18nData = document.getElementById('i18n-data');
+            var msgAnalyzing = i18nData ? i18nData.dataset.analyzing : 'Analyzing your data...';
+            var msgError = i18nData ? i18nData.dataset.error : 'Sorry, could not process your query.';
 
             function bubble(role) {
                 var d = document.createElement('div');
@@ -109,7 +118,7 @@
                 bubble('user').textContent = q;
                 var bot = bubble('bot');
                 bot.classList.add('as-typing');
-                bot.textContent = 'Analyzing your data...';
+                bot.textContent = msgAnalyzing;
                 send.disabled = true;
 
                 var headers = {'Content-Type': 'application/json'};
@@ -129,11 +138,11 @@
                     .then(function (a) {
                         bot.classList.remove('as-typing');
                         bot.textContent = a.answer;
-                        showData(bot, a); // CORREGIDO: llamaba a showFacts en lugar de showData
+                        showData(bot, a);
                     })
                     .catch(function (err) {
                         bot.classList.remove('as-typing');
-                        bot.textContent = 'Sorry, could not process your query. Please check your AI API key or connection.';
+                        bot.textContent = msgError;
                     })
                     .finally(function () { send.disabled = false; input.focus(); log.scrollTop = log.scrollHeight; });
             }

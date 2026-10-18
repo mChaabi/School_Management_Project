@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Quiz results', ~{::main}, 'courses')}">
+      th:replace="~{layout/base :: layout(#{quizzes.attempts.pageTitle}, ~{::main}, 'courses')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1 th:text="'Results: ' + ${quizTitle}">Results</h1>
-            <div class="breadcrumb">Home / Courses / Quiz / Results</div>
+            <h1 th:text="#{quizzes.attempts.heading} + ' ' + ${quizTitle}">Results</h1>
+            <div class="breadcrumb" th:text="#{quizzes.attempts.breadcrumb}">Home / Courses / Quiz / Results</div>
         </div>
-        <a th:href="@{/quizzes/{id}/edit(id=${quizId})}" class="btn btn-light">Back to the quiz</a>
+        <a th:href="@{/quizzes/{id}/edit(id=${quizId})}" class="btn btn-light" th:text="#{btn.backToQuiz}">Back to the quiz</a>
     </div>
     <div class="card"><div class="table-wrap">
         <table>
-            <thead><tr><th>Student</th><th>Status</th><th>Score</th><th>Percentage</th><th>Submitted</th></tr></thead>
+            <thead>
+            <tr>
+                <th th:text="#{table.student}">Student</th>
+                <th th:text="#{table.status}">Status</th>
+                <th th:text="#{table.score}">Score</th>
+                <th th:text="#{table.percentage}">Percentage</th>
+                <th th:text="#{table.submitted}">Submitted</th>
+            </tr>
+            </thead>
             <tbody>
             <tr th:each="r : ${rows}">
                 <td><strong th:text="${r.student}"></strong></td>
-                <td><span class="badge badge-success" th:if="${r.submitted}">Done</span>
-                    <span class="badge badge-info" th:unless="${r.submitted}">In progress</span></td>
+                <td>
+                    <span class="badge badge-success" th:if="${r.submitted}" th:text="#{badge.done}">Done</span>
+                    <span class="badge badge-info" th:unless="${r.submitted}" th:text="#{badge.inProgress}">In progress</span>
+                </td>
                 <td th:text="${r.submitted} ? ${r.score} + ' / ' + ${r.total} : '-'"></td>
                 <td th:text="${r.submitted} ? ${r.percent} + '%' : '-'"></td>
                 <td th:text="${r.at != null} ? ${#temporals.format(r.at,'dd/MM/yyyy HH:mm')} : '-'"></td>
             </tr>
             <tr th:if="${#lists.isEmpty(rows)}">
-                <td colspan="5" class="empty"><i class="bi bi-inbox"></i> Nobody has taken this quiz yet.</td>
+                <td colspan="5" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{quizzes.attempts.empty}">Nobody has taken this quiz yet.</span></td>
             </tr>
             </tbody>
         </table>

@@ -1,53 +1,62 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Quizzes', ~{::main}, 'courses')}">
+      th:replace="~{layout/base :: layout(#{quizzes.title}, ~{::main}, 'courses')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1 th:text="'Quizzes: ' + ${courseTitle}">Quizzes</h1>
-            <div class="breadcrumb">Home / Courses / Quizzes</div>
+            <h1 th:text="#{quizzes.heading} + ': ' + ${courseTitle}">Quizzes</h1>
+            <div class="breadcrumb" th:text="#{quizzes.courseQuizzes.breadcrumb}">Home / Courses / Quizzes</div>
         </div>
-        <a th:href="@{/courses}" class="btn btn-light">Back</a>
+        <a th:href="@{/courses}" class="btn btn-light" th:text="#{btn.back}">Back</a>
     </div>
 
     <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
         <form th:action="@{/courses/{id}/quizzes(id=${courseId})}" method="post" class="actions" style="align-items:flex-end">
             <div class="form-group">
-                <label>Quiz title</label>
-                <input type="text" name="title" maxlength="100" required placeholder="e.g. Chapter 1 quiz">
+                <label th:text="#{form.quizTitle}">Quiz title</label>
+                <input type="text" name="title" maxlength="100" required th:placeholder="#{quizzes.placeholder.title}">
             </div>
             <div class="form-group">
-                <label>Duration (minutes)</label>
+                <label th:text="#{form.durationMinutes}">Duration (minutes)</label>
                 <input type="number" name="minutes" value="15" min="1" max="240" required>
             </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create quiz</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> <span th:text="#{btn.createQuiz}">Create quiz</span></button>
         </form>
     </div></div>
 
     <div class="card"><div class="table-wrap">
         <table>
-            <thead><tr><th>Quiz</th><th>Duration</th><th>Questions</th><th>Status</th><th>Attempts</th><th>Actions</th></tr></thead>
+            <thead>
+            <tr>
+                <th th:text="#{table.quiz}">Quiz</th>
+                <th th:text="#{table.duration}">Duration</th>
+                <th th:text="#{table.questions}">Questions</th>
+                <th th:text="#{table.status}">Status</th>
+                <th th:text="#{table.attempts}">Attempts</th>
+                <th th:text="#{table.actions}">Actions</th>
+            </tr>
+            </thead>
             <tbody>
             <tr th:each="q : ${quizzes}">
                 <td><strong th:text="${q.title}"></strong></td>
-                <td th:text="${q.minutes} + ' min'"></td>
+                <td th:text="${q.minutes} + ' ' + #{unit.min}"></td>
                 <td><span class="badge badge-primary" th:text="${q.questions}"></span></td>
                 <td>
-                    <span class="badge badge-success" th:if="${q.published}">Open</span>
-                    <span class="badge badge-info" th:unless="${q.published}">Draft</span>
+                    <span class="badge badge-success" th:if="${q.published}" th:text="#{badge.open}">Open</span>
+                    <span class="badge badge-info" th:unless="${q.published}" th:text="#{badge.draft}">Draft</span>
                 </td>
                 <td th:text="${q.attempts}"></td>
                 <td><div class="actions">
-                    <a th:href="@{/quizzes/{id}/edit(id=${q.id})}" class="btn btn-icon edit" title="Questions"><i class="bi bi-pencil-square"></i></a>
-                    <a th:href="@{/quizzes/{id}/attempts(id=${q.id})}" class="btn btn-icon edit" title="Results"><i class="bi bi-bar-chart-fill"></i></a>
-                    <form th:action="@{/quizzes/{id}/delete(id=${q.id})}" method="post" data-confirm="Delete this quiz and its results?">
-                        <button type="submit" class="btn btn-icon delete" title="Delete"><i class="bi bi-trash-fill"></i></button>
+                    <a th:href="@{/quizzes/{id}/edit(id=${q.id})}" class="btn btn-icon edit" th:title="#{title.questions}"><i class="bi bi-pencil-square"></i></a>
+                    <a th:href="@{/quizzes/{id}/attempts(id=${q.id})}" class="btn btn-icon edit" th:title="#{title.results}"><i class="bi bi-bar-chart-fill"></i></a>
+                    <form th:action="@{/quizzes/{id}/delete(id=${q.id})}" method="post" th:attr="data-confirm=#{quizzes.delete.confirm}">
+                        <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}"><i class="bi bi-trash-fill"></i></button>
                     </form>
                 </div></td>
             </tr>
             <tr th:if="${#lists.isEmpty(quizzes)}">
-                <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No quiz yet. Create the first one above.</td>
+                <td colspan="6" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{quizzes.emptyList}">No quiz yet. Create the first one above.</span></td>
             </tr>
             </tbody>
         </table>

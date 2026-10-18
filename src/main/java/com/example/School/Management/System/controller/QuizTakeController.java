@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,18 +25,16 @@ public class QuizTakeController {
     private final QuizService service;
 
     @GetMapping("/my-quizzes")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
     public String mine(Authentication auth, Model model) {
         model.addAttribute("quizzes", service.myQuizzes(auth));
         return "quiz/my";
     }
 
     @GetMapping("/quizzes/{id}/take")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
     public String take(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
         try {
             var view = service.start(id, auth);
-            if (view == null) return "redirect:/quizzes/" + id + "/result";    // time already over
+            if (view == null) return "redirect:/quizzes/" + id + "/result";
             model.addAttribute("quiz", view);
             return "quiz/take";
         } catch (IllegalStateException e) {
@@ -47,7 +44,6 @@ public class QuizTakeController {
     }
 
     @PostMapping("/quizzes/{id}/submit")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
     public String submit(@PathVariable Long id, @RequestParam Map<String, String> form,
                          Authentication auth, RedirectAttributes ra) {
         Map<Long, Long> chosen = new HashMap<>();
@@ -67,7 +63,6 @@ public class QuizTakeController {
     }
 
     @GetMapping("/quizzes/{id}/result")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
     public String result(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
         try {
             model.addAttribute("r", service.result(id, auth));
@@ -79,7 +74,6 @@ public class QuizTakeController {
     }
 
     @GetMapping("/quizzes/questions/{qid}/image")
-    @PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
     public ResponseEntity<byte[]> image(@PathVariable Long qid, Authentication auth) {
         QuizQuestion q = service.imageFor(qid, auth);
         return ResponseEntity.ok()

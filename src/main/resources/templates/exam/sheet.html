@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Exam scores', ~{::main}, 'courses')}">
+      th:replace="~{layout/base :: layout(#{exams.scores.pageTitle}, ~{::main}, 'courses')}">
 <body>
 <main>
   <div class="page-header">
     <div>
       <h1 th:text="${sheet.examTitle}">Exam</h1>
-      <div class="breadcrumb" th:text="'Home / Courses / ' + ${sheet.courseTitle} + ' / Scores'">Course</div>
+      <div class="breadcrumb" th:text="#{breadcrumb.homeCourses} + ' ' + ${sheet.courseTitle} + ' / ' + #{breadcrumb.scores}">Course</div>
     </div>
-    <a th:href="@{/courses/{id}/exams(id=${sheet.courseId})}" class="btn btn-light">Back to exams</a>
+    <a th:href="@{/courses/{id}/exams(id=${sheet.courseId})}" class="btn btn-light" th:text="#{btn.backToExams}">Back to exams</a>
   </div>
 
   <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
     <div class="ex-chips">
       <span class="ex-chip"><i class="bi bi-journal-bookmark-fill"></i> <strong th:text="${sheet.courseTitle}"></strong></span>
       <span class="ex-chip"><i class="bi bi-calendar-event"></i> <strong th:text="${#temporals.format(sheet.examDate,'dd/MM/yyyy')}"></strong></span>
-      <span class="ex-chip"><i class="bi bi-trophy"></i> Max <strong th:text="${sheet.maxScore}"></strong></span>
-      <span class="ex-chip"><i class="bi bi-percent"></i> Weight <strong th:text="${sheet.weight} + '%'"></strong></span>
+      <span class="ex-chip"><i class="bi bi-trophy"></i> <span th:text="#{chip.max}">Max</span> <strong th:text="${sheet.maxScore}"></strong></span>
+      <span class="ex-chip"><i class="bi bi-percent"></i> <span th:text="#{table.weight}">Weight</span> <strong th:text="${sheet.weight} + '%'"></strong></span>
     </div>
-    <small>Leave the score empty if the exam is not graded yet. Tick <em>Absent</em> if the student
-      did not take the exam: it counts as 0 in the final grade.</small>
+    <small th:text="#{exams.scores.instructions}">Leave the score empty if the exam is not graded yet. Tick Absent if the student did not take the exam: it counts as 0 in the final grade.</small>
   </div></div>
 
   <div class="card">
     <form th:object="${sheet}" th:action="@{/exams/{id}/grades(id=${sheet.examId})}" method="post">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>Student</th>
-            <th th:text="'Score (/ ' + ${sheet.maxScore} + ')'">Score</th><th>Absent</th></tr></thead>
+          <thead><tr>
+            <th>#</th>
+            <th th:text="#{table.student}">Student</th>
+            <th th:text="#{table.score} + ' (/ ' + ${sheet.maxScore} + ')'">Score</th>
+            <th th:text="#{badge.absent}">Absent</th>
+          </tr></thead>
           <tbody>
           <tr th:each="r, i : *{rows}">
             <td th:text="${i.count}"></td>
@@ -44,13 +47,13 @@
           </tr>
           <tr th:if="${#lists.isEmpty(sheet.rows)}">
             <td colspan="4" class="empty"><i class="bi bi-inbox"></i>
-              No student is enrolled in this course yet.</td>
+              <span th:text="#{exams.scores.noStudents}">No student is enrolled in this course yet.</span></td>
           </tr>
           </tbody>
         </table>
       </div>
       <div class="form-actions" th:unless="${#lists.isEmpty(sheet.rows)}">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save scores</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> <span th:text="#{btn.saveScores}">Save scores</span></button>
       </div>
     </form>
   </div>

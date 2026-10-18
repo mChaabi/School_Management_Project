@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Quiz', ~{::main}, 'quizzes')}">
+      th:replace="~{layout/base :: layout(#{quizzes.take.pageTitle}, ~{::main}, 'quizzes')}">
 <body>
 <main>
     <div class="page-header">
         <div>
             <h1 th:text="${quiz.title}">Quiz</h1>
-            <div class="breadcrumb" th:text="'Home / My quizzes / ' + ${quiz.courseTitle}">Course</div>
+            <div class="breadcrumb" th:text="#{breadcrumb.homeMyQuizzes} + ' ' + ${quiz.courseTitle}">Course</div>
         </div>
         <div class="qz-timer" id="timer" th:attr="data-seconds=${quiz.secondsLeft}">--:--</div>
     </div>
@@ -21,7 +21,7 @@
             </label>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Submit my answers</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> <span th:text="#{btn.submitAnswers}">Submit my answers</span></button>
         </div>
     </form>
 

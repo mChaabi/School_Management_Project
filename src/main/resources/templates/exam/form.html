@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('New exam', ~{::main}, 'courses')}">
+      th:replace="~{layout/base :: layout(#{exams.form.pageTitle}, ~{::main}, 'courses')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>New exam</h1>
-            <div class="breadcrumb" th:text="'Home / Courses / ' + ${courseTitle}">Course</div>
+            <h1 th:text="#{exams.form.new}">New exam</h1>
+            <div class="breadcrumb" th:text="#{breadcrumb.homeCourses} + ' ' + ${courseTitle}">Home / Courses / Course</div>
         </div>
     </div>
 
@@ -14,33 +14,33 @@
         <form th:object="${examForm}" th:action="@{/courses/{id}/exams(id=${courseId})}" method="post">
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Title <span class="req">*</span></label>
-                    <input type="text" th:field="*{title}" placeholder="e.g. Midterm exam"
+                    <label><span th:text="#{form.title}">Title</span> <span class="req">*</span></label>
+                    <input type="text" th:field="*{title}" th:placeholder="#{exams.placeholder.title}"
                            th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'">
                     <span class="error-text" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
                 </div>
                 <div class="form-group">
-                    <label>Date <span class="req">*</span></label>
+                    <label><span th:text="#{form.date}">Date</span> <span class="req">*</span></label>
                     <input type="date" th:field="*{examDate}"
                            th:classappend="${#fields.hasErrors('examDate')} ? 'is-invalid'">
                     <span class="error-text" th:if="${#fields.hasErrors('examDate')}" th:errors="*{examDate}"></span>
                 </div>
                 <div class="form-group">
-                    <label>Maximum score <span class="req">*</span></label>
+                    <label><span th:text="#{table.maxScore}">Maximum score</span> <span class="req">*</span></label>
                     <input type="number" step="0.5" th:field="*{maxScore}"
                            th:classappend="${#fields.hasErrors('maxScore')} ? 'is-invalid'">
                     <span class="error-text" th:if="${#fields.hasErrors('maxScore')}" th:errors="*{maxScore}"></span>
                 </div>
                 <div class="form-group">
-                    <label>Weight (%) <span class="req">*</span></label>
-                    <input type="number" th:field="*{weight}" placeholder="e.g. 40"
+                    <label><span th:text="#{table.weight}">Weight (%)</span> <span class="req">*</span></label>
+                    <input type="number" th:field="*{weight}" th:placeholder="#{exams.placeholder.weight}"
                            th:classappend="${#fields.hasErrors('weight')} ? 'is-invalid'">
                     <span class="error-text" th:if="${#fields.hasErrors('weight')}" th:errors="*{weight}"></span>
                 </div>
             </div>
             <div class="form-actions">
-                <a th:href="@{/courses/{id}/exams(id=${courseId})}" class="btn btn-light">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Save and enter scores</button>
+                <a th:href="@{/courses/{id}/exams(id=${courseId})}" class="btn btn-light" th:text="#{btn.cancel}">Cancel</a>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> <span th:text="#{btn.saveAndEnterScores}">Save and enter scores</span></button>
             </div>
         </form>
     </div></div>

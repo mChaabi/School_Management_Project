@@ -10,7 +10,16 @@
         <h2 class="topbar-title" th:text="${title}">Title</h2>
     </div>
 
-    <div class="topbar-right">
+    <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+
+        <!-- Language Switcher Buttons -->
+        <div class="lang-selector" style="display: flex; gap: 0.2rem;">
+            <a th:href="@{''(lang='en')}" class="btn btn-sm btn-light" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;">EN</a>
+            <a th:href="@{''(lang='fr')}" class="btn btn-sm btn-light" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;">FR</a>
+            <a th:href="@{''(lang='es')}" class="btn btn-sm btn-light" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;">ES</a>
+            <a th:href="@{''(lang='ar')}" class="btn btn-sm btn-light" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;">AR</a>
+        </div>
+
         <a th:href="@{/notifications}" class="icon-btn bell-link" aria-label="Notifications" title="Notifications"
            th:with="unread=${@notificationRepository.countByRecipientUsernameAndSeenFalse(#authentication.name)}">
             <i class="bi bi-bell"></i>
@@ -19,7 +28,6 @@
         </a>
 
         <div class="user">
-            <!-- First letter of the username -->
             <div class="avatar"
                  th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">A</div>
 
@@ -34,7 +42,6 @@
             </div>
         </div>
 
-        <!-- Logout must be POST (CSRF is enabled) -->
         <form th:action="@{/logout}" method="post" class="logout-form">
             <button type="submit" class="icon-btn logout-btn" title="Logout" aria-label="Logout">
                 <i class="bi bi-box-arrow-right"></i>

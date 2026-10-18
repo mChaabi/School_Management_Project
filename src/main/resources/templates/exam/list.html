@@ -1,25 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('Exams', ~{::main}, 'courses')}">
+      th:replace="~{layout/base :: layout(#{exams.title}, ~{::main}, 'courses')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1 th:text="'Exams: ' + ${courseTitle}">Exams</h1>
-            <div class="breadcrumb">Home / Courses / Exams</div>
+            <h1 th:text="#{exams.heading} + ': ' + ${courseTitle}">Exams</h1>
+            <div class="breadcrumb" th:text="#{exams.courseExams.breadcrumb}">Home / Courses / Exams</div>
         </div>
         <div class="actions">
-            <a th:href="@{/courses}" class="btn btn-light">Back</a>
+            <a th:href="@{/courses}" class="btn btn-light" th:text="#{btn.back}">Back</a>
             <a th:href="@{/courses/{id}/exams/new(id=${courseId})}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> New exam</a>
+                <i class="bi bi-plus-lg"></i> <span th:text="#{exams.btn.new}">New exam</span></a>
         </div>
     </div>
 
     <div class="card">
         <div class="table-wrap">
             <table>
-                <thead><tr><th>Exam</th><th>Date</th><th>Max score</th><th>Weight</th>
-                    <th>Scores entered</th><th>Actions</th></tr></thead>
+                <thead>
+                <tr>
+                    <th th:text="#{table.exam}">Exam</th>
+                    <th th:text="#{form.date}">Date</th>
+                    <th th:text="#{table.maxScore}">Max score</th>
+                    <th th:text="#{table.weight}">Weight</th>
+                    <th th:text="#{exams.scoresEntered}">Scores entered</th>
+                    <th th:text="#{table.actions}">Actions</th>
+                </tr>
+                </thead>
                 <tbody>
                 <tr th:each="e : ${exams}">
                     <td><strong th:text="${e.title}"></strong></td>
@@ -29,22 +37,22 @@
                     <td><span class="badge badge-primary" th:text="${e.graded} + ' / ' + ${e.total}"></span></td>
                     <td>
                         <div class="actions">
-                            <a th:href="@{/exams/{id}/paper(id=${e.id})}" class="btn btn-icon edit" title="Exam paper">
+                            <a th:href="@{/exams/{id}/paper(id=${e.id})}" class="btn btn-icon edit" th:title="#{title.examPaper}">
                                 <i class="bi bi-file-earmark-text-fill"></i></a>
-                            <a th:href="@{/exams/{id}/grades(id=${e.id})}" class="btn btn-icon edit" title="Enter scores">
+                            <a th:href="@{/exams/{id}/grades(id=${e.id})}" class="btn btn-icon edit" th:title="#{title.enterScores}">
                                 <i class="bi bi-pencil-square"></i></a>
-                            <a th:href="@{/courses/{id}/results(id=${courseId})}" class="btn btn-icon edit" title="View results">
+                            <a th:href="@{/courses/{id}/results(id=${courseId})}" class="btn btn-icon edit" th:title="#{title.viewResults}">
                                 <i class="bi bi-eye-fill"></i></a>
                             <form th:action="@{/exams/{id}/delete(id=${e.id})}" method="post"
-                                  data-confirm="Delete this exam and its scores?">
-                                <button type="submit" class="btn btn-icon delete" title="Delete">
+                                  th:attr="data-confirm=#{exams.delete.confirm}">
+                                <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                                     <i class="bi bi-trash-fill"></i></button>
                             </form>
                         </div>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(exams)}">
-                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No exams yet. Create the first one.</td>
+                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{exams.emptyList}">No exams yet. Create the first one.</span></td>
                 </tr>
                 </tbody>
             </table>

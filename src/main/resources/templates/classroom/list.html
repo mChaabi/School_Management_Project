@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
-      th:replace="~{layout/base :: layout('Classrooms', ~{::main}, 'classrooms')}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(#{classrooms.title}, ~{::main}, 'classrooms')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>Classrooms</h1>
-            <div class="breadcrumb">Home / Classrooms</div>
+            <h1 th:text="#{classrooms.title}">Classrooms</h1>
+            <div class="breadcrumb" th:text="#{classrooms.breadcrumb}">Home / Classrooms</div>
         </div>
-        <a th:href="@{/classrooms/new}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> New Classroom
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/classrooms/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> <span th:text="#{classrooms.btn.new}">New Classroom</span>
         </a>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h3>All classrooms <span class="badge badge-primary" th:text="${classrooms.totalElements}">0</span></h3>
+            <h3><span th:text="#{classrooms.all}">All classrooms</span> <span class="badge badge-primary" th:text="${classrooms.totalElements}">0</span></h3>
             <form th:action="@{/classrooms}" method="get" class="search">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search classroom...">
+                <input type="text" name="keyword" th:value="${keyword}" th:placeholder="#{classrooms.search.placeholder}">
                 <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
             </form>
         </div>
@@ -27,9 +27,9 @@
                 <thead>
                 <tr>
                     <th>#</th>
-                    <th>Name</th>
-                    <th>Capacity</th>
-                    <th>Actions</th>
+                    <th th:text="#{table.name}">Name</th>
+                    <th th:text="#{table.capacity}">Capacity</th>
+                    <th th:text="#{table.actions}">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -45,16 +45,16 @@
                     </td>
                     <td>
                         <div class="actions">
-                            <a th:href="@{/classrooms/{id}(id=${classroom.id})}" class="btn btn-icon edit" title="Details">
+                            <a th:href="@{/classrooms/{id}(id=${classroom.id})}" class="btn btn-icon edit" th:title="#{title.details}">
                                 <i class="bi bi-eye-fill"></i>
                             </a>
                             <a sec:authorize="hasRole('ADMIN')" th:href="@{/classrooms/edit/{id}(id=${classroom.id})}"
-                               class="btn btn-icon edit" title="Edit">
+                               class="btn btn-icon edit" th:title="#{title.edit}">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
                             <form sec:authorize="hasRole('ADMIN')" th:action="@{/classrooms/delete/{id}(id=${classroom.id})}"
-                                  method="post" data-confirm="Delete this classroom?">
-                                <button type="submit" class="btn btn-icon delete" title="Delete">
+                                  method="post" th:attr="data-confirm=#{classrooms.delete.confirm}">
+                                <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </form>
@@ -63,7 +63,7 @@
                 </tr>
                 <tr th:if="${classrooms.empty}">
                     <td colspan="4" class="empty">
-                        <i class="bi bi-inbox"></i> No classrooms found.
+                        <i class="bi bi-inbox"></i> <span th:text="#{classrooms.empty}">No classrooms found.</span>
                     </td>
                 </tr>
                 </tbody>

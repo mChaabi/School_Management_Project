@@ -18,7 +18,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_TEACHER','ROLE_STUDENT')")
 public class QuizController {
 
     private final QuizService service;

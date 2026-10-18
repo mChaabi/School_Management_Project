@@ -1,36 +1,45 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout('My quizzes', ~{::main}, 'quizzes')}">
+      th:replace="~{layout/base :: layout(#{quizzes.my.pageTitle}, ~{::main}, 'quizzes')}">
 <body>
 <main>
     <div class="page-header">
         <div>
-            <h1>My quizzes</h1>
-            <div class="breadcrumb">Home / My quizzes</div>
+            <h1 th:text="#{quizzes.my.pageTitle}">My quizzes</h1>
+            <div class="breadcrumb" th:text="#{quizzes.my.breadcrumb}">Home / My quizzes</div>
         </div>
     </div>
     <div class="card"><div class="table-wrap">
         <table>
-            <thead><tr><th>Quiz</th><th>Course</th><th>Duration</th><th>Questions</th><th>Status</th><th></th></tr></thead>
+            <thead>
+            <tr>
+                <th th:text="#{table.quiz}">Quiz</th>
+                <th th:text="#{table.course}">Course</th>
+                <th th:text="#{table.duration}">Duration</th>
+                <th th:text="#{table.questions}">Questions</th>
+                <th th:text="#{table.status}">Status</th>
+                <th></th>
+            </tr>
+            </thead>
             <tbody>
             <tr th:each="q : ${quizzes}">
                 <td><strong th:text="${q.title}"></strong></td>
                 <td th:text="${q.courseTitle}"></td>
-                <td th:text="${q.minutes} + ' min'"></td>
+                <td th:text="${q.minutes} + ' ' + #{unit.min}"></td>
                 <td th:text="${q.questions}"></td>
                 <td>
-                    <span class="badge badge-info" th:if="${q.status == 'TODO'}">To do</span>
-                    <span class="badge badge-primary" th:if="${q.status == 'IN_PROGRESS'}">In progress</span>
+                    <span class="badge badge-info" th:if="${q.status == 'TODO'}" th:text="#{badge.toDo}">To do</span>
+                    <span class="badge badge-primary" th:if="${q.status == 'IN_PROGRESS'}" th:text="#{badge.inProgress}">In progress</span>
                     <span class="badge badge-success" th:if="${q.status == 'DONE'}" th:text="${q.score} + ' / ' + ${q.total}"></span>
                 </td>
                 <td>
                     <a th:if="${q.status != 'DONE'}" th:href="@{/quizzes/{id}/take(id=${q.id})}" class="btn btn-primary"
-                       th:text="${q.status == 'TODO'} ? 'Start' : 'Continue'"></a>
-                    <a th:if="${q.status == 'DONE'}" th:href="@{/quizzes/{id}/result(id=${q.id})}" class="btn btn-light">See result</a>
+                       th:text="${q.status == 'TODO'} ? #{btn.start} : #{btn.continue}"></a>
+                    <a th:if="${q.status == 'DONE'}" th:href="@{/quizzes/{id}/result(id=${q.id})}" class="btn btn-light" th:text="#{btn.seeResult}">See result</a>
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(quizzes)}">
-                <td colspan="6" class="empty"><i class="bi bi-inbox"></i> No quiz available right now.</td>
+                <td colspan="6" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{quizzes.my.empty}">No quiz available right now.</span></td>
             </tr>
             </tbody>
         </table>
