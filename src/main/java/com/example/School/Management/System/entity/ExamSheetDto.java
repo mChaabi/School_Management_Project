@@ -1,6 +1,5 @@
 package com.example.School.Management.System.entity;
 
-import com.lowagie.text.Row;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

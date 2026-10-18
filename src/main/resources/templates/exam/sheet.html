@@ -11,17 +11,13 @@
     <a th:href="@{/courses/{id}/exams(id=${sheet.courseId})}" class="btn btn-light">Back to exams</a>
   </div>
 
-  <div class="alert alert-danger" th:if="${error != null}">
-    <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
-  </div>
-
   <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
-    <p>
-      <strong>Course:</strong> <span th:text="${sheet.courseTitle}"></span> &nbsp;|&nbsp;
-      <strong>Date:</strong> <span th:text="${#temporals.format(sheet.examDate,'dd/MM/yyyy')}"></span> &nbsp;|&nbsp;
-      <strong>Maximum score:</strong> <span th:text="${sheet.maxScore}"></span> &nbsp;|&nbsp;
-      <strong>Weight:</strong> <span th:text="${sheet.weight} + '%'"></span>
-    </p>
+    <div class="ex-chips">
+      <span class="ex-chip"><i class="bi bi-journal-bookmark-fill"></i> <strong th:text="${sheet.courseTitle}"></strong></span>
+      <span class="ex-chip"><i class="bi bi-calendar-event"></i> <strong th:text="${#temporals.format(sheet.examDate,'dd/MM/yyyy')}"></strong></span>
+      <span class="ex-chip"><i class="bi bi-trophy"></i> Max <strong th:text="${sheet.maxScore}"></strong></span>
+      <span class="ex-chip"><i class="bi bi-percent"></i> Weight <strong th:text="${sheet.weight} + '%'"></strong></span>
+    </div>
     <small>Leave the score empty if the exam is not graded yet. Tick <em>Absent</em> if the student
       did not take the exam: it counts as 0 in the final grade.</small>
   </div></div>
@@ -41,7 +37,7 @@
             </td>
             <td>
               <input type="number" step="0.25" min="0" th:max="${sheet.maxScore}"
-                     class="score" style="max-width:120px"
+                     class="score ex-score"
                      th:field="*{rows[__${i.index}__].score}">
             </td>
             <td><input type="checkbox" class="absent" th:field="*{rows[__${i.index}__].absent}"></td>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Exams calendar', ~{::main}, 'exams')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1>Exams</h1>
+            <div class="breadcrumb">Home / Exams</div>
+        </div>
+    </div>
+
+    <!-- Date filter -->
+    <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
+        <form th:action="@{/exams}" method="get" class="actions" style="align-items:flex-end">
+            <div class="form-group">
+                <label>From</label>
+                <input type="date" name="from" th:value="${from}">
+            </div>
+            <div class="form-group">
+                <label>To</label>
+                <input type="date" name="to" th:value="${to}">
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Show</button>
+            <a th:href="@{/exams(from=${today},to=${today})}" class="btn btn-light">Today</a>
+            <a th:href="@{/exams(from=${weekStart},to=${weekEnd})}" class="btn btn-light">This week</a>
+            <a th:href="@{/exams}" class="btn btn-light">Next 30 days</a>
+        </form>
+    </div></div>
+
+    <!-- One card per day -->
+    <section class="ex-day" th:each="d : ${days}"
+             th:classappend="${d.key.isEqual(today)} ? 'ex-today' : (${d.key.isBefore(today)} ? 'ex-past')">
+
+        <header class="ex-day-head">
+            <div class="ex-date">
+                <strong th:text="${#temporals.format(d.key,'dd')}">15</strong>
+                <span th:text="${#temporals.format(d.key,'MMM')}">Nov</span>
+            </div>
+            <div class="ex-day-info">
+                <h3 th:text="${#temporals.format(d.key,'EEEE')}">Sunday</h3>
+                <small th:text="${#temporals.format(d.key,'dd/MM/yyyy')}">15/11/2026</small>
+            </div>
+            <span class="ex-pill" th:if="${d.key.isEqual(today)}">Today</span>
+            <span class="ex-count" th:text="${#lists.size(d.value)} + ' exam(s)'">1 exam(s)</span>
+        </header>
+
+        <div class="ex-item" th:each="e : ${d.value}"
+             th:with="pct=${e.total == 0 ? 0 : (e.graded * 100 / e.total)}">
+
+            <div class="ex-main">
+                <strong class="ex-title" th:text="${e.title}">Midterm Exam</strong>
+                <span class="ex-course"><i class="bi bi-journal-bookmark-fill"></i>
+                    <span th:text="${e.courseTitle}">Course</span></span>
+            </div>
+
+            <div class="ex-meta">
+                <i class="bi bi-person-workspace"></i> <span th:text="${e.teacherName}">Teacher</span>
+            </div>
+
+            <div>
+                <span class="ex-label">Max score</span>
+                <strong th:text="${e.maxScore}">20.0</strong>
+            </div>
+
+            <div>
+                <span class="ex-label">Weight</span>
+                <span class="ex-weight" th:text="${e.weight} + '%'">40%</span>
+            </div>
+
+            <div>
+                <div class="ex-progress-text">
+                    <span>Scores entered</span>
+                    <strong th:text="${e.graded} + ' / ' + ${e.total}">0 / 1</strong>
+                </div>
+                <div class="ex-bar"
+                     th:classappend="${e.total > 0 && e.graded == e.total} ? 'ex-done' : (${e.graded == 0} ? 'ex-empty')">
+                    <span th:style="'width:' + ${pct} + '%'"></span>
+                </div>
+            </div>
+
+            <div class="ex-actions">
+                <a th:href="@{/exams/{id}/paper(id=${e.examId})}" class="btn btn-icon edit" title="Exam paper">
+                    <i class="bi bi-file-earmark-text-fill"></i></a>
+                <a th:href="@{/exams/{id}/grades(id=${e.examId})}" class="btn btn-icon edit" title="Enter scores">
+                    <i class="bi bi-pencil-square"></i></a>
+                <a th:href="@{/courses/{id}/results(id=${e.courseId})}" class="btn btn-icon edit" title="View results">
+                    <i class="bi bi-eye-fill"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <div class="ex-none" th:if="${#maps.isEmpty(days)}">
+        <i class="bi bi-calendar-x"></i> No exams in this period.
+    </div>
+</main>
+</body>
+</html>

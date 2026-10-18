@@ -29,8 +29,12 @@
                     <td><span class="badge badge-primary" th:text="${e.graded} + ' / ' + ${e.total}"></span></td>
                     <td>
                         <div class="actions">
+                            <a th:href="@{/exams/{id}/paper(id=${e.id})}" class="btn btn-icon edit" title="Exam paper">
+                                <i class="bi bi-file-earmark-text-fill"></i></a>
                             <a th:href="@{/exams/{id}/grades(id=${e.id})}" class="btn btn-icon edit" title="Enter scores">
                                 <i class="bi bi-pencil-square"></i></a>
+                            <a th:href="@{/courses/{id}/results(id=${courseId})}" class="btn btn-icon edit" title="View results">
+                                <i class="bi bi-eye-fill"></i></a>
                             <form th:action="@{/exams/{id}/delete(id=${e.id})}" method="post"
                                   data-confirm="Delete this exam and its scores?">
                                 <button type="submit" class="btn btn-icon delete" title="Delete">

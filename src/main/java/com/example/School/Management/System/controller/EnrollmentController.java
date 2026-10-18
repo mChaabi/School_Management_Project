@@ -30,7 +30,7 @@ public class EnrollmentController {
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("enrollmentDto", new EnrollmentDto(null, null, null, null, null));
+        model.addAttribute("enrollmentDto", new EnrollmentDto(null, null, null, null, null, null, null));
         addFormData(model);
         return "enrollments/form";
     }

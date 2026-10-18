@@ -14,6 +14,8 @@ public record EnrollmentDto(
         Long courseId,
 
         LocalDate enrollmentDate,
+        String studentName,
+        String courseName,
 
         Double grade
 ) {}

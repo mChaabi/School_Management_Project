@@ -29,6 +29,14 @@
             <a th:href="@{/courses}"><i class="bi bi-journal-bookmark-fill"></i> Courses</a>
         </li>
 
+        <li sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:classappend="${currentMenu == 'exams'} ? 'active'">
+            <a th:href="@{/exams}"><i class="bi bi-journal-check"></i> Exams</a>
+        </li>
+
+        <li sec:authorize="hasAnyRole('ADMIN','TEACHER','STUDENT')" th:classappend="${currentMenu == 'quizzes'} ? 'active'">
+            <a th:href="@{/my-quizzes}"><i class="bi bi-ui-checks-grid"></i> Quizzes</a>
+        </li>
+
         <!-- Enrollments: everyone (data is filtered per role in the controller) -->
         <li th:classappend="${currentMenu == 'enrollments'} ? 'active'">
             <a th:href="@{/enrollments}"><i class="bi bi-card-checklist"></i> Enrollments</a>

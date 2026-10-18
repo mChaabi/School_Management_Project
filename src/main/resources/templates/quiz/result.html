@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Result', ~{::main}, 'quizzes')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="${r.title}">Result</h1>
+            <div class="breadcrumb" th:text="'Home / My quizzes / ' + ${r.courseTitle}">Course</div>
+        </div>
+        <a th:href="@{/my-quizzes}" class="btn btn-light">My quizzes</a>
+    </div>
+
+    <div class="card qz-q" style="text-align:center">
+        <div class="qz-score" th:classappend="${r.passed} ? 'qz-pass' : 'qz-fail'" th:text="${r.percent} + '%'">80%</div>
+        <p><strong th:text="${r.score} + ' / ' + ${r.total} + ' correct answers'"></strong></p>
+        <span class="badge badge-success" th:if="${r.passed}">Passed</span>
+        <span class="badge badge-danger" th:unless="${r.passed}">Not passed</span>
+    </div>
+
+    <div class="card qz-q" th:each="x, i : ${r.review}">
+        <div class="ex-file">
+            <strong style="flex:1" th:text="${i.count} + '. ' + ${x.question}"></strong>
+            <i class="bi bi-check-circle-fill qz-ok" th:if="${x.correct}"></i>
+            <i class="bi bi-x-circle-fill qz-bad" th:unless="${x.correct}"></i>
+        </div>
+        <small>Your answer: <span th:text="${x.chosen}"></span></small>
+    </div>
+</main>
+</body>
+</html>

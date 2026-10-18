@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Quiz', ~{::main}, 'quizzes')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="${quiz.title}">Quiz</h1>
+            <div class="breadcrumb" th:text="'Home / My quizzes / ' + ${quiz.courseTitle}">Course</div>
+        </div>
+        <div class="qz-timer" id="timer" th:attr="data-seconds=${quiz.secondsLeft}">--:--</div>
+    </div>
+
+    <form id="quizForm" th:action="@{/quizzes/{id}/submit(id=${quiz.id})}" method="post">
+        <div class="card qz-q" th:each="q, i : ${quiz.questions}">
+            <strong th:text="${i.count} + '. ' + ${q.text}"></strong>
+            <img th:if="${q.hasImage}" th:src="@{/quizzes/questions/{id}/image(id=${q.id})}" class="qz-img" alt="Question image">
+            <label class="qz-choice" th:each="o : ${q.options}">
+                <input type="radio" th:name="'q_' + ${q.id}" th:value="${o.id}">
+                <span th:text="${o.text}"></span>
+            </label>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Submit my answers</button>
+        </div>
+    </form>
+
+    <script>
+        (function () {
+            var t = document.getElementById('timer'), f = document.getElementById('quizForm');
+            var left = parseInt(t.dataset.seconds, 10), sent = false;
+            f.addEventListener('submit', function () { sent = true; });
+            window.addEventListener('beforeunload', function (e) { if (!sent) { e.preventDefault(); e.returnValue = ''; } });
+            (function tick() {
+                if (left <= 0) { if (!sent) { sent = true; f.submit(); } return; }
+                var m = Math.floor(left / 60), s = left % 60;
+                t.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+                if (left <= 60) t.classList.add('qz-urgent');
+                left--; setTimeout(tick, 1000);
+            })();
+        })();
+    </script>
+</main>
+</body>
+</html>

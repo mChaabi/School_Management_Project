@@ -69,6 +69,10 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/notifications/dev/**").hasRole("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/exams/*/paper/view", "/exams/*/paper/download").authenticated()
+
+                        .requestMatchers("/my-quizzes", "/quizzes/**").authenticated()
+
                         // 5. Attendance: "my" and "student/{id}" are for everyone (filtered), the rest is staff only
                         .requestMatchers("/attendances/my", "/attendances/student/**").authenticated()
                         .requestMatchers("/attendances/**").hasAnyRole("ADMIN", "TEACHER")

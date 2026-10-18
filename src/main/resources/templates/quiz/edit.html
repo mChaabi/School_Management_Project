@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout('Quiz', ~{::main}, 'courses')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="${quiz.title}">Quiz</h1>
+            <div class="breadcrumb" th:text="'Home / Courses / ' + ${quiz.courseTitle}">Course</div>
+        </div>
+        <div class="actions">
+            <a th:href="@{/quizzes/{id}/attempts(id=${quiz.id})}" class="btn btn-light"><i class="bi bi-bar-chart-fill"></i> Results</a>
+            <a th:href="@{/courses/{id}/quizzes(id=${quiz.courseId})}" class="btn btn-light">Back</a>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="card" style="margin-bottom:1.5rem"><div class="card-body">
+        <div class="ex-file">
+            <div class="ex-chips" style="margin:0;flex:1">
+                <span class="ex-chip"><i class="bi bi-clock"></i> <strong th:text="${quiz.minutes} + ' min'"></strong></span>
+                <span class="ex-chip"><i class="bi bi-question-circle"></i> <strong th:text="${#lists.size(quiz.questions)} + ' questions'"></strong></span>
+                <span class="ex-chip"><i class="bi bi-people"></i> <strong th:text="${quiz.attempts} + ' attempts'"></strong></span>
+                <span class="badge badge-success" th:if="${quiz.published}">Open to students</span>
+                <span class="badge badge-info" th:unless="${quiz.published}">Draft</span>
+            </div>
+            <form th:action="@{/quizzes/{id}/publish(id=${quiz.id})}" method="post">
+                <input type="hidden" name="publish" th:value="${!quiz.published}">
+                <button type="submit" class="btn btn-primary" th:text="${quiz.published} ? 'Hide from students' : 'Publish to students'"></button>
+            </form>
+        </div>
+    </div></div>
+
+    <!-- Import -->
+    <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header"><h3>Import questions from a file</h3></div>
+        <div class="card-body">
+            <form th:action="@{/quizzes/{id}/import(id=${quiz.id})}" method="post" enctype="multipart/form-data" class="actions" style="align-items:flex-end">
+                <div class="form-group">
+                    <label>TXT, Word (.docx) or PDF file</label>
+                    <input type="file" name="file" accept=".txt,.docx,.pdf" required>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-cloud-arrow-up-fill"></i> Import</button>
+            </form>
+            <details style="margin-top:1rem">
+                <summary><strong>Format of the file</strong></summary>
+                <pre class="qz-sql">1. What does SQL stand for?
+A) Structured Query Language *
+B) Simple Query Logic
+C) Standard Question List
+
+2. Which command removes all rows quickly?
+A) DELETE
+B) TRUNCATE
+C) DROP
+Answer: B</pre>
+                <small>Mark the correct option with <code>*</code> at its end, or with a line <code>Answer: B</code>.
+                    Scanned PDFs and photos cannot be read: add them as an image of a question below.</small>
+            </details>
+        </div>
+    </div>
+
+    <!-- Manual add -->
+    <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header"><h3>Add a question</h3></div>
+        <div class="card-body">
+            <form th:action="@{/quizzes/{id}/questions(id=${quiz.id})}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Question <span class="req">*</span></label>
+                    <textarea name="text" rows="2" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Image (optional, JPG or PNG)</label>
+                    <input type="file" name="image" accept=".jpg,.jpeg,.png">
+                </div>
+                <label>Options (select the correct one)</label>
+                <div class="qz-opt" th:each="i : ${#numbers.sequence(0,5)}">
+                    <input type="radio" name="correct" th:value="${i}" th:checked="${i == 0}" title="Correct answer">
+                    <input type="text" name="option" maxlength="500"
+                           th:placeholder="'Option ' + ${#strings.substring('ABCDEF', i, i + 1)}" th:required="${i < 2}">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Questions -->
+    <div class="card qz-q" th:each="q, i : ${quiz.questions}">
+        <div class="ex-file">
+            <strong style="flex:1" th:text="${i.count} + '. ' + ${q.text}"></strong>
+            <form th:action="@{/quizzes/questions/{id}/delete(id=${q.id})}" method="post" data-confirm="Delete this question?">
+                <button type="submit" class="btn btn-icon delete" title="Delete"><i class="bi bi-trash-fill"></i></button>
+            </form>
+        </div>
+        <img th:if="${q.hasImage}" th:src="@{/quizzes/questions/{id}/image(id=${q.id})}" class="qz-img" alt="Question image">
+        <div class="qz-choice" th:each="o : ${q.options}" th:classappend="${o.correct} ? 'qz-right'">
+            <i class="bi" th:classappend="${o.correct} ? 'bi-check-circle-fill qz-ok' : 'bi-circle'"></i>
+            <span th:text="${o.text}"></span>
+        </div>
+    </div>
+    <div class="ex-none" th:if="${#lists.isEmpty(quiz.questions)}">
+        <i class="bi bi-question-circle"></i> No question yet.
+    </div>
+</main>
+</body>
+</html>

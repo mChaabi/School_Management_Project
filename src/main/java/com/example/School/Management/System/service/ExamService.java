@@ -1,10 +1,10 @@
 package com.example.School.Management.System.service;
 
+import com.example.School.Management.System.dto.AgendaRow;
+import com.example.School.Management.System.dto.ExamHeader;
+import com.example.School.Management.System.dto.ResultRow;
 import com.example.School.Management.System.entity.*;
-import com.example.School.Management.System.repository.CourseRepository;
-import com.example.School.Management.System.repository.EnrollmentRepository;
-import com.example.School.Management.System.repository.ExamRepository;
-import com.example.School.Management.System.repository.ExamResultRepository;
+import com.example.School.Management.System.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,10 +23,48 @@ public class ExamService {
     private final ExamResultRepository results;
     private final CourseRepository courses;
     private final EnrollmentRepository enrollments;
+    private final ExamFileRepository examFiles;
 
     public record ExamRow(Long id, String title, LocalDate date, Double maxScore,
                           Integer weight, long graded, long total) {}
     public record Graded(Long studentId, double score20) {}
+
+    private boolean isAdmin(Authentication auth) {
+        return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    /** Exams between two dates, grouped by day. A teacher sees only their own courses. */
+    @Transactional(readOnly = true)
+    public Map<LocalDate, List<AgendaRow>> agenda(LocalDate from, LocalDate to, Authentication auth) {
+        String username = isAdmin(auth) ? null : auth.getName();
+        return exams.findBetween(from, to, username).stream()
+                .map(e -> {
+                    Teacher t = e.getCourse().getTeacher();
+                    return new AgendaRow(e.getId(), e.getCourse().getId(), e.getCourse().getTitle(),
+                            t == null ? "No teacher" : t.getFirstName() + " " + t.getLastName(),
+                            e.getTitle(), e.getExamDate(), e.getMaxScore(), e.getWeight(),
+                            results.countByExamId(e.getId()),
+                            enrollments.countByCourseId(e.getCourse().getId()));
+                })
+                .collect(Collectors.groupingBy(AgendaRow::date, TreeMap::new, Collectors.toList()));
+    }
+
+    /** Every exam result of a course: who took which exam and what score. */
+    @Transactional(readOnly = true)
+    public List<ResultRow> courseResults(Long courseId) {
+        return results.findByExamCourseId(courseId).stream()
+                .map(r -> {
+                    Teacher t = r.getExam().getCourse().getTeacher();
+                    return new ResultRow(r.getExam().getCourse().getTitle(),
+                            t == null ? "N/A" : t.getFirstName() + " " + t.getLastName(),
+                            r.getStudent().getFirstName() + " " + r.getStudent().getLastName(),
+                            r.getExam().getTitle(), r.getExam().getExamDate(),
+                            r.isAbsent(), r.getScore(), r.getExam().getMaxScore());
+                })
+                .sorted(Comparator.comparing(ResultRow::examDate).reversed()
+                        .thenComparing(ResultRow::studentName))
+                .toList();
+    }
 
     // ---------- access: admin = everything, teacher = own courses only ----------
     @Transactional(readOnly = true)
@@ -70,10 +108,18 @@ public class ExamService {
                 .course(courses.findById(courseId).orElseThrow()).build());
     }
 
+    @Transactional(readOnly = true)
+    public ExamHeader header(Long examId) {
+        Exam e = exams.findById(examId).orElseThrow();
+        return new ExamHeader(e.getId(), e.getCourse().getId(), e.getCourse().getTitle(),
+                e.getTitle(), e.getExamDate(), e.getMaxScore(), e.getWeight());
+    }
+
     @Transactional
     public void delete(Long examId) {
         Exam e = exams.findById(examId).orElseThrow();
         Long courseId = e.getCourse().getId();
+        examFiles.deleteByExamId(examId);
         exams.delete(e);
         exams.flush();
         recompute(courseId);

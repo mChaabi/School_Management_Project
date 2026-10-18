@@ -7,16 +7,17 @@ import com.example.School.Management.System.service.ExamService;
 import com.example.School.Management.System.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 @Controller
 @RequiredArgsConstructor
@@ -88,6 +89,34 @@ public class ExamController {
             model.addAttribute("error", e.getMessage());
             return "exam/sheet";
         }
+    }
+
+    // ----- all exams, day by day -----
+    @GetMapping("/exams")
+    public String agenda(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                         Authentication auth, Model model) {
+        LocalDate today = LocalDate.now();
+        LocalDate start = from != null ? from : today;
+        LocalDate end = (to != null && !to.isBefore(start)) ? to : start.plusDays(30);
+
+        model.addAttribute("days", service.agenda(start, end, auth));
+        model.addAttribute("from", start);
+        model.addAttribute("to", end);
+        model.addAttribute("today", today);
+        model.addAttribute("weekStart", today.with(DayOfWeek.MONDAY));
+        model.addAttribute("weekEnd", today.with(DayOfWeek.MONDAY).plusDays(6));
+        return "exam/agenda";
+    }
+
+    // ----- read-only results of a course -----
+    @GetMapping("/courses/{courseId}/results")
+    public String results(@PathVariable Long courseId, Authentication auth, Model model) {
+        service.checkCourseAccess(courseId, auth);
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("courseTitle", service.courseTitle(courseId));
+        model.addAttribute("grades", service.courseResults(courseId));
+        return "exam/results";
     }
 
     @PostMapping("/exams/{examId}/delete")

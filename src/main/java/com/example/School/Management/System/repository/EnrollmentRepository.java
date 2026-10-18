@@ -13,6 +13,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
 
+    boolean existsByCourseIdAndStudentId(Long courseId, Long studentId);
+
     List<Enrollment> findByStudentId(Long studentId);
 
     List<Enrollment> findByCourseId(Long courseId);
@@ -21,6 +23,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     // Add this to find enrollments for a list of student IDs
     List<Enrollment> findByStudentIdIn(List<Long> studentIds);
+
 
     @Query("""
            select e from Enrollment e
@@ -45,5 +48,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
        order by c.title, e.student.lastName
        """)
     List<Enrollment> findAllForExport();
+
+    boolean existsByCourseIdAndStudentUserUsername(Long courseId, String username);
+    boolean existsByCourseIdAndStudentParentUsername(Long courseId, String username);
 
 }

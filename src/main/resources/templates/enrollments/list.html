@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/base :: layout('Enrollments', ~{::main}, 'enrollments')}">
 <body>
 <main>
@@ -21,13 +22,14 @@
         <div class="table-wrap">
             <table>
                 <thead>
-                <tr><th>#</th><th>Student ID</th><th>Course ID</th><th>Date</th><th>Grade</th><th>Actions</th></tr>
+                <tr><th>#</th><th>Student</th><th>Course</th><th>Date</th><th>Grade</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="e : ${enrollments}">
                     <td th:text="${e.id}"></td>
-                    <td th:text="${e.studentId}"></td>
-                    <td th:text="${e.courseId}"></td>
+                    <td th:text="${e.studentName}"></td>
+                    <td th:text="${e.courseName}"></td>
+
                     <td th:text="${e.enrollmentDate != null} ? ${#temporals.format(e.enrollmentDate, 'dd/MM/yyyy')} : '-'"></td>
                     <td><span class="badge badge-success" th:text="${e.grade != null} ? ${e.grade} : '-'"></span></td>
                     <td>
