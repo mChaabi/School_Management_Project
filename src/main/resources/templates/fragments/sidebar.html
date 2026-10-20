@@ -61,6 +61,11 @@
                 <i class="bi bi-person-vcard"></i> <span th:text="#{admin360.menu}">Student Profile</span>
             </a>
         </li>
+
+        <a sec:authorize="hasRole('PARENT')" th:href="@{/parent}"
+           th:classappend="${active == 'parent'} ? 'active'">
+            <i class="bi bi-people-fill"></i> <span th:text="#{parent.menu}">My children</span>
+        </a>
     </ul>
 </aside>
 </html>

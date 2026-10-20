@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{parent.title}, ~{::main}, 'parent')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="${p.fullName}"></h1>
+            <div class="breadcrumb" th:text="${p.classroomName ?: ''}"></div>
+        </div>
+        <div class="actions no-print">
+            <button type="button" class="btn btn-light" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i> <span th:text="#{admin360.print}">Print</span></button>
+            <a th:href="@{/parent}" class="btn btn-light" th:text="#{btn.back}">Back</a>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{dashboard.averageGrade}">Average</h3>
+            <p style="font-size:2rem;font-weight:700"
+               th:text="${p.average != null} ? ${#numbers.formatDecimal(p.average,1,2)} + ' / 20' : '-'"></p>
+        </div></div>
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{title.attendance}">Attendance</h3>
+            <p>✔ <span th:text="${p.attendance.present}"></span>
+                ✖ <span th:text="${p.attendance.absent}"></span>
+                ⏱ <span th:text="${p.attendance.late}"></span></p>
+            <a th:href="@{/attendances/student/{id}(id=${p.id})}" th:text="#{parent.attendanceDetail}">Detail</a>
+        </div></div>
+    </div>
+
+    <!-- Cursos y notas -->
+    <div class="card">
+        <div class="card-header"><h3 th:text="#{student.coursesAndTeachers}">Courses</h3></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th th:text="#{table.course}"></th><th th:text="#{table.teacher}"></th><th th:text="#{table.grade}"></th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${p.courses}">
+                <td th:text="${c.title}"></td><td th:text="${c.teacherName}"></td><td th:text="${c.grade ?: '-'}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(p.courses)}"><td colspan="3" class="empty" th:text="#{student.notEnrolled}"></td></tr>
+            </tbody></table></div>
+    </div>
+
+    <!-- Exámenes -->
+    <div class="card">
+        <div class="card-header"><h3 th:text="#{admin360.exams}">Exams</h3></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Examen</th><th>Curso</th><th>Fecha</th><th>Nota</th></tr></thead>
+            <tbody>
+            <tr th:each="e : ${p.exams}">
+                <td th:text="${e.examTitle}"></td><td th:text="${e.courseTitle}"></td>
+                <td th:text="${e.date != null} ? ${#temporals.format(e.date,'dd/MM/yyyy')} : '-'"></td>
+                <td th:text="${e.score ?: '-'}"></td>
+            </tr>
+            </tbody></table></div>
+    </div>
+
+    <!-- Horario -->
+    <div class="card">
+        <div class="card-header"><h3 th:text="#{admin360.schedule}">Schedule</h3></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Día</th><th>Inicio</th><th>Fin</th><th>Curso</th><th>Aula</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${p.schedule}">
+                <td th:text="${r.day}"></td><td th:text="${r.start}"></td><td th:text="${r.end}"></td>
+                <td th:text="${r.courseTitle}"></td><td th:text="${r.room}"></td>
+            </tr>
+            </tbody></table></div>
+    </div>
+</main>
+</body>
+</html>

@@ -61,4 +61,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
      or lower(s.email)     like lower(concat('%', :k, '%'))
 """)
     Page<Student> searchAll(@Param("k") String keyword, Pageable pageable);
+
+    List<Student> findByParentUsername(String username);
+    boolean existsByIdAndParentUsername(Long id, String username);
+    boolean existsByIdAndUserUsername(Long id, String username);
 }

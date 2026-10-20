@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{parent.title}, ~{::main}, 'parent')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{parent.title}">My children</h1>
+            <div class="breadcrumb" th:text="#{parent.breadcrumb}">Home / My children</div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="card" th:each="c : ${children}">
+            <div class="card-body">
+                <h3 th:text="${c.fullName}"></h3>
+                <p th:text="${c.classroomName ?: #messages.msg('student.notAssigned')}"></p>
+                <p><strong th:text="#{dashboard.averageGrade} + ':'">Average:</strong>
+                    <span th:text="${c.average != null} ? ${#numbers.formatDecimal(c.average,1,2)} + ' / 20' : '-'"></span></p>
+                <p>✔ <span th:text="${c.attendance.present}"></span>
+                    ✖ <span th:text="${c.attendance.absent}"></span>
+                    ⏱ <span th:text="${c.attendance.late}"></span></p>
+                <a class="btn btn-primary" th:href="@{/parent/children/{id}(id=${c.id})}">
+                    <i class="bi bi-eye-fill"></i> <span th:text="#{parent.view}">View</span></a>
+            </div>
+        </div>
+
+        <div class="card" th:if="${#lists.isEmpty(children)}">
+            <div class="card-body empty" th:text="#{parent.noChildren}">No children linked.</div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

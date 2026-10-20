@@ -6,9 +6,11 @@ import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.service.AttendanceService;
 import com.example.School.Management.System.service.ClassroomService;
 import com.example.School.Management.System.service.NotificationService;
+import com.example.School.Management.System.service.StudentAccessService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,13 +27,15 @@ public class AttendanceController {
     private final ClassroomService classroomService;
     private final ClassroomRepository classroomRepository;
     private final NotificationService notificationService; // <-- ADD THIS
+    private final StudentAccessService access;
 
     public AttendanceController(AttendanceService attendanceService, ClassroomService classroomService,
-                                ClassroomRepository classroomRepository, NotificationService notificationService) {
+                                ClassroomRepository classroomRepository, NotificationService notificationService,StudentAccessService access) {
         this.attendanceService = attendanceService;
         this.classroomService = classroomService;
         this.classroomRepository = classroomRepository;
         this.notificationService = notificationService; // <-- ADD THIS
+        this.access=access;
     }
 
     // Attendance sheet (pick classroom + date) -> templates/attendance/sheet.html
@@ -75,6 +79,15 @@ public class AttendanceController {
     // Student history + summary -> templates/attendance/history.html
     @GetMapping("/student/{studentId}")
     public String studentHistory(@PathVariable Long studentId, Model model) {
+        model.addAttribute("studentId", studentId);
+        model.addAttribute("attendances", attendanceService.findByStudentId(studentId));
+        model.addAttribute("summary", attendanceService.getSummary(studentId));
+        return "attendance/history";
+    }
+
+    @GetMapping("/student/{studentId}")
+    public String studentHistory(@PathVariable Long studentId, Authentication auth, Model model) {
+        access.requireView(studentId, auth);                     // NUEVO
         model.addAttribute("studentId", studentId);
         model.addAttribute("attendances", attendanceService.findByStudentId(studentId));
         model.addAttribute("summary", attendanceService.getSummary(studentId));

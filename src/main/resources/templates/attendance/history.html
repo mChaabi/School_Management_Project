@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -326,6 +326,13 @@
             font-size: 0.9rem;
         }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
         /* Footer */
         .footer {
             padding: 1.5rem 2rem;
@@ -443,7 +450,11 @@
                         <td>
                             <input type="hidden" th:field="*{rows[__${i.index}__].studentId}">
                             <input type="hidden" th:field="*{rows[__${i.index}__].studentName}">
-                            <a th:href="@{/attendances/student/{id}(id=${row.studentId})}" th:text="${row.studentName}"></a>
+                            <a sec:authorize="hasAnyRole('ADMIN','TEACHER')"
+                               th:href="@{/attendances/delete/{id}(id=${a.id},studentId=${studentId})}"
+                               class="btn btn-icon delete">
+                                <i class="bi bi-trash-fill"></i>
+                            </a>
                         </td>
                         <td>
                             <select th:field="*{rows[__${i.index}__].status}">
