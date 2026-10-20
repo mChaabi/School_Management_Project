@@ -40,26 +40,20 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findByClassroomId(Long classroomId);
 
-    // Conflicto de PROFESOR
-    @Query("""
-  select s from Schedule s
-  where s.course.teacher.id = :teacherId
-    and s.day = :day
-    and s.startTime < :end
-    and s.endTime > :start
-    and (:excludeId is null or s.id <> :excludeId)
-""")
-    List<Schedule> findTeacherConflicts(@Param("teacherId") Long teacherId,
-                                        @Param("day") DayOfWeek day,
-                                        @Param("start") LocalTime start,
-                                        @Param("end") LocalTime end,
-                                        @Param("excludeId") Long excludeId);
+    @Query("select s from Schedule s where s.course.teacher.id = :teacherId and s.dayOfWeek = :day and s.startTime < :end and s.endTime > :start and (:excludeId is null or s.id <> :excludeId)")
+    List<Schedule> findTeacherConflicts(
+            @Param("teacherId") Long teacherId,
+            @Param("day") DayOfWeek day,
+            @Param("start") LocalTime start,
+            @Param("end") LocalTime end,
+            @Param("excludeId") Long excludeId
+    );
 
     // Conflicto de AULA
     @Query("""
   select s from Schedule s
   where s.classroom.id = :classroomId
-    and s.day = :day
+    and s.dayOfWeek = :day
     and s.startTime < :end
     and s.endTime > :start
     and (:excludeId is null or s.id <> :excludeId)
@@ -68,5 +62,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
                                           @Param("day") DayOfWeek day,
                                           @Param("start") LocalTime start,
                                           @Param("end") LocalTime end,
-                                          @Param("excludeId") Long excludeId);
-}
+                                          @Param("excludeId") Long excludeId);}

@@ -11,6 +11,8 @@
         </div>
         <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/export/students.xlsx}" class="btn btn-light">
             <i class="bi bi-file-earmark-excel-fill"></i> <span th:text="#{btn.excel}">Excel</span></a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/import/students}" class="btn btn-light">
+            <i class="bi bi-upload"></i> <span th:text="#{import.menu}">Import</span></a>
         <a sec:authorize="hasAnyRole('ADMIN','TEACHER')" th:href="@{/export/students.csv}" class="btn btn-light">
             <i class="bi bi-filetype-csv"></i> <span th:text="#{btn.csv}">CSV</span></a>
         <a sec:authorize="hasRole('ADMIN')" th:href="@{/students/new}" class="btn btn-primary">

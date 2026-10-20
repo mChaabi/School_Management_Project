@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{import.title}, ~{::main}, 'students')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{import.title}">Import students</h1>
+            <div class="breadcrumb" th:text="#{import.breadcrumb}">Home / Students / Import</div>
+        </div>
+        <a th:href="@{/students}" class="btn btn-light" th:text="#{btn.back}">Back</a>
+    </div>
+
+    <!-- Subida -->
+    <div class="card">
+        <div class="card-body">
+            <p th:text="#{import.help}">Upload a .csv or .xlsx file.</p>
+            <p><small th:text="#{import.columns}">Columns</small></p>
+            <p>
+                <a th:href="@{/admin/import/students/template.csv}" class="btn btn-light">
+                    <i class="bi bi-download"></i> <span th:text="#{import.template}">Download template</span>
+                </a>
+            </p>
+
+            <div class="alert alert-danger" th:if="${fileError != null}">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${#messages.msgOrNull(fileError) ?: fileError}"></span>
+            </div>
+
+            <form th:action="@{/admin/import/students}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" name="file" accept=".csv,.xlsx" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> <span th:text="#{import.btn}">Import</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultado -->
+    <th:block th:if="${result != null}">
+        <div class="stats">
+            <div class="card"><div class="card-body">
+                <h3 th:text="#{import.total}">Rows read</h3>
+                <p style="font-size:2rem;font-weight:700" th:text="${result.total}"></p>
+            </div></div>
+            <div class="card"><div class="card-body">
+                <h3 th:text="#{import.created}">Created</h3>
+                <p style="font-size:2rem;font-weight:700;color:#16a34a" th:text="${result.created}"></p>
+            </div></div>
+            <div class="card"><div class="card-body">
+                <h3 th:text="#{import.failed}">Failed</h3>
+                <p style="font-size:2rem;font-weight:700;color:#dc2626" th:text="${#lists.size(result.errors)}"></p>
+            </div></div>
+        </div>
+
+        <div class="card" th:if="${!#lists.isEmpty(result.errors)}">
+            <div class="card-header"><h3 th:text="#{import.errors}">Errors</h3></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th th:text="#{import.row}">Row</th><th th:text="#{import.reason}">Reason</th></tr></thead>
+                    <tbody>
+                    <tr th:each="e : ${result.errors}">
+                        <td th:text="${e.row}"></td>
+                        <td th:text="${#messages.msgOrNull(e.message) ?: e.message}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </th:block>
+</main>
+</body>
+</html>
