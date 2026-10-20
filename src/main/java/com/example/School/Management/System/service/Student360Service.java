@@ -2,11 +2,13 @@ package com.example.School.Management.System.service;
 
 import com.example.School.Management.System.dto.*;
 import com.example.School.Management.System.entity.Student;
+import com.example.School.Management.System.entity.User;
 import com.example.School.Management.System.enums.AttendanceStatus;
 import com.example.School.Management.System.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,19 @@ public class Student360Service {
     @Transactional(readOnly = true)
     public Page<Student> search(String keyword, Pageable pageable) {
         return studentRepo.searchAll(keyword == null ? "" : keyword.trim(), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentSuggestDto> suggest(String q) {
+        if (q == null || q.trim().length() < 2) return List.of();
+        return studentRepo.searchAll(q.trim(), PageRequest.of(0, 8))
+                .getContent().stream()
+                .map(s -> new StudentSuggestDto(
+                        s.getId(),
+                        s.getFirstName() + " " + s.getLastName(),
+                        s.getEmail(),
+                        s.getClassroom() != null ? s.getClassroom().getName() : null))
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -86,22 +101,26 @@ public class Student360Service {
         String averageGradeStr = Double.isNaN(avg) ? null : String.format("%.2f", avg);
 
         // 6. Build and Return DTO
-        return new Student360Dto(
-                s.getId(),
-                s.getFirstName() + " " + s.getLastName(),
-                s.getEmail(),
-                s.getPhone(),
-                s.getCity(),
-                s.getCountry(),
-                s.getGender() != null ? s.getGender().name() : null,
-                s.getBirthDate(),
+        return new Student360Dto(s.getId(), s.getFirstName() + " " + s.getLastName(),
+                s.getEmail(), s.getPhone(), s.getCity(), s.getCountry(),
+                s.getGender() != null ? s.getGender().name() : null, s.getBirthDate(),
                 s.getClassroom() != null ? s.getClassroom().getName() : null,
                 s.getClassroom() != null ? s.getClassroom().getCapacity() : null,
-                averageGradeStr != null ? Double.parseDouble(averageGradeStr) : null,
-                courses,     // 1. courses (List<CourseRow>)
-                exams,       // 2. exams (List<ExamRow>)
-                attendance,  // 3. attendance (AttendanceSummary)
-                schedule     // 4. schedule (List<ScheduleRow>)
-        );
+                avg.isNaN() ? null : avg, courses, exams, attendance, schedule,
+                toAccount(s.getParent()),     // NUEVO
+                toAccount(s.getUser()));      // NUEVO
+    }
+
+    private AccountInfo toAccount(User u) {
+        if (u == null) return null;
+        return new AccountInfo(
+                u.getId(),
+                u.getUsername(),
+                u.getEmail(),
+                u.isEnabled(),
+                u.getRoles().stream()
+                        .map(r -> r.name().replace("ROLE_", ""))
+                        .sorted()
+                        .toList());
     }
 }

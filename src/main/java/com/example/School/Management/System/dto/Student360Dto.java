@@ -11,6 +11,8 @@ public record Student360Dto(
         List<CourseRow> courses,
         List<ExamRow> exams,
         AttendanceSummary attendance,
-        List<ScheduleRow> schedule
+        List<ScheduleRow> schedule,
+        AccountInfo parent,            // NUEVO
+        AccountInfo studentAccount
 ) {
 }

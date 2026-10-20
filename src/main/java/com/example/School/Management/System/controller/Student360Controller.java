@@ -1,6 +1,7 @@
 package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.StudentDto;
+import com.example.School.Management.System.dto.StudentSuggestDto;
 import com.example.School.Management.System.service.Student360Service;
 import com.example.School.Management.System.service.StudentServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,12 @@ public class Student360Controller {
     public String profile(@PathVariable Long id, Model model) {
         model.addAttribute("p", service.getProfile(id));
         return "admin/student-360-profile";
+    }
+
+    @GetMapping("/suggest")
+    @ResponseBody
+    public List<StudentSuggestDto> suggest(@RequestParam("q") String q) {
+        return service.suggest(q);
     }
 
     @GetMapping("/search-ajax") // Keep it short so it resolves to /admin/student-360/search-ajax

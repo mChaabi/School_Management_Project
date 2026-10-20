@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="card(title, acc, emptyMsg)" class="card">
+    <div class="card-body">
+        <h3 th:text="${title}">Title</h3>
+
+        <th:block th:if="${acc != null}">
+            <p><strong th:text="#{admin360.username} + ':'">Username:</strong>
+                <span th:text="${acc.username}"></span></p>
+            <p><strong th:text="#{form.email} + ':'">Email:</strong>
+                <span th:text="${acc.email ?: '-'}"></span></p>
+            <p><strong th:text="#{admin360.roles} + ':'">Roles:</strong>
+                <span class="badge badge-info" th:each="r : ${acc.roles}" th:text="${r}"></span></p>
+            <p><strong th:text="#{admin360.status} + ':'">Status:</strong>
+                <span class="badge"
+                      th:classappend="${acc.enabled} ? 'badge-success' : 'badge-danger'"
+                      th:text="${acc.enabled} ? #{admin360.enabled} : #{admin360.disabled}"></span></p>
+        </th:block>
+
+        <p class="empty" th:if="${acc == null}" th:text="${emptyMsg}">Nothing linked.</p>
+    </div>
+</div>
+</body>
+</html>

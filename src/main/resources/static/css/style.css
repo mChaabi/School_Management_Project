@@ -744,3 +744,28 @@ label.qz-choice:hover{background:#eef2ff;border-color:#a5b4fc}
     border-bottom: 2px solid #f3f4f6;
     padding-bottom: 8px;
 }
+
+@media print {
+    .sidebar, .topbar, .no-print, .breadcrumb { display: none !important; }
+
+    body, main, .content, .main-content {
+        margin: 0 !important; padding: 0 !important;
+        background: #fff !important; width: 100% !important;
+    }
+    .card { box-shadow: none !important; border: 1px solid #ddd; break-inside: avoid; }
+    .table-wrap { overflow: visible !important; }
+    table { width: 100%; font-size: 11px; }
+    thead { display: table-header-group; }     /* repite cabecera en cada página */
+    tr { break-inside: avoid; }
+
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: A4; margin: 12mm; }
+}
+
+.chart-box { position: relative; height: 320px; }
+
+@media print {
+    .chart-box { height: 260px; break-inside: avoid; }
+}
+
+.badge-danger { background: #fee2e2; color: #b91c1c; }

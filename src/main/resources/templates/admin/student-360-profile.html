@@ -8,7 +8,15 @@
             <h1 th:text="${p.fullName}"></h1>
             <div class="breadcrumb" th:text="#{admin360.breadcrumb}"></div>
         </div>
-        <a th:href="@{/admin/student-360}" class="btn btn-light" th:text="#{btn.back}">Back</a>
+        <div class="actions no-print">
+            <a th:href="@{/students/{id}/report-card(id=${p.id})}" class="btn btn-primary">
+                <i class="bi bi-file-earmark-pdf-fill"></i> <span th:text="#{btn.reportCard}">Report card</span>
+            </a>
+            <button type="button" class="btn btn-light" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i> <span th:text="#{admin360.print}">Print</span>
+            </button>
+            <a th:href="@{/admin/student-360}" class="btn btn-light" th:text="#{btn.back}">Back</a>
+        </div>
     </div>
 
     <!-- Tarjetas resumen -->
@@ -31,7 +39,6 @@
                th:text="${p.average != null} ? ${#numbers.formatDecimal(p.average,1,2)} + ' / 20' : '-'"></p>
         </div></div>
 
-        <!-- Safe navigation for Attendance -->
         <div class="card"><div class="card-body">
             <h3 th:text="#{title.attendance}">Attendance</h3>
             <p>✔ <span th:text="${p.attendance != null ? p.attendance.present : 0}"></span>
@@ -40,22 +47,48 @@
         </div></div>
     </div>
 
+    <!-- Gráfico de notas -->
+    <div class="card">
+        <div class="card-header">
+            <h3 th:text="#{admin360.gradesChart}">Grades by course</h3>
+        </div>
+        <div class="card-body">
+            <div class="chart-box" th:if="${!#lists.isEmpty(p.courses)}">
+                <canvas id="gradesChart"></canvas>
+            </div>
+            <p class="empty" th:if="${#lists.isEmpty(p.courses)}" th:text="#{student.notEnrolled}">
+                Not enrolled in any course.
+            </p>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div th:replace="~{fragments/account-card :: card(#{admin360.parent}, ${p.parent}, #{admin360.noParent})}"></div>
+        <div th:replace="~{fragments/account-card :: card(#{admin360.studentAccount}, ${p.studentAccount}, #{admin360.noAccount})}"></div>
+    </div>
+
     <!-- Cursos -->
     <div class="card">
         <div class="card-header"><h3 th:text="#{student.coursesAndTeachers}">Courses</h3></div>
         <div class="table-wrap"><table>
-            <thead><tr><th th:text="#{table.course}"></th><th th:text="#{table.credits}"></th>
-                <th th:text="#{table.teacher}"></th><th th:text="#{table.enrolledOn}"></th><th th:text="#{table.grade}"></th></tr></thead>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th th:text="#{table.course}">Course</th>
+                <th th:text="#{table.teacher}">Teacher</th>
+                <th th:text="#{table.enrolledOn}">Enrolled On</th>
+                <th th:text="#{table.grade}">Grade</th>
+            </tr>
+            </thead>
             <tbody>
             <tr th:each="c : ${p.courses}">
+                <td th:text="${c.id}"></td>
                 <td th:text="${c.title}"></td>
-                <td th:text="${c.credits != null ? c.credits : '-'}"></td>
                 <td th:text="${c.teacherName}"></td>
-                <!-- Fixed property name to enrollmentDate -->
                 <td th:text="${c.enrollmentDate != null} ? ${#temporals.format(c.enrollmentDate,'dd/MM/yyyy')} : '-'"></td>
                 <td th:text="${c.grade ?: '-'}"></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(p.courses)}"><td colspan="5" class="empty">No courses found.</td></tr>
+            <tr th:if="${#lists.isEmpty(p.courses)}"><td colspan="5" class="empty" th:text="#{admin360.noCourses}">No courses found.</td></tr>
             </tbody></table></div>
     </div>
 
@@ -63,7 +96,15 @@
     <div class="card">
         <div class="card-header"><h3 th:text="#{admin360.exams}">Exams</h3></div>
         <div class="table-wrap"><table>
-            <thead><tr><th>Examen</th><th>Curso</th><th>Fecha</th><th>Nota</th><th>Estado</th></tr></thead>
+            <thead>
+            <tr>
+                <th th:text="#{table.exam}">Exam</th>
+                <th th:text="#{table.course}">Course</th>
+                <th th:text="#{table.date}">Date</th>
+                <th th:text="#{table.grade}">Grade</th>
+                <th th:text="#{table.status}">Status</th>
+            </tr>
+            </thead>
             <tbody>
             <tr th:each="e : ${p.exams}">
                 <td th:text="${e.examTitle}"></td>
@@ -72,7 +113,7 @@
                 <td th:text="${e.score ?: '-'}"></td>
                 <td><span class="badge badge-primary" th:text="${e.status}"></span></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(p.exams)}"><td colspan="5" class="empty">No exams found.</td></tr>
+            <tr th:if="${#lists.isEmpty(p.exams)}"><td colspan="5" class="empty" th:text="#{admin360.noExams}">No exams found.</td></tr>
             </tbody></table></div>
     </div>
 
@@ -80,7 +121,15 @@
     <div class="card">
         <div class="card-header"><h3 th:text="#{admin360.schedule}">Schedule</h3></div>
         <div class="table-wrap"><table>
-            <thead><tr><th>Día</th><th>Inicio</th><th>Fin</th><th>Curso</th><th>Aula</th></tr></thead>
+            <thead>
+            <tr>
+                <th th:text="#{table.day}">Day</th>
+                <th th:text="#{table.startTime}">Start</th>
+                <th th:text="#{table.endTime}">End</th>
+                <th th:text="#{table.course}">Course</th>
+                <th th:text="#{table.classroom}">Room</th>
+            </tr>
+            </thead>
             <tbody>
             <tr th:each="r : ${p.schedule}">
                 <td th:text="${r.day}"></td>
@@ -89,9 +138,71 @@
                 <td th:text="${r.courseTitle}"></td>
                 <td th:text="${r.room}"></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(p.schedule)}"><td colspan="5" class="empty">No schedule found.</td></tr>
+            <tr th:if="${#lists.isEmpty(p.schedule)}"><td colspan="5" class="empty" th:text="#{admin360.noSchedule}">No schedule found.</td></tr>
             </tbody></table></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script th:inline="javascript" th:if="${!#lists.isEmpty(p.courses)}">
+        (function () {
+            const labels = /*[[${p.courses.![title]}]]*/ [];
+            const grades = /*[[${p.courses.![grade]}]]*/ [];
+            const avg    = /*[[${p.average}]]*/ null;
+
+            // Mismos colores que el gráfico de distribución del dashboard
+            function colorFor(g) {
+                if (g === null || g === undefined) return '#d1d5db';
+                if (g < 10)  return '#ef4444';   // rojo
+                if (g < 14)  return '#f59e0b';   // naranja
+                if (g < 17)  return '#3b82f6';   // azul
+                return '#22c55e';                // verde
+            }
+
+            const datasets = [{
+                type: 'bar',
+                label: 'Nota',
+                data: grades,
+                backgroundColor: grades.map(colorFor),
+                borderRadius: 6,
+                maxBarThickness: 60
+            }];
+
+            // Línea horizontal con el promedio del estudiante
+            if (avg !== null) {
+                datasets.push({
+                    type: 'line',
+                    label: 'Promedio',
+                    data: labels.map(() => avg),
+                    borderColor: '#4f46e5',
+                    borderDash: [6, 6],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                });
+            }
+
+            new Chart(document.getElementById('gradesChart'), {
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 20, ticks: { stepSize: 2 } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ctx.dataset.label + ': ' +
+                                    (ctx.parsed.y !== null ? ctx.parsed.y.toFixed(2) : '-') + ' / 20'
+                            }
+                        }
+                    },
+                    animation: false   // útil para que la impresión salga completa
+                }
+            });
+        })();
+    </script>
 </main>
 </body>
 </html>

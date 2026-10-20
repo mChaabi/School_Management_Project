@@ -12,14 +12,11 @@
 
   <div class="card">
     <div class="card-header" style="position: relative;">
-      <form th:action="@{/admin/student-360}" method="get" class="search" style="position: relative; width: 100%;">
-        <!-- Added autocomplete="off" to hide browser saved info popup -->
-        <input type="text" id="studentSearchInput" name="keyword" th:value="${keyword}"
-               th:placeholder="#{students.search.placeholder}" autocomplete="off" style="width: 100%;">
+      <form th:action="@{/admin/student-360}" method="get" class="search ac-wrap" autocomplete="off">
+        <input type="text" id="acInput" name="keyword" th:value="${keyword}"
+               th:placeholder="#{students.search.placeholder}">
         <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
-
-        <!-- Live Suggestions Dropdown Container -->
-        <div id="searchSuggestions" class="suggestions-dropdown" style="display: none;"></div>
+        <ul id="acList" class="ac-list" hidden></ul>
       </form>
     </div>
 
@@ -42,6 +39,18 @@
 
   <!-- Inline CSS & JavaScript for Live Autocomplete -->
   <style>
+
+    .ac-wrap { position: relative; }
+    .ac-list {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      margin: 4px 0 0; padding: 4px; list-style: none;
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.12); max-height: 320px; overflow-y: auto;
+    }
+    .ac-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    .ac-item:hover, .ac-item.active { background: #eef2ff; }
+    .ac-item small { display: block; color: #6b7280; }
+    .ac-empty { padding: 8px 12px; color: #6b7280; }
     .suggestions-dropdown {
       position: absolute;
       top: 100%;
@@ -74,6 +83,76 @@
     }
   </style>
 
+
+  <script th:inline="javascript">
+    (function () {
+      const input = document.getElementById('acInput');
+      const list  = document.getElementById('acList');
+      const base  = /*[[@{/admin/student-360}]]*/ '/admin/student-360';
+      let timer = null, items = [], active = -1;
+
+      function close() { list.hidden = true; list.innerHTML = ''; active = -1; }
+
+      function render(data) {
+        list.innerHTML = '';
+        items = [];
+        if (data.length === 0) {
+          const li = document.createElement('li');
+          li.className = 'ac-empty';
+          li.textContent = '—';
+          list.appendChild(li);
+        }
+        data.forEach(s => {
+          const li = document.createElement('li');
+          li.className = 'ac-item';
+          const strong = document.createElement('strong');
+          strong.textContent = s.fullName;
+          const small = document.createElement('small');
+          small.textContent = s.email + (s.classroomName ? ' · ' + s.classroomName : '');
+          li.append(strong, small);
+          li.addEventListener('mousedown', () => go(s.id));
+          list.appendChild(li);
+          items.push(li);
+        });
+        list.hidden = false;
+      }
+
+      function go(id) { window.location.href = base + '/' + id; }
+
+      function setActive(i) {
+        items.forEach(li => li.classList.remove('active'));
+        active = i;
+        if (items[active]) {
+          items[active].classList.add('active');
+          items[active].scrollIntoView({ block: 'nearest' });
+        }
+      }
+
+      input.addEventListener('input', () => {
+        clearTimeout(timer);
+        const q = input.value.trim();
+        if (q.length < 2) { close(); return; }
+        timer = setTimeout(async () => {
+          try {
+            const res = await fetch(base + '/suggest?q=' + encodeURIComponent(q),
+                    { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) { close(); return; }
+            render(await res.json());
+          } catch (e) { close(); }
+        }, 250);   // debounce: espera 250 ms después de dejar de escribir
+      });
+
+      input.addEventListener('keydown', e => {
+        if (list.hidden || items.length === 0) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive((active + 1) % items.length); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((active - 1 + items.length) % items.length); }
+        else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); items[active].dispatchEvent(new Event('mousedown')); }
+        else if (e.key === 'Escape') close();
+      });
+
+      input.addEventListener('blur', () => setTimeout(close, 150));
+    })();
+  </script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const input = document.getElementById('studentSearchInput');
