@@ -51,4 +51,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<StudentAbsence> findFrequentAbsentees(@Param("from") LocalDate from, @Param("min") long min);
 
     long countByStudentIdAndStatus(Long studentId, AttendanceStatus status);
+
+    @Query("select a.student.id, count(a) from Attendance a " +
+            "where a.status = :status group by a.student.id")
+    List<Object[]> countByStatusGroupedByStudent(@Param("status") AttendanceStatus status);
 }

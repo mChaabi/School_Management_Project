@@ -15,7 +15,7 @@
             <form th:object="${scheduleDto}"
                   th:action="${scheduleDto.id == null} ? @{/schedules} : @{/schedules/update/{id}(id=${scheduleDto.id})}"
                   method="post">
-                <!-- Conflict message from the service -->
+
                 <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
                     <i class="bi bi-exclamation-triangle-fill"></i>
                     <span th:each="e : ${#fields.globalErrors()}" th:text="${e}"></span>

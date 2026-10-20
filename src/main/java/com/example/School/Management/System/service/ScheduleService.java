@@ -6,6 +6,8 @@ import com.example.School.Management.System.entity.Classroom;
 import com.example.School.Management.System.entity.Course;
 import com.example.School.Management.System.entity.Schedule;
 import com.example.School.Management.System.entity.Teacher;
+import com.example.School.Management.System.exception.ResourceNotFoundException;
+import com.example.School.Management.System.exception.ScheduleConflictException;
 import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.repository.CourseRepository;
 import com.example.School.Management.System.repository.ScheduleRepository;
@@ -27,6 +29,8 @@ public class ScheduleService {
     private final ScheduleRepository repo;
     private final CourseRepository courseRepo;
     private final ClassroomRepository classroomRepo;
+    private final ScheduleRepository scheduleRepository;
+    private final CourseRepository courseRepository;
 
     @Transactional
     public Schedule save(Long id, Long courseId, Long classroomId,
@@ -59,6 +63,34 @@ public class ScheduleService {
         return repo.save(s);
     }
 
+    @Transactional
+    public Schedule create(ScheduleDto dto) {
+        checkConflicts(dto, null);
+        return persistSchedule(new Schedule(), dto);
+    }
+
+    @Transactional
+    public Schedule update(Long id, ScheduleDto dto) {
+        checkConflicts(dto, id);
+        Schedule schedule = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Schedule not found with id: " + id));
+        return persistSchedule(schedule, dto);
+    }
+
+    private Schedule persistSchedule(Schedule schedule, ScheduleDto dto) {
+        Course course = courseRepo.findById(dto.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        Classroom room = classroomRepo.findById(dto.getClassroomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
+
+        schedule.setCourse(course);
+        schedule.setClassroom(room);
+        schedule.setDayOfWeek(dto.getDayOfWeek());
+        schedule.setStartTime(dto.getStartTime());
+        schedule.setEndTime(dto.getEndTime());
+        return repo.save(schedule);
+    }
+
     @Transactional(readOnly = true)
     public Map<DayOfWeek, List<ScheduleCell>> grid(Long classroomId, Long teacherId) {
         Map<DayOfWeek, List<ScheduleCell>> map = new EnumMap<>(DayOfWeek.class);
@@ -86,6 +118,35 @@ public class ScheduleService {
         dto.setStartTime(s.getStartTime());
         dto.setEndTime(s.getEndTime());
         return dto;
+    }
+
+    private void checkConflicts(ScheduleDto dto, Long excludeId) {
+
+        if (dto.getStartTime() == null || dto.getEndTime() == null
+                || !dto.getStartTime().isBefore(dto.getEndTime())) {
+            throw new ScheduleConflictException("schedule.error.invalidTime");
+        }
+
+        Course course = courseRepository.findById(dto.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+
+        if (course.getTeacher() != null) {
+            var teacherConflicts = scheduleRepository.findTeacherConflicts(
+                    course.getTeacher().getId(), dto.getDayOfWeek(),
+                    dto.getStartTime(), dto.getEndTime(), excludeId);
+            if (!teacherConflicts.isEmpty()) {
+                throw new ScheduleConflictException("schedule.error.teacherBusy");
+            }
+        }
+
+        if (dto.getClassroomId() != null) {
+            var roomConflicts = scheduleRepository.findClassroomConflicts(
+                    dto.getClassroomId(), dto.getDayOfWeek(),
+                    dto.getStartTime(), dto.getEndTime(), excludeId);
+            if (!roomConflicts.isEmpty()) {
+                throw new ScheduleConflictException("schedule.error.roomBusy");
+            }
+        }
     }
 
     @Transactional

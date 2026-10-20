@@ -769,3 +769,7 @@ label.qz-choice:hover{background:#eef2ff;border-color:#a5b4fc}
 }
 
 .badge-danger { background: #fee2e2; color: #b91c1c; }
+.badge-warning { background: #fef3c7; color: #b45309; }
+
+.alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }
+.alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }

@@ -1,6 +1,7 @@
 package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.ScheduleDto;
+import com.example.School.Management.System.exception.ScheduleConflictException;
 import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.repository.CourseRepository;
 import com.example.School.Management.System.repository.TeacherRepository;
@@ -47,17 +48,32 @@ public class ScheduleController {
     }
 
     // ---------- create ----------
+    // ---------- create form handler ----------
     @GetMapping("/new")
-    public String create(Model model) {
+    public String createForm(Model model) {
         model.addAttribute("scheduleDto", new ScheduleDto());
         fillForm(model);
         return "schedule/form";
     }
 
+    // ---------- save (create) ----------
     @PostMapping
     public String save(@Valid @ModelAttribute("scheduleDto") ScheduleDto dto,
                        BindingResult result, Model model, RedirectAttributes ra) {
-        return persist(null, dto, result, model, ra, "Lesson added.");
+        if (result.hasErrors()) {
+            fillForm(model);
+            return "schedule/form";
+        }
+        try {
+            service.create(dto); // or service.save(...) depending on your service method name
+            triggerNotification(dto, "added");
+            ra.addFlashAttribute("success", "Lesson added.");
+            return "redirect:/schedules?classroomId=" + dto.getClassroomId();
+        } catch (ScheduleConflictException ex) {
+            result.reject(ex.getMessage()); // i18n key as global error
+            fillForm(model);
+            return "schedule/form";
+        }
     }
 
     // ---------- edit ----------
@@ -72,8 +88,20 @@ public class ScheduleController {
     public String update(@PathVariable Long id,
                          @Valid @ModelAttribute("scheduleDto") ScheduleDto dto,
                          BindingResult result, Model model, RedirectAttributes ra) {
-        dto.setId(id);
-        return persist(id, dto, result, model, ra, "Lesson updated.");
+        if (result.hasErrors()) {
+            fillForm(model);
+            return "schedule/form";
+        }
+        try {
+            service.update(id, dto);
+            triggerNotification(dto, "updated");
+            ra.addFlashAttribute("success", "Lesson updated.");
+            return "redirect:/schedules?classroomId=" + dto.getClassroomId();
+        } catch (ScheduleConflictException ex) {
+            result.reject(ex.getMessage()); // i18n key as global error
+            fillForm(model);
+            return "schedule/form";
+        }
     }
 
     // ---------- delete ----------
@@ -85,35 +113,18 @@ public class ScheduleController {
     }
 
     // ---------- helpers ----------
-    private String persist(Long id, ScheduleDto dto, BindingResult result,
-                           Model model, RedirectAttributes ra, String okMessage) {
-        if (!result.hasErrors()) {
-            try {
-                service.save(id, dto.getCourseId(), dto.getClassroomId(),
-                        dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime());
+    private void triggerNotification(ScheduleDto dto, String action) {
+        var classroom = classroomRepo.findById(dto.getClassroomId()).orElse(null);
+        String classroomName = (classroom != null) ? classroom.getName() : "Unknown";
 
-                // <-- ADD AI NOTIFICATION TRIGGER HERE -->
-                var classroom = classroomRepo.findById(dto.getClassroomId()).orElse(null);
-                String classroomName = (classroom != null) ? classroom.getName() : "Unknown";
-                String action = (id == null) ? "added" : "updated";
-
-                notificationService.onScheduleChanged(
-                        dto.getCourseId(),
-                        dto.getClassroomId(),
-                        classroomName,
-                        action,
-                        dto.getDayOfWeek().name(),
-                        dto.getStartTime().toString()
-                );
-
-                ra.addFlashAttribute("success", okMessage);
-                return "redirect:/schedules?classroomId=" + dto.getClassroomId();
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                result.reject("schedule.conflict", e.getMessage());
-            }
-        }
-        fillForm(model);
-        return "schedule/form";
+        notificationService.onScheduleChanged(
+                dto.getCourseId(),
+                dto.getClassroomId(),
+                classroomName,
+                action,
+                dto.getDayOfWeek().name(),
+                dto.getStartTime().toString()
+        );
     }
 
     private void fillForm(Model model) {

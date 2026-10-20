@@ -3,10 +3,13 @@ package com.example.School.Management.System.service;
 import com.example.School.Management.System.dto.StudentDto;
 import com.example.School.Management.System.entity.Classroom;
 import com.example.School.Management.System.entity.Student;
+import com.example.School.Management.System.entity.User;
+import com.example.School.Management.System.enums.Role;
 import com.example.School.Management.System.exception.ResourceNotFoundException;
 import com.example.School.Management.System.mapper.StudentMapper;
 import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.repository.StudentRepository;
+import com.example.School.Management.System.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,12 +22,15 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final ClassroomRepository classroomRepository; // Optional: if you want to link classrooms
     private final StudentValidator validator;
+    private final UserRepository userRepository;
 
     public StudentServiceImpl(StudentRepository studentRepository,
                               ClassroomRepository classroomRepository,
+                              UserRepository userRepository,
                               StudentValidator validator) {
         this.studentRepository = studentRepository;
         this.classroomRepository = classroomRepository;
+        this.userRepository = userRepository;
         this.validator = validator;
     }
 
@@ -38,6 +44,7 @@ public class StudentServiceImpl implements StudentService {
 
         Classroom classroom = findClassroomById(studentDto.classroomId());
         Student student = StudentMapper.toEntity(studentDto, classroom);
+        student.setParent(findParentById(studentDto.parentUserId()));
 
         Student savedStudent = studentRepository.save(student);
         return StudentMapper.toDto(savedStudent);
@@ -64,6 +71,9 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setBirthDate(studentDto.birthDate());
         existingStudent.setGender(studentDto.gender());
         existingStudent.setClassroom(classroom);
+        existingStudent.setCity(studentDto.city());
+        existingStudent.setCountry(studentDto.country());
+        existingStudent.setParent(findParentById(studentDto.parentUserId()));
 
         Student updatedStudent = studentRepository.save(existingStudent);
         return StudentMapper.toDto(updatedStudent);
@@ -98,6 +108,18 @@ public class StudentServiceImpl implements StudentService {
             throw new ResourceNotFoundException("Student not found with id: " + id);
         }
         studentRepository.deleteById(id);
+    }
+
+    private User findParentById(Long parentUserId) {
+        if (parentUserId == null) {
+            return null;
+        }
+        User user = userRepository.findById(parentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + parentUserId));
+        if (!user.getRoles().contains(Role.ROLE_PARENT)) {
+            throw new IllegalArgumentException("User is not a parent: " + user.getUsername());
+        }
+        return user;
     }
 
     // Helper method to fetch classroom safely if ID is present

@@ -85,6 +85,15 @@
                         </select>
                         <span class="error-text" th:if="${#fields.hasErrors('classroomId')}" th:errors="*{classroomId}"></span>
                     </div>
+                    <div class="form-group">
+                        <label th:text="#{admin360.parent}">Parent / Guardian</label>
+                        <select th:field="*{parentUserId}">
+                            <option value="" th:text="#{form.noParent}">-- No parent --</option>
+                            <option th:each="u : ${parents}" th:value="${u.id}"
+                                    th:text="${u.username + ' (' + u.email + ')'}"></option>
+                        </select>
+                        <span class="error-text" th:if="${#fields.hasErrors('parentUserId')}" th:errors="*{parentUserId}"></span>
+                    </div>
                 </div>
 
                 <div class="form-actions">

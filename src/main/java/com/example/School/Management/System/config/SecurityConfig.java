@@ -70,11 +70,13 @@ public class SecurityConfig {
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
+
                         .requestMatchers("/api/notifications/dev/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/exams/*/paper/view", "/exams/*/paper/download").authenticated()
 
                         .requestMatchers("/quizzes/*/take", "/quizzes/*/submit", "/quizzes/*/result").hasAnyRole("STUDENT", "ADMIN", "TEACHER")
+
 
                         .requestMatchers("/my-quizzes", "/quizzes/**").authenticated()
 

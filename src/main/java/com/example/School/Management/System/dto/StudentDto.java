@@ -43,5 +43,6 @@ public record StudentDto(
         @NotNull(message = "Gender is mandatory")
         Gender gender,
 
-        Long classroomId // Use ID instead of passing the entire Classroom entity in the DTO
+        Long classroomId ,
+        Long parentUserId
 ) {}

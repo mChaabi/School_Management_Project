@@ -55,4 +55,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("select e from Enrollment e join fetch e.course c left join fetch c.teacher where e.student.id = :id")
     List<Enrollment> findByStudentIdWithCourse(@Param("id") Long id);
 
+    @Query("select e.student.id, avg(e.grade) from Enrollment e " +
+            "where e.grade is not null group by e.student.id")
+    List<Object[]> averageGradeByStudent();
+
 }

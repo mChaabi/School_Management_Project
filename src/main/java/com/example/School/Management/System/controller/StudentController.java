@@ -2,7 +2,9 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.StudentDetailDto;
 import com.example.School.Management.System.dto.StudentDto;
+import com.example.School.Management.System.enums.Role;
 import com.example.School.Management.System.exception.FieldValidationException;
+import com.example.School.Management.System.repository.UserRepository;
 import com.example.School.Management.System.service.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -27,15 +29,18 @@ public class StudentController {
     private final StudentDetailService studentDetailService;
     private final ReportCardPdfService reportCardPdfService;
     private final NotificationService notificationService; // <-- ADD THIS
+    private final UserRepository userRepository;
 
     public StudentController(StudentService studentService, ClassroomService classroomService,
                              StudentDetailService studentDetailService, ReportCardPdfService reportCardPdfService,
-                             NotificationService notificationService) { // <-- ADD THIS
+                             NotificationService notificationService,
+                             UserRepository userRepository) { // <-- ADD THIS
         this.reportCardPdfService = reportCardPdfService;
         this.studentDetailService = studentDetailService;
         this.studentService = studentService;
         this.classroomService = classroomService;
         this.notificationService = notificationService; // <-- ADD THIS
+        this.userRepository = userRepository;
     }
 
     // List all students -> returns templates/student/list.html
@@ -57,8 +62,9 @@ public class StudentController {
     // Show form for creating a new student -> returns templates/student/form.html
     @GetMapping("/new")
     public String showCreateForm(Model model, Pageable pageable) {
-        model.addAttribute("studentDto", new StudentDto(null, "", "", "","","", "", null, null, null));
+        model.addAttribute("studentDto", new StudentDto(null, "", "", "","","", "", null, null, null,null));
         model.addAttribute("classrooms", classroomService.getAllClassrooms(Pageable.unpaged()).getContent());
+        model.addAttribute("parents", userRepository.findByRole(Role.ROLE_PARENT));
         return "student/form";
     }
 

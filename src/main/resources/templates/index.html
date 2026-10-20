@@ -82,6 +82,51 @@
         </div>
     </div>
 
+    <div class="card" sec:authorize="hasRole('ADMIN')">
+        <div class="card-header">
+            <h3>
+                <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i>
+                <span th:text="#{risk.title}">Students at risk</span>
+                <span class="badge badge-danger" th:text="${riskTotal}">0</span>
+            </h3>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th th:text="#{table.name}">Name</th>
+                    <th th:text="#{form.classroom}">Classroom</th>
+                    <th th:text="#{risk.average}">Average</th>
+                    <th th:text="#{risk.absences}">Absences</th>
+                    <th th:text="#{risk.reason}">Reason</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${riskStudents}">
+                    <td><strong th:text="${r.fullName}"></strong></td>
+                    <td th:text="${r.classroomName ?: '-'}"></td>
+                    <td th:text="${r.average != null} ? ${#numbers.formatDecimal(r.average,1,2)} : '-'"></td>
+                    <td th:text="${r.absences}"></td>
+                    <td>
+                        <span class="badge badge-danger" th:if="${r.lowAverage}" th:text="#{risk.lowAverage}">Low average</span>
+                        <span class="badge badge-warning" th:if="${r.manyAbsences}" th:text="#{risk.manyAbsences}">Many absences</span>
+                    </td>
+                    <td>
+                        <a class="btn btn-icon edit" th:href="@{/admin/student-360/{id}(id=${r.id})}"
+                           th:title="#{admin360.open}"><i class="bi bi-person-vcard"></i></a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(riskStudents)}">
+                    <td colspan="6" class="empty"><i class="bi bi-check-circle"></i>
+                        <span th:text="#{risk.none}">No students at risk.</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Quick actions -->
     <div class="card" style="margin-top:1.5rem">
         <div class="card-header"><h3 th:text="#{dashboard.quickActions}">Quick actions</h3></div>

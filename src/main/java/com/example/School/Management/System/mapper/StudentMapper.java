@@ -20,7 +20,8 @@ public class StudentMapper {
                 student.getCountry(),
                 student.getBirthDate(),
                 student.getGender(),
-                student.getClassroom() != null ? student.getClassroom().getId() : null
+                student.getClassroom() != null ? student.getClassroom().getId() : null,
+                student.getParent() != null ? student.getParent().getId() : null   // último argumento del new StudentDto(...)
         );
     }
 
