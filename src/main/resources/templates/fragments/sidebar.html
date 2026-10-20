@@ -55,6 +55,12 @@
         <li sec:authorize="hasRole('ADMIN')" th:classappend="${currentMenu == 'users'} ? 'active'">
             <a th:href="@{/users}"><i class="bi bi-shield-lock-fill"></i> <span th:text="#{nav.users}">Users Management</span></a>
         </li>
+
+        <li sec:authorize="hasRole('ADMIN')" th:classappend="${currentMenu == 'admin360'} ? 'active'">
+            <a th:href="@{/admin/student-360}" class="student-360-link">
+                <i class="bi bi-person-vcard"></i> <span th:text="#{admin360.menu}">Student Profile</span>
+            </a>
+        </li>
     </ul>
 </aside>
 </html>

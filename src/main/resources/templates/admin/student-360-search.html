@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{admin360.title}, ~{::main}, 'admin360')}">
+<body>
+<main>
+  <div class="page-header">
+    <div>
+      <h1 th:text="#{admin360.title}">Student 360</h1>
+      <div class="breadcrumb" th:text="#{admin360.breadcrumb}">Home / Administration / Student file</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="position: relative;">
+      <form th:action="@{/admin/student-360}" method="get" class="search" style="position: relative; width: 100%;">
+        <!-- Added autocomplete="off" to hide browser saved info popup -->
+        <input type="text" id="studentSearchInput" name="keyword" th:value="${keyword}"
+               th:placeholder="#{students.search.placeholder}" autocomplete="off" style="width: 100%;">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+
+        <!-- Live Suggestions Dropdown Container -->
+        <div id="searchSuggestions" class="suggestions-dropdown" style="display: none;"></div>
+      </form>
+    </div>
+
+    <div class="table-wrap" th:if="${results != null}">
+      <table>
+        <thead><tr><th>#</th><th th:text="#{table.name}">Name</th><th th:text="#{table.email}">Email</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="s : ${results.content}">
+          <td th:text="${s.id}"></td>
+          <td><strong th:text="${s.firstName + ' ' + s.lastName}"></strong></td>
+          <td th:text="${s.email}"></td>
+          <td><a class="btn btn-primary" th:href="@{/admin/student-360/{id}(id=${s.id})}"
+                 th:text="#{admin360.open}">Open file</a></td>
+        </tr>
+        <tr th:if="${results.empty}"><td colspan="4" class="empty" th:text="#{students.empty}">No students found.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Inline CSS & JavaScript for Live Autocomplete -->
+  <style>
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .suggestion-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-decoration: none;
+      color: #1f2937;
+    }
+    .suggestion-item:hover {
+      background-color: #f9fafb;
+      color: #4f46e5;
+    }
+    .suggestion-item small {
+      color: #6b7280;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('studentSearchInput');
+      const dropdown = document.getElementById('searchSuggestions');
+
+      let timeout = null;
+
+      input.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+
+        if (query.length < 1) {
+          dropdown.style.display = 'none';
+          dropdown.innerHTML = '';
+          return;
+        }
+
+        // Debounce request to avoid hammering backend on every keypress
+        timeout = setTimeout(() => {
+          fetch(`/admin/student-360/search-ajax?keyword=${encodeURIComponent(query)}`)
+                  .then(response => response.json())
+                  .then(data => {
+                    dropdown.innerHTML = '';
+                    if (data && data.length > 0) {
+                      data.forEach(student => {
+                        const item = document.createElement('a');
+                        item.className = 'suggestion-item';
+                        item.href = `/admin/student-360/${student.id}`;
+                        item.innerHTML = `<span><strong>${student.firstName} ${student.lastName}</strong></span> <small>${student.email}</small>`;
+                        dropdown.appendChild(item);
+                      });
+                      dropdown.style.display = 'block';
+                    } else {
+                      dropdown.style.display = 'none';
+                    }
+                  })
+                  .catch(err => console.error('Error fetching search suggestions:', err));
+        }, 200);
+      });
+
+      // Hide dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</main>
+</body>
+</html>

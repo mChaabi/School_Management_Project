@@ -121,6 +121,13 @@ public class QuizController {
         return "redirect:/courses/" + courseId + "/quizzes";
     }
 
+    @GetMapping("/quizzes/{id}/result")
+    public String viewResult(@PathVariable Long id, Authentication auth, Model model) {
+        QuizService.ResultView result = service.result(id, auth); // <-- Cambiado de Service a service
+        model.addAttribute("r", result);
+        return "quiz/result";
+    }
+
     @GetMapping("/quizzes/{id}/attempts")
     public String attempts(@PathVariable Long id, Authentication auth, Model model) {
         exams.checkCourseAccess(service.courseIdOfQuiz(id), auth);

@@ -49,4 +49,6 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
        having count(a) >= :min
        """)
     List<StudentAbsence> findFrequentAbsentees(@Param("from") LocalDate from, @Param("min") long min);
+
+    long countByStudentIdAndStatus(Long studentId, AttendanceStatus status);
 }

@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
 
+
                         // 0. Allow public access to REST APIs (or change to authenticated() if using Basic Auth)
                         .requestMatchers("/api/**").permitAll()
 
@@ -67,9 +68,13 @@ public class SecurityConfig {
 
                         .requestMatchers("/dev/**").hasRole("ADMIN")
 
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         .requestMatchers("/api/notifications/dev/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/exams/*/paper/view", "/exams/*/paper/download").authenticated()
+
+                        .requestMatchers("/quizzes/*/take", "/quizzes/*/submit", "/quizzes/*/result").hasAnyRole("STUDENT", "ADMIN", "TEACHER")
 
                         .requestMatchers("/my-quizzes", "/quizzes/**").authenticated()
 
@@ -78,6 +83,9 @@ public class SecurityConfig {
                         .requestMatchers("/attendances/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers("/export/**").hasAnyRole("ADMIN", "TEACHER")
                         .anyRequest().authenticated()
+                )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

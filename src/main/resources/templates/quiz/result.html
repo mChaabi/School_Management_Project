@@ -6,25 +6,38 @@
     <div class="page-header">
         <div>
             <h1 th:text="${r.title}">Result</h1>
-            <div class="breadcrumb" th:text="#{breadcrumb.homeMyQuizzes} + ' ' + ${r.courseTitle}">Course</div>
+            <div class="breadcrumb" th:text="|#{breadcrumb.homeMyQuizzes} ${r.courseTitle}|">Course</div>
         </div>
         <a th:href="@{/my-quizzes}" class="btn btn-light" th:text="#{quizzes.my.pageTitle}">My quizzes</a>
     </div>
 
-    <div class="card qz-q" style="text-align:center">
-        <div class="qz-score" th:classappend="${r.passed} ? 'qz-pass' : 'qz-fail'" th:text="${r.percent} + '%'">80%</div>
+    <!-- Tarjeta Principal del Resultado con Nombre del Estudiante -->
+    <div class="card qz-q" style="text-align:center; padding: 2rem;">
+        <!-- Nombre del Estudiante -->
+        <h4 class="text-muted mb-2">
+            <i class="bi bi-person-circle me-1"></i> <span th:text="${studentName != null ? studentName : #authentication.name}">Student Name</span>
+        </h4>
+        <h5 class="text-primary mb-3" th:text="${r.courseTitle}">Course Title</h5>
+
+        <div class="qz-score mb-3" th:classappend="${r.passed} ? 'qz-pass' : 'qz-fail'" th:text="${r.percent} + '%'">80%</div>
         <p><strong th:text="${r.score} + ' / ' + ${r.total} + ' ' + #{quizzes.correctAnswers}"></strong></p>
-        <span class="badge badge-success" th:if="${r.passed}" th:text="#{badge.passed}">Passed</span>
-        <span class="badge badge-danger" th:unless="${r.passed}" th:text="#{badge.notPassed}">Not passed</span>
+        <div>
+            <span class="badge badge-success fs-6" th:if="${r.passed}" th:text="#{badge.passed}">Passed</span>
+            <span class="badge badge-danger fs-6" th:unless="${r.passed}" th:text="#{badge.notPassed}">Not passed</span>
+        </div>
     </div>
 
+    <!-- Detalle de Respuestas -->
     <div class="card qz-q" th:each="x, i : ${r.review}">
         <div class="ex-file">
             <strong style="flex:1" th:text="${i.count} + '. ' + ${x.question}"></strong>
-            <i class="bi bi-check-circle-fill qz-ok" th:if="${x.correct}"></i>
-            <i class="bi bi-x-circle-fill qz-bad" th:unless="${x.correct}"></i>
+            <i class="bi bi-check-circle-fill qz-ok text-success" th:if="${x.correct}"></i>
+            <i class="bi bi-x-circle-fill qz-bad text-danger" th:unless="${x.correct}"></i>
         </div>
-        <small><span th:text="#{quizzes.yourAnswer} + ':'">Your answer:</span> <span th:text="${x.chosen}"></span></small>
+        <small class="d-block mt-2">
+            <span class="fw-bold" th:text="#{quizzes.yourAnswer} + ':'">Your answer:</span>
+            <span th:text="${x.chosen}"></span>
+        </small>
     </div>
 </main>
 </body>

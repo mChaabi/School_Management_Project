@@ -52,4 +52,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     boolean existsByCourseIdAndStudentUserUsername(Long courseId, String username);
     boolean existsByCourseIdAndStudentParentUsername(Long courseId, String username);
 
+    @Query("select e from Enrollment e join fetch e.course c left join fetch c.teacher where e.student.id = :id")
+    List<Enrollment> findByStudentIdWithCourse(@Param("id") Long id);
+
 }

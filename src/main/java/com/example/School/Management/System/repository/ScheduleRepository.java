@@ -37,4 +37,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
        """)
     List<Schedule> findForGrid(@Param("classroomId") Long classroomId,
                                @Param("teacherId") Long teacherId);
+
+    List<Schedule> findByClassroomId(Long classroomId);
 }

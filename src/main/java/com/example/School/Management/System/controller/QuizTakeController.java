@@ -62,16 +62,6 @@ public class QuizTakeController {
         return "redirect:/quizzes/" + id + "/result";
     }
 
-    @GetMapping("/quizzes/{id}/result")
-    public String result(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
-        try {
-            model.addAttribute("r", service.result(id, auth));
-            return "quiz/result";
-        } catch (IllegalStateException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/my-quizzes";
-        }
-    }
 
     @GetMapping("/quizzes/questions/{qid}/image")
     public ResponseEntity<byte[]> image(@PathVariable Long qid, Authentication auth) {

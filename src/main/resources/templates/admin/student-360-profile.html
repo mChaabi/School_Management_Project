@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{admin360.title}, ~{::main}, 'admin360')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="${p.fullName}"></h1>
+            <div class="breadcrumb" th:text="#{admin360.breadcrumb}"></div>
+        </div>
+        <a th:href="@{/admin/student-360}" class="btn btn-light" th:text="#{btn.back}">Back</a>
+    </div>
+
+    <!-- Tarjetas resumen -->
+    <div class="stats">
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{student.profile}">Profile</h3>
+            <p th:text="${p.email}"></p>
+            <p th:text="${p.phone ?: '-'}"></p>
+            <p th:text="${p.city ?: '-'} + ', ' + ${p.country ?: '-'}"></p>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{form.classroom}">Classroom</h3>
+            <p th:text="${p.classroomName ?: #messages.msg('student.notAssigned')}"></p>
+        </div></div>
+
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{dashboard.averageGrade}">Average</h3>
+            <p style="font-size:2rem;font-weight:700"
+               th:text="${p.average != null} ? ${#numbers.formatDecimal(p.average,1,2)} + ' / 20' : '-'"></p>
+        </div></div>
+
+        <!-- Safe navigation for Attendance -->
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{title.attendance}">Attendance</h3>
+            <p>✔ <span th:text="${p.attendance != null ? p.attendance.present : 0}"></span>
+                ✖ <span th:text="${p.attendance != null ? p.attendance.absent : 0}"></span>
+                ⏱ <span th:text="${p.attendance != null ? p.attendance.late : 0}"></span></p>
+        </div></div>
+    </div>
+
+    <!-- Cursos -->
+    <div class="card">
+        <div class="card-header"><h3 th:text="#{student.coursesAndTeachers}">Courses</h3></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th th:text="#{table.course}"></th><th th:text="#{table.credits}"></th>
+                <th th:text="#{table.teacher}"></th><th th:text="#{table.enrolledOn}"></th><th th:text="#{table.grade}"></th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${p.courses}">
+                <td th:text="${c.title}"></td>
+                <td th:text="${c.credits != null ? c.credits : '-'}"></td>
+                <td th:text="${c.teacherName}"></td>
+                <!-- Fixed property name to enrollmentDate -->
+                <td th:text="${c.enrollmentDate != null} ? ${#temporals.format(c.enrollmentDate,'dd/MM/yyyy')} : '-'"></td>
+                <td th:text="${c.grade ?: '-'}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(p.courses)}"><td colspan="5" class="empty">No courses found.</td></tr>
+            </tbody></table></div>
+    </div>
+
+    <!-- Exámenes -->
+    <div class="card">
+        <div class="card-header"><h3 th:text="#{admin360.exams}">Exams</h3></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Examen</th><th>Curso</th><th>Fecha</th><th>Nota</th><th>Estado</th></tr></thead>
+            <tbody>
+            <tr th:each="e : ${p.exams}">
+                <td th:text="${e.examTitle}"></td>
+                <td th:text="${e.courseTitle}"></td>
+                <td th:text="${e.date != null} ? ${#temporals.format(e.date,'dd/MM/yyyy')} : '-'"></td>
+                <td th:text="${e.score ?: '-'}"></td>
+                <td><span class="badge badge-primary" th:text="${e.status}"></span></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(p.exams)}"><td colspan="5" class="empty">No exams found.</td></tr>
+            </tbody></table></div>
+    </div>
+
+    <!-- Horario / planificación -->
+    <div class="card">
+        <div class="card-header"><h3 th:text="#{admin360.schedule}">Schedule</h3></div>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Día</th><th>Inicio</th><th>Fin</th><th>Curso</th><th>Aula</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${p.schedule}">
+                <td th:text="${r.day}"></td>
+                <td th:text="${r.start}"></td>
+                <td th:text="${r.end}"></td>
+                <td th:text="${r.courseTitle}"></td>
+                <td th:text="${r.room}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(p.schedule)}"><td colspan="5" class="empty">No schedule found.</td></tr>
+            </tbody></table></div>
+    </div>
+</main>
+</body>
+</html>

@@ -198,24 +198,32 @@ public class QuizService {
     @Transactional(readOnly = true)
     public String quizTitle(Long quizId) { return quiz(quizId).getTitle(); }
 
-    // =============== student ===============
     @Transactional(readOnly = true)
     public List<MyQuizRow> myQuizzes(Authentication auth) {
         boolean isStaff = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_TEACHER"));
 
+        Student s = null;
         if (isStaff) {
-            // Admins/Teachers see all quizzes as a preview
+            // Para que el Admin pueda probar, usa el primer estudiante de prueba en el sistema
+            s = students.findAll().stream().findFirst().orElse(null);
+        } else {
+            s = me(auth);
+        }
+
+        if (s == null) {
             return quizzes.findAll().stream().map(q -> new MyQuizRow(
                     q.getId(), q.getTitle(), q.getCourse().getTitle(), q.getDurationMinutes(),
                     q.getQuestions().size(), "TODO", null, null
             )).toList();
         }
 
-        Student s = me(auth);
         Map<Long, QuizAttempt> mine = attempts.findByStudentId(s.getId()).stream()
                 .collect(Collectors.toMap(a -> a.getQuiz().getId(), a -> a));
-        return quizzes.availableFor(s.getId()).stream().map(q -> {
+
+        List<Quiz> availableQuizzes = isStaff ? quizzes.findAll() : quizzes.availableFor(s.getId());
+
+        return availableQuizzes.stream().map(q -> {
             QuizAttempt a = mine.get(q.getId());
             String status = a == null ? "TODO" : (a.getSubmittedAt() == null ? "IN_PROGRESS" : "DONE");
             return new MyQuizRow(q.getId(), q.getTitle(), q.getCourse().getTitle(), q.getDurationMinutes(),

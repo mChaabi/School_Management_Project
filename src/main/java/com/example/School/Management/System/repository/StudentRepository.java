@@ -53,4 +53,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByClassroomForNotification(@Param("classroomId") Long classroomId);
 
 
+
+    @Query("""
+  select s from Student s
+  where lower(s.firstName) like lower(concat('%', :k, '%'))
+     or lower(s.lastName)  like lower(concat('%', :k, '%'))
+     or lower(s.email)     like lower(concat('%', :k, '%'))
+""")
+    Page<Student> searchAll(@Param("k") String keyword, Pageable pageable);
 }
