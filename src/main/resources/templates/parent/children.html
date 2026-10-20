@@ -8,6 +8,13 @@
             <h1 th:text="#{parent.title}">My children</h1>
             <div class="breadcrumb" th:text="#{parent.breadcrumb}">Home / My children</div>
         </div>
+        <!-- Buscador exclusivo para administradores y profesores -->
+        <div th:if="${isAdminView}">
+            <form th:action="@{/parent}" method="get" class="search">
+                <input type="text" name="keyword" th:value="${keyword}" th:placeholder="#{students.search.placeholder}">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
     </div>
 
     <div class="stats">
@@ -26,7 +33,7 @@
         </div>
 
         <div class="card" th:if="${#lists.isEmpty(children)}">
-            <div class="card-body empty" th:text="#{parent.noChildren}">No children linked.</div>
+            <div class="card-body empty" th:text="#{parent.noChildren}">No records found.</div>
         </div>
     </div>
 </main>

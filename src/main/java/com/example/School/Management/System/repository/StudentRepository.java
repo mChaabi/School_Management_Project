@@ -65,4 +65,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByParentUsername(String username);
     boolean existsByIdAndParentUsername(Long id, String username);
     boolean existsByIdAndUserUsername(Long id, String username);
+
+
 }

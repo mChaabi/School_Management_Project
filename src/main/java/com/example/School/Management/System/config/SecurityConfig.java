@@ -75,6 +75,12 @@ public class SecurityConfig {
                         .requestMatchers("/quizzes/*/take", "/quizzes/*/submit", "/quizzes/*/result").hasAnyRole("STUDENT", "ADMIN", "TEACHER")
                         .requestMatchers("/my-quizzes", "/quizzes/**").authenticated()
 
+                        .requestMatchers("/parent/**").hasAnyRole("PARENT", "ADMIN", "TEACHER")
+
+                        .requestMatchers(HttpMethod.POST, "/calendar/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/calendar/**").hasRole("ADMIN")
+                        .requestMatchers("/calendar/**").authenticated()
+
                         // 5. Attendance
                         .requestMatchers("/attendances/my", "/attendances/student/**").authenticated()
                         .requestMatchers("/attendances/**").hasAnyRole("ADMIN", "TEACHER")

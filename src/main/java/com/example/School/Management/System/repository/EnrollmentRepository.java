@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -58,5 +59,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("select e.student.id, avg(e.grade) from Enrollment e " +
             "where e.grade is not null group by e.student.id")
     List<Object[]> averageGradeByStudent();
+
+    @Query("select e.course.id from Enrollment e where e.student.id in :ids")
+    List<Long> findCourseIdsByStudentIds(@Param("ids") Collection<Long> ids);
 
 }

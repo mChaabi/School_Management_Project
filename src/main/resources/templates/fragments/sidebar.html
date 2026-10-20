@@ -62,10 +62,18 @@
             </a>
         </li>
 
-        <a sec:authorize="hasRole('PARENT')" th:href="@{/parent}"
-           th:classappend="${active == 'parent'} ? 'active'">
-            <i class="bi bi-people-fill"></i> <span th:text="#{parent.menu}">My children</span>
-        </a>
+        <!-- Parent / Children Menu -->
+        <li sec:authorize="hasAnyRole('PARENT', 'ADMIN', 'TEACHER')" th:classappend="${currentMenu == 'parent'} ? 'active'">
+            <a th:href="@{/parent}">
+                <i class="bi bi-people-fill"></i> <span th:text="#{parent.menu}">My children / Students</span>
+            </a>
+        </li>
+
+        <li th:classappend="${currentMenu == 'calendar'} ? 'active'">
+            <a th:href="@{/calendar}">
+                <i class="bi bi-calendar3"></i> <span th:text="#{calendar.menu}">Calendar</span>
+            </a>
+        </li>
     </ul>
 </aside>
 </html>

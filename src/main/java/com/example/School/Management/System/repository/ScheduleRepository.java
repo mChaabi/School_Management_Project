@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
@@ -48,6 +49,13 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             @Param("end") LocalTime end,
             @Param("excludeId") Long excludeId
     );
+
+    @Query("select s from Schedule s join fetch s.course join fetch s.classroom")
+    List<Schedule> findAllWithDetails();
+
+    @Query("select s from Schedule s join fetch s.course join fetch s.classroom " +
+            "where s.classroom.id in :ids")
+    List<Schedule> findByClassroomIds(@Param("ids") Collection<Long> ids);
 
     // Conflicto de AULA
     @Query("""

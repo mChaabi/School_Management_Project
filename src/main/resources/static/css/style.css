@@ -773,3 +773,53 @@ label.qz-choice:hover{background:#eef2ff;border-color:#a5b4fc}
 
 .alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; }
 .alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* Contenedor de las tarjetas de los hijos */
+.children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Tarjeta individual del hijo */
+.child-card {
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.child-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.child-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main, #1e293b);
+    margin-bottom: 0.5rem;
+}
+
+.child-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted, #64748b);
+    margin-bottom: 0.75rem;
+}
+
+/* Estilo para los indicadores de asistencia o notas */
+.child-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+    color: var(--text-muted);
+}
+

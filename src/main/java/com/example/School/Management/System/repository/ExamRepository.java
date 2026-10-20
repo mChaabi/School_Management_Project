@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 public interface ExamRepository extends JpaRepository<Exam, Long> {
@@ -24,4 +25,12 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     List<Exam> findBetween(@Param("from") LocalDate from,
                            @Param("to") LocalDate to,
                            @Param("username") String username);
+
+    @Query("select e from Exam e join fetch e.course where e.examDate between :from and :to")
+    List<Exam> findInRange(@Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("select e from Exam e join fetch e.course " +
+            "where e.examDate between :from and :to and e.course.id in :courseIds")
+    List<Exam> findInRangeForCourses(@Param("from") LocalDate from, @Param("to") LocalDate to,
+                                     @Param("courseIds") Collection<Long> courseIds);
 }

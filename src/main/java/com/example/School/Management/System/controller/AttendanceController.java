@@ -85,15 +85,6 @@ public class AttendanceController {
         return "attendance/history";
     }
 
-    @GetMapping("/student/{studentId}")
-    public String studentHistory(@PathVariable Long studentId, Authentication auth, Model model) {
-        access.requireView(studentId, auth);                     // NUEVO
-        model.addAttribute("studentId", studentId);
-        model.addAttribute("attendances", attendanceService.findByStudentId(studentId));
-        model.addAttribute("summary", attendanceService.getSummary(studentId));
-        return "attendance/history";
-    }
-
     // Delete one attendance record
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Long id, @RequestParam Long studentId) {

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(#{calendar.title}, ~{::main}, 'calendar')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{calendar.title}">School calendar</h1>
+            <div class="breadcrumb" th:text="#{calendar.breadcrumb}">Home / Calendar</div>
+        </div>
+    </div>
+
+    <!-- Marca invisible: si existe, el usuario es admin -->
+    <span id="adminFlag" sec:authorize="hasRole('ADMIN')" hidden></span>
+
+    <!-- Alta de festivo / evento (solo ADMIN) -->
+    <div class="card no-print" sec:authorize="hasRole('ADMIN')">
+        <div class="card-header"><h3 th:text="#{calendar.add.title}">Add holiday or event</h3></div>
+        <div class="card-body">
+            <form id="eventForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label th:text="#{calendar.field.title}">Title</label>
+                        <input type="text" name="title" maxlength="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label th:text="#{calendar.field.type}">Type</label>
+                        <select name="type">
+                            <option value="HOLIDAY" th:text="#{calendar.type.holiday}">Holiday</option>
+                            <option value="EVENT" th:text="#{calendar.type.event}">Event</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label th:text="#{calendar.field.start}">Start</label>
+                        <input type="date" name="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label th:text="#{calendar.field.end}">End (optional)</label>
+                        <input type="date" name="endDate">
+                    </div>
+                    <div class="form-group">
+                        <label th:text="#{calendar.field.description}">Description</label>
+                        <input type="text" name="description" maxlength="500">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> <span th:text="#{calendar.add.btn}">Add</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calendario -->
+    <div class="card">
+        <div class="card-body">
+            <div class="cal-legend no-print">
+                <label><input type="checkbox" class="cal-filter" data-kind="CLASS" checked>
+                    <span class="dot" style="background:#4f46e5"></span> <span th:text="#{calendar.legend.classes}">Classes</span></label>
+                <label><input type="checkbox" class="cal-filter" data-kind="EXAM" checked>
+                    <span class="dot" style="background:#dc2626"></span> <span th:text="#{calendar.legend.exams}">Exams</span></label>
+                <label><input type="checkbox" class="cal-filter" data-kind="EVENT" checked>
+                    <span class="dot" style="background:#16a34a"></span><span class="dot" style="background:#f59e0b"></span>
+                    <span th:text="#{calendar.legend.events}">Holidays and events</span></label>
+            </div>
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <style>
+        .cal-legend { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:16px; }
+        .cal-legend label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+        .dot { display:inline-block; width:12px; height:12px; border-radius:50%; }
+        #calendar { min-height: 600px; }
+        .fc .fc-event { cursor: default; }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const base       = /*[[@{/calendar/events}]]*/ '/calendar/events';
+            const lang       = /*[[${#locale.language}]]*/ 'en';
+            const confirmMsg = /*[[#{calendar.delete.confirm}]]*/ 'Delete this item?';
+            const errorMsg   = /*[[#{calendar.error.save}]]*/ 'Could not save.';
+            const isAdmin    = !!document.getElementById('adminFlag');
+
+            const visible = { CLASS: true, EXAM: true, EVENT: true };
+            const group = kind => (kind === 'HOLIDAY' ? 'EVENT' : kind);   // festivo y evento comparten filtro
+
+            const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+                initialView: 'dayGridMonth',
+                locale: lang,
+                firstDay: 1,
+                height: 'auto',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                },
+                events: async (info, success, failure) => {
+                    try {
+                        const from = info.startStr.substring(0, 10);
+                        const to   = info.endStr.substring(0, 10);
+                        const res  = await fetch(base + '?from=' + from + '&to=' + to,
+                            { headers: { 'Accept': 'application/json' } });
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const data = await res.json();
+                        success(data.filter(e => visible[group(e.extendedProps.kind)]));
+                    } catch (err) { failure(err); }
+                },
+                eventDidMount: info => {
+                    const d = info.event.extendedProps.detail;
+                    info.el.title = info.event.title + (d ? ' — ' + d : '');   // tooltip nativo
+                },
+                eventClick: async info => {
+                    const p = info.event.extendedProps;
+                    const deletable = isAdmin && (p.kind === 'HOLIDAY' || p.kind === 'EVENT') && p.dbId;
+                    if (!deletable || !confirm(confirmMsg + '\n' + info.event.title)) return;
+                    const res = await fetch(base + '/' + p.dbId, { method: 'DELETE' });
+                    if (res.ok) calendar.refetchEvents(); else alert(errorMsg);
+                }
+            });
+            calendar.render();
+
+            // Filtros
+            document.querySelectorAll('.cal-filter').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    visible[cb.dataset.kind] = cb.checked;
+                    calendar.refetchEvents();
+                });
+            });
+
+            // Alta de evento
+            const form = document.getElementById('eventForm');
+            if (form) {
+                form.addEventListener('submit', async e => {
+                    e.preventDefault();
+                    const f = form.elements;               // form.title chocaría con la propiedad "title" del DOM
+                    const body = {
+                        title: f['title'].value.trim(),
+                        type: f['type'].value,
+                        startDate: f['startDate'].value,
+                        endDate: f['endDate'].value || null,
+                        description: f['description'].value.trim() || null
+                    };
+                    const res = await fetch(base, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (res.ok) { form.reset(); calendar.refetchEvents(); } else { alert(errorMsg); }
+                });
+            }
+        });
+    </script>
+</main>
+</body>
+</html>
