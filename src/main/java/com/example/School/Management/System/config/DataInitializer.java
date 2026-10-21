@@ -2,6 +2,7 @@ package com.example.School.Management.System.config;
 
 import com.example.School.Management.System.dto.UserRegistrationDto;
 import com.example.School.Management.System.enums.Role;
+import com.example.School.Management.System.repository.UserRepository;
 import com.example.School.Management.System.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -16,6 +17,7 @@ import java.util.Set;
 public class DataInitializer implements CommandLineRunner {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public void run(String... args) {
@@ -28,9 +30,17 @@ public class DataInitializer implements CommandLineRunner {
 
         for (UserRegistrationDto dto : users) {
             userService.findByUsername(dto.username()).ifPresentOrElse(
-                    existing -> userService.updateUser(existing.id(), dto),  // resets the password hash
+                    existing -> userService.updateUser(existing.id(), dto),
                     () -> userService.registerUser(dto)
             );
+
+            // NUEVO: los usuarios semilla no necesitan verificación por email
+            userRepository.findByUsername(dto.username()).ifPresent(u -> {
+                if (!u.isEnabled()) {
+                    u.setEnabled(true);
+                    userRepository.save(u);
+                }
+            });
         }
         System.out.println(">>> Default users are ready");
     }

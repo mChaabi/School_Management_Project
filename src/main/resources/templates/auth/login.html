@@ -82,9 +82,28 @@
         <p th:text="#{login.subtitle}">Sign in to School Management System</p>
     </div>
 
-    <!-- Error Alert -->
-    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-1"></i> <span th:text="#{login.error.invalid}">Invalid username or password.</span>
+    <!-- Alertas dinámicas de activación y errores -->
+    <div class="alert alert-success alert-dismissible fade show py-2" role="alert" th:if="${param.activated}">
+        <i class="bi bi-check-circle-fill me-1"></i> <span th:text="#{auth.activated}">Account activated successfully.</span>
+        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" th:aria-label="#{btn.close}"></button>
+    </div>
+
+    <div class="alert alert-success alert-dismissible fade show py-2" role="alert" th:if="${param.checkEmail}">
+        <i class="bi bi-envelope-check-fill me-1"></i> <span th:text="#{auth.checkEmail}">Please check your email to activate your account.</span>
+        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" th:aria-label="#{btn.close}"></button>
+    </div>
+
+    <div class="alert alert-danger alert-dismissible fade show py-2" role="alert" th:if="${param.invalidToken}">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="#{auth.invalidToken}">Invalid or expired activation token.</span>
+        <button type="button" class="btn-close py-2" data-bs-dismiss="alert" th:aria-label="#{btn.close}"></button>
+    </div>
+
+    <!-- Alerta unificada de error de login (cubre credenciales incorrectas y cuentas sin activar por seguridad) -->
+    <div class="alert alert-danger alert-dismissible fade show py-2" role="alert" th:if="${param.error}">
+        <i class="bi bi-exclamation-circle-fill me-1"></i>
+        <span th:text="#{auth.loginError}">Invalid username or password, or account not activated.</span>
+        <br>
+        <a th:href="@{/activation/resend}" class="alert-link small" th:text="#{auth.resend.link}">Resend activation email</a>
         <button type="button" class="btn-close py-2" data-bs-dismiss="alert" th:aria-label="#{btn.close}"></button>
     </div>
 
@@ -94,7 +113,7 @@
         <button type="button" class="btn-close py-2" data-bs-dismiss="alert" th:aria-label="#{btn.close}"></button>
     </div>
 
-    <!-- Signup Success Message -->
+    <!-- Signup Success Message (Flash attribute) -->
     <div th:if="${message}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
         <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${message}"></span>
         <button type="button" class="btn-close py-2" data-bs-dismiss="alert" th:aria-label="#{btn.close}"></button>

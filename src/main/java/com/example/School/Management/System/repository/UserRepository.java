@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select distinct u from User u join u.roles r where r = :role")
     List<User> findByRole(@Param("role") Role role);
 
+    List<User> findAllByEmailIgnoreCase(String email);
+
 }

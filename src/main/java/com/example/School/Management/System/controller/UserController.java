@@ -1,6 +1,7 @@
 package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.UserRegistrationDto;
+import com.example.School.Management.System.service.AccountActivationService; // <--- Importa tu servicio
 import com.example.School.Management.System.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -13,9 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
 
     private final UserService userService;
+    private final AccountActivationService activationService; // <--- Declara el servicio
 
-    public UserController(UserService userService) {
+    // Inyección de dependencias por constructor
+    public UserController(UserService userService, AccountActivationService activationService) {
         this.userService = userService;
+        this.activationService = activationService;
     }
 
     // --- ENROLLMENT / INSCRIPTION PUBLIQUE ---
@@ -33,13 +37,15 @@ public class UserController {
             return "auth/signup";
         }
         try {
-            userService.registerUser(userDto);
-            redirectAttributes.addFlashAttribute("message", "Inscription réussie ! Vous pouvez maintenant vous connecter.");
+            // Utiliza el servicio de activación tal como indica la guía
+            activationService.registerAndSend(userDto);
+            redirectAttributes.addFlashAttribute("message", "Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "auth/signup";
         }
-        return "redirect:/login";
+        // Redirige tal como pide la instrucción para verificar el correo
+        return "redirect:/login?checkEmail";
     }
 
     // --- GESTION ADMINISTRATIVE DES UTILISATEURS ---
@@ -64,6 +70,7 @@ public class UserController {
             return "user/form";
         }
         try {
+            // El admin los crea directamente con userService (según la nota de la guía)
             userService.registerUser(userDto);
             redirectAttributes.addFlashAttribute("message", "User registered successfully!");
         } catch (RuntimeException e) {

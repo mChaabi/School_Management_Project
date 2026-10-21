@@ -29,7 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
 
                         // 1. Public web pages
-                        .requestMatchers("/login", "/signup", "/css/**", "/js/**", "/error/**").permitAll()
+                        .requestMatchers("/login", "/signup", "/activate", "/activation/**", "/css/**", "/js/**", "/error/**").permitAll()
 
                         .requestMatchers("/assistant/ask", "/api/test/**").permitAll()
                         .requestMatchers("/api/assistant/**").permitAll()
