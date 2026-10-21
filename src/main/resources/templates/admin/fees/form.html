@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{fees.form.title}, ~{::main}, 'fees')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{fees.form.title}">New fee</h1>
+            <div class="breadcrumb" th:text="#{fees.breadcrumb}">Home / Payments</div>
+        </div>
+    </div>
+
+    <div class="card"><div class="card-body">
+        <form th:object="${feeForm}" th:action="@{/admin/fees}" method="post">
+
+            <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:each="e : ${#fields.globalErrors()}" th:text="${e}"></span>
+            </div>
+
+            <p><small th:text="#{fees.target.hint}">Choose a student OR a whole classroom.</small></p>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label th:text="#{fees.field.student}">Student</label>
+                    <select th:field="*{studentId}">
+                        <option value="" th:text="#{form.select}">-- Select --</option>
+                        <option th:each="s : ${students}" th:value="${s.id}"
+                                th:text="${s.lastName + ' ' + s.firstName}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label th:text="#{fees.field.classroom}">Classroom</label>
+                    <select th:field="*{classroomId}">
+                        <option value="" th:text="#{form.select}">-- Select --</option>
+                        <option th:each="c : ${classrooms}" th:value="${c.id}" th:text="${c.name}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><span th:text="#{fees.field.title}">Concept</span> <span class="req">*</span></label>
+                    <input type="text" th:field="*{title}" maxlength="120"
+                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'">
+                    <span class="error-text" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label><span th:text="#{fees.field.amount}">Amount</span> (<span th:text="${currency}"></span>)
+                        <span class="req">*</span></label>
+                    <input type="number" step="0.01" min="0.01" th:field="*{amount}"
+                           th:classappend="${#fields.hasErrors('amount')} ? 'is-invalid'">
+                    <span class="error-text" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label><span th:text="#{fees.field.dueDate}">Due date</span> <span class="req">*</span></label>
+                    <input type="date" th:field="*{dueDate}"
+                           th:classappend="${#fields.hasErrors('dueDate')} ? 'is-invalid'">
+                    <span class="error-text" th:if="${#fields.hasErrors('dueDate')}" th:errors="*{dueDate}"></span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/admin/fees}" class="btn btn-light" th:text="#{btn.cancel}">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> <span th:text="#{btn.save}">Save</span></button>
+            </div>
+        </form>
+    </div></div>
+</main>
+</body>
+</html>

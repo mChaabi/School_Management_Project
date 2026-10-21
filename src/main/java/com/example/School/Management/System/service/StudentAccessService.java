@@ -33,4 +33,15 @@ public class StudentAccessService {
             throw new AccessDeniedException("Not allowed to view this student");
         }
     }
+
+    public boolean canViewFinance(Long studentId, Authentication auth) {
+        if (auth == null || studentId == null) return false;
+        var roles = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+
+        if (roles.contains("ROLE_ADMIN")) return true;
+        if (roles.contains("ROLE_PARENT")
+                && studentRepo.existsByIdAndParentUsername(studentId, auth.getName())) return true;
+        return roles.contains("ROLE_STUDENT")
+                && studentRepo.existsByIdAndUserUsername(studentId, auth.getName());
+    }
 }

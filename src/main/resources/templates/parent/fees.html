@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{fees.parent.title}, ~{::main}, 'parentFees')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{fees.parent.title}">Payments</h1>
+            <div class="breadcrumb" th:text="#{parent.breadcrumb}">Home</div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{fees.parent.pendingTotal}">Amount due</h3>
+            <p style="font-size:2rem;font-weight:700;color:#b45309"
+               th:text="${#numbers.formatDecimal(pendingTotal,1,2)} + ' ' + ${currency}"></p>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th th:text="#{table.name}">Student</th>
+                    <th th:text="#{fees.field.title}">Concept</th>
+                    <th th:text="#{fees.field.amount}">Amount</th>
+                    <th th:text="#{fees.col.dueDate}">Due</th>
+                    <th th:text="#{fees.field.status}">Status</th>
+                    <th></th>
+                </tr></thead>
+                <tbody>
+                <tr th:each="f : ${fees}">
+                    <td th:text="${f.student.firstName + ' ' + f.student.lastName}"></td>
+                    <td th:text="${f.title}"></td>
+                    <td><strong th:text="${#numbers.formatDecimal(f.amount,1,2)} + ' ' + ${currency}"></strong></td>
+                    <td th:text="${#temporals.format(f.dueDate,'dd/MM/yyyy')}"></td>
+                    <td>
+              <span class="badge"
+                    th:classappend="${f.status.name() == 'PAID'} ? 'badge-success'
+                                   : (${f.status.name() == 'CANCELLED'} ? 'badge-info'
+                                   : (${f.overdue} ? 'badge-danger' : 'badge-warning'))"
+                    th:text="${f.overdue} ? #{fees.status.overdue} : #{${'fees.status.' + f.status.name()}}"></span>
+                    </td>
+                    <td>
+                        <a th:if="${f.status.name() == 'PAID'}" th:href="@{/fees/{id}/receipt(id=${f.id})}"
+                           target="_blank" class="btn btn-light">
+                            <i class="bi bi-file-earmark-pdf-fill"></i> <span th:text="#{fees.btn.receipt}">Receipt</span></a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(fees)}">
+                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{fees.none}">No fees.</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

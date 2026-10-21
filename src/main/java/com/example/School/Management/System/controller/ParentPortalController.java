@@ -1,6 +1,9 @@
 package com.example.School.Management.System.controller;
 
+import com.example.School.Management.System.entity.Fee;
+import com.example.School.Management.System.enums.FeeStatus;
 import com.example.School.Management.System.repository.StudentRepository;
+import com.example.School.Management.System.service.FeeService;
 import com.example.School.Management.System.service.Student360Service;
 import com.example.School.Management.System.service.StudentAccessService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Controller
 @RequestMapping("/parent")
 @PreAuthorize("hasAnyRole('PARENT', 'ADMIN', 'TEACHER')")
@@ -23,6 +29,7 @@ public class ParentPortalController {
     private final StudentRepository studentRepo;
     private final Student360Service student360;
     private final StudentAccessService access;
+    private final FeeService feeService;
 
     @GetMapping
     public String children(@RequestParam(required = false) String keyword, Authentication auth, Model model) {
@@ -69,5 +76,16 @@ public class ParentPortalController {
         model.addAttribute("p", student360.getProfile(id));
         model.addAttribute("currentMenu", "parent");
         return "parent/child";
+    }
+
+    @GetMapping("/fees")
+    public String fees(Authentication auth, Model model) {
+        List<Fee> fees = feeService.findForParent(auth.getName());
+        model.addAttribute("fees", fees);
+        model.addAttribute("pendingTotal", fees.stream()
+                .filter(f -> f.getStatus() == FeeStatus.PENDING)
+                .map(Fee::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        return "parent/fees";
     }
 }

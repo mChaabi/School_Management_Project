@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{fees.title}, ~{::main}, 'fees')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{fees.title}">Payments</h1>
+            <div class="breadcrumb" th:text="#{fees.breadcrumb}">Home / Payments</div>
+        </div>
+        <a th:href="@{/admin/fees/new}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> <span th:text="#{fees.new}">New fee</span></a>
+    </div>
+
+    <div class="alert alert-danger" th:if="${error != null}">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="#{${error}}"></span>
+    </div>
+    <div class="alert alert-success" th:if="${created != null}">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="#{fees.created} + ': ' + ${created}"></span>
+    </div>
+
+    <div class="stats">
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{fees.summary.pending}">Pending</h3>
+            <p style="font-size:1.8rem;font-weight:700;color:#b45309"
+               th:text="${#numbers.formatDecimal(summary.pending,1,2)} + ' ' + ${currency}"></p>
+        </div></div>
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{fees.summary.overdue}">Overdue</h3>
+            <p style="font-size:1.8rem;font-weight:700;color:#dc2626"
+               th:text="${#numbers.formatDecimal(summary.overdue,1,2)} + ' ' + ${currency}"></p>
+        </div></div>
+        <div class="card"><div class="card-body">
+            <h3 th:text="#{fees.summary.collected}">Collected</h3>
+            <p style="font-size:1.8rem;font-weight:700;color:#16a34a"
+               th:text="${#numbers.formatDecimal(summary.collected,1,2)} + ' ' + ${currency}"></p>
+        </div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 th:text="#{fees.title}">Payments</h3>
+            <form th:action="@{/admin/fees}" method="get" class="search">
+                <select name="status">
+                    <option value="" th:text="#{fees.status.all}">All</option>
+                    <option th:each="s : ${statuses}" th:value="${s}"
+                            th:selected="${s == status}" th:text="#{${'fees.status.' + s}}"></option>
+                </select>
+                <input type="text" name="keyword" th:value="${keyword}" th:placeholder="#{students.search.placeholder}">
+                <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr>
+                    <th th:text="#{table.name}">Student</th>
+                    <th th:text="#{fees.field.title}">Concept</th>
+                    <th th:text="#{fees.field.amount}">Amount</th>
+                    <th th:text="#{fees.col.dueDate}">Due</th>
+                    <th th:text="#{fees.field.status}">Status</th>
+                    <th th:text="#{table.actions}">Actions</th>
+                </tr></thead>
+                <tbody>
+                <tr th:each="f : ${fees.content}">
+                    <td><a th:href="@{/admin/student-360/{id}(id=${f.student.id})}"
+                           th:text="${f.student.firstName + ' ' + f.student.lastName}"></a></td>
+                    <td th:text="${f.title}"></td>
+                    <td><strong th:text="${#numbers.formatDecimal(f.amount,1,2)} + ' ' + ${currency}"></strong></td>
+                    <td th:text="${#temporals.format(f.dueDate,'dd/MM/yyyy')}"></td>
+                    <td>
+              <span class="badge"
+                    th:classappend="${f.status.name() == 'PAID'} ? 'badge-success'
+                                   : (${f.status.name() == 'CANCELLED'} ? 'badge-info'
+                                   : (${f.overdue} ? 'badge-danger' : 'badge-warning'))"
+                    th:text="${f.overdue} ? #{fees.status.overdue} : #{${'fees.status.' + f.status.name()}}"></span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <!-- PENDING: cobrar y cancelar -->
+                            <form th:if="${f.status.name() == 'PENDING'}"
+                                  th:action="@{/admin/fees/{id}/pay(id=${f.id})}" method="post" style="display:flex;gap:6px">
+                                <select name="method">
+                                    <option th:each="m : ${methods}" th:value="${m}" th:text="#{${'fees.method.' + m}}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-cash-coin"></i>
+                                    <span th:text="#{fees.btn.pay}">Pay</span></button>
+                            </form>
+                            <form th:if="${f.status.name() == 'PENDING'}"
+                                  th:action="@{/admin/fees/{id}/cancel(id=${f.id})}" method="post"
+                                  th:attr="data-confirm=#{fees.cancel.confirm}">
+                                <button type="submit" class="btn btn-icon delete" th:title="#{fees.btn.cancel}">
+                                    <i class="bi bi-x-circle-fill"></i></button>
+                            </form>
+                            <!-- PAID: recibo -->
+                            <a th:if="${f.status.name() == 'PAID'}" th:href="@{/fees/{id}/receipt(id=${f.id})}"
+                               target="_blank" class="btn btn-light">
+                                <i class="bi bi-file-earmark-pdf-fill"></i> <span th:text="${f.receiptNumber}"></span></a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${fees.empty}">
+                    <td colspan="6" class="empty"><i class="bi bi-inbox"></i> <span th:text="#{fees.none}">No fees.</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:replace="~{fragments/pagination :: pagination(${fees}, '/admin/fees', ${keyword})}"></div>
+    </div>
+</main>
+</body>
+</html>
