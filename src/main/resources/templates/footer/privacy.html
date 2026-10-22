@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{footer.privacy}, ~{::main}, 'privacy')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{footer.privacy}">Privacy Policy</h1>
+            <div class="breadcrumb">Home / Privacy</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h3 th:text="#{privacy.title}">Data Protection</h3>
+            <p th:text="#{privacy.description}">We are committed to protecting your school data and ensuring full compliance with security protocols.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,10 +1,4 @@
-Event: a new item was added to the school calendar.
-Audience: everyone at the school.
-
-FACTS
-- Kind: {kind}
-- Title: {title}
-- Dates: {dates}
-- Description: {description}
-
-Task: announce it clearly. Mention the description only if it is provided.
+A new school {kind} has been scheduled: "{title}".
+Dates: {dates}.
+Details: {description}
+Please notify all users accordingly.

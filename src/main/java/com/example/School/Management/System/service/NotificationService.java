@@ -195,6 +195,7 @@ public class NotificationService {
     }
 
     /** Holiday or event added to the calendar. Pass plain values: the DB transaction may not be committed yet. */
+    /** Holiday, event or exam added to the calendar. Pass plain values: the DB transaction may not be committed yet. */
     @Async
     public void onSchoolEvent(Long eventId, String type, String title,
                               LocalDate start, LocalDate end, String description) {
@@ -202,8 +203,16 @@ public class NotificationService {
             String dates = start.equals(end)
                     ? start.format(DATE)
                     : start.format(DATE) + " - " + end.format(DATE);
+
+            // Determinar el nombre legible del tipo para el prompt de la IA
+            String kindLabel = switch (type) {
+                case "HOLIDAY" -> "Holiday";
+                case "EXAM" -> "Exam";
+                default -> "Event";
+            };
+
             notify(NotificationType.SCHOOL_EVENT,
-                    facts("kind", "HOLIDAY".equals(type) ? "Holiday" : "Event",
+                    facts("kind", kindLabel,
                             "title", title, "dates", dates, "description", description),
                     everyone(), "/calendar", "SCHOOL_EVENT:" + eventId);
         });

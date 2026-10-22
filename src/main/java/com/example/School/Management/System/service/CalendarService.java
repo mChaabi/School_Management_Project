@@ -67,13 +67,21 @@ public class CalendarService {
     // ---------- festivos y eventos ----------
     private List<CalendarEventDto> schoolEvents(LocalDate from, LocalDate to) {
         return eventRepo.findByStartDateLessThanEqualAndEndDateGreaterThanEqual(to, from).stream()
-                .map(e -> new CalendarEventDto(
-                        "event-" + e.getId(), e.getTitle(),
-                        e.getStartDate().toString(),
-                        e.getEndDate().plusDays(1).toString(),    // en FullCalendar el fin es exclusivo
-                        true, null, null, null,
-                        e.getType() == EventType.HOLIDAY ? HOLIDAY_COLOR : EVENT_COLOR,
-                        props(e.getType().name(), e.getDescription(), e.getId())))
+                .map(e -> {
+                    String color = switch (e.getType()) {
+                        case HOLIDAY -> HOLIDAY_COLOR;
+                        case EXAM -> EXAM_COLOR;
+                        default -> EVENT_COLOR;
+                    };
+                    return new CalendarEventDto(
+                            "event-" + e.getId(), e.getTitle(),
+                            e.getStartDate().toString(),
+                            e.getEndDate().plusDays(1).toString(),
+                            true, null, null, null,
+                            color,
+                            props(e.getType().name() == "EXAM" ? "EXAM" : e.getType().name(), e.getDescription(), e.getId())
+                    );
+                })
                 .toList();
     }
 

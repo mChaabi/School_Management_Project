@@ -5,9 +5,9 @@
     <span>&copy; <span th:text="${#temporals.createNow().year}">2026</span>
           <strong>EduManage</strong>. <span th:text="#{footer.rights}">All rights reserved.</span></span>
     <span class="footer-links">
-        <a href="#" th:text="#{footer.help}">Help</a>
-        <a href="#" th:text="#{footer.privacy}">Privacy</a>
-        <a href="#" th:text="#{footer.contact}">Contact</a>
+        <a th:href="@{/help}" th:text="#{footer.help}">Help</a>
+        <a th:href="@{/privacy}" th:text="#{footer.privacy}">Privacy</a>
+        <a th:href="@{/contact}" th:text="#{footer.contact}">Contact</a>
     </span>
 </footer>
 </body>

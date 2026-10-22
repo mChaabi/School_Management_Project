@@ -57,9 +57,9 @@ public class StudentDetailService {
                 s.getId(),
                 s.getFirstName() + " " + s.getLastName(),
                 s.getEmail(),
-                s.getPhone(),
-                s.getCity(),
-                s.getCountry(),
+                s.getPhone(),      // <--- 1. Teléfono en su lugar correcto
+                s.getCity(),       // <--- 2. Ciudad en su lugar correcto
+                s.getCountry(),    // <--- 3. País en su lugar correcto
                 s.getGender(),
                 s.getBirthDate(),
                 c != null ? c.getName() : null,

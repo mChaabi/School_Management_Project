@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{footer.contact}, ~{::main}, 'contact')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{footer.contact}">Contact Us</h1>
+            <div class="breadcrumb">Home / Contact</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h3 th:text="#{contact.title}">Get in Touch</h3>
+            <p th:text="#{contact.description}">For administrative inquiries, technical assistance, or support, reach out to the system administrator.</p>
+            <p><strong>Email:</strong> admin@edumanage.com</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

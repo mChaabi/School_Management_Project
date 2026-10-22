@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{footer.help}, ~{::main}, 'help')}">
+<body>
+<main>
+    <div class="page-header">
+        <div>
+            <h1 th:text="#{footer.help}">Help & Support</h1>
+            <div class="breadcrumb">Home / Help</div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h3 th:text="#{help.welcome}">Welcome to EduManage Support</h3>
+            <p th:text="#{help.description}">Here you can find guides on how to manage students, grades, payments, and schedules.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>
