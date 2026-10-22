@@ -844,3 +844,114 @@ main, .content, .main-content { min-width: 0; max-width: 100%; }
     .stats { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
 }
+/* ================= THEME: DARK ================= */
+html.theme-dark {
+    background-color: #0b0f19;
+    color: #f3f4f6;
+}
+html.theme-dark body {
+    background-color: #0b0f19;
+    color: #f3f4f6;
+}
+html.theme-dark .card,
+html.theme-dark .topbar,
+html.theme-dark .sidebar {
+    background-color: #111827 !important;
+    color: #f3f4f6 !important;
+    border-color: #1f2937 !important;
+}
+html.theme-dark .card h1,
+html.theme-dark .card h2,
+html.theme-dark .card h3,
+html.theme-dark .card p,
+html.theme-dark .card span,
+html.theme-dark .stat h3,
+html.theme-dark .stat p {
+    color: #f3f4f6 !important;
+}
+html.theme-dark table th,
+html.theme-dark table td {
+    color: #e5e7eb !important;
+    border-color: #1f2937 !important;
+}
+html.theme-dark input,
+html.theme-dark select {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+    border-color: #374151 !important;
+}
+
+
+/* ================= THEME: TRANSPARENT / PROFESSIONAL GLASS (SaaS Style) ================= */
+html.theme-transparent {
+    background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 75%);
+    color: #ffffff;
+    min-height: 100vh;
+}
+html.theme-transparent body {
+    background: transparent !important;
+    color: #ffffff;
+}
+
+/* Panel lateral y barra superior con efecto Glassmorphism refinado */
+html.theme-transparent .sidebar,
+html.theme-transparent .topbar {
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+/* Tarjetas y contenedores con transparencia elegante */
+html.theme-transparent .card,
+html.theme-transparent .stat {
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    color: #ffffff !important;
+}
+
+/* Garantizar visibilidad absoluta de TODOS los números y textos en modo Glass */
+html.theme-transparent h1,
+html.theme-transparent h2,
+html.theme-transparent h3,
+html.theme-transparent h4,
+html.theme-transparent p,
+html.theme-transparent span,
+html.theme-transparent strong,
+html.theme-transparent small,
+html.theme-transparent label,
+html.theme-transparent .stat h3,
+html.theme-transparent .stat p,
+html.theme-transparent .topbar-title,
+html.theme-transparent .user-info strong,
+html.theme-transparent .user-info small {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Tablas y elementos internos */
+html.theme-transparent table th,
+html.theme-transparent table td {
+    color: #f1f5f9 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html.theme-transparent tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Formularios y campos de entrada translúcidos */
+html.theme-transparent input,
+html.theme-transparent select,
+html.theme-transparent textarea {
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+html.theme-transparent input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}

@@ -20,6 +20,13 @@
             <a th:href="@{''(lang='ar')}" class="btn btn-sm btn-light" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;">AR</a>
         </div>
 
+        <!-- NEW: Theme Switcher Button -->
+        <div class="theme-selector" style="display: flex; gap: 0.2rem;">
+            <button onclick="setTheme('light')" class="btn btn-sm btn-light" title="Light Theme" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;"><i class="bi bi-sun-fill"></i></button>
+            <button onclick="setTheme('dark')" class="btn btn-sm btn-light" title="Dark Theme" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;"><i class="bi bi-moon-fill"></i></button>
+            <button onclick="setTheme('transparent')" class="btn btn-sm btn-light" title="Glass / Transparent Theme" style="padding: 0.2rem 0.4rem; font-size: 0.75rem;"><i class="bi bi-circle-half"></i></button>
+        </div>
+
         <a th:href="@{/notifications}" class="icon-btn bell-link" aria-label="Notifications" title="Notifications"
            th:with="unread=${@notificationRepository.countByRecipientUsernameAndSeenFalse(#authentication.name)}">
             <i class="bi bi-bell"></i>
@@ -48,6 +55,24 @@
             </button>
         </form>
     </div>
+
+    <script>
+        function setTheme(themeName) {
+            document.documentElement.className = ''; // Limpia clases previas
+            if (themeName !== 'light') {
+                document.documentElement.classList.add('theme-' + themeName);
+            }
+            localStorage.setItem('edumanage_theme', themeName);
+        }
+
+        // Cargar el tema guardado al iniciar la página
+        (function () {
+            const savedTheme = localStorage.getItem('edumanage_theme');
+            if (savedTheme && savedTheme !== 'light') {
+                document.documentElement.classList.add('theme-' + savedTheme);
+            }
+        })();
+    </script>
 </header>
 </body>
 </html>

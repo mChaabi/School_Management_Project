@@ -25,66 +25,62 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 0. Allow public access to REST APIs
+                        // 0. Archivos públicos y recursos estáticos
                         .requestMatchers("/api/**").permitAll()
-
-                        // 1. Public web pages
                         .requestMatchers("/login", "/signup", "/activate", "/activation/**", "/css/**", "/js/**", "/error/**").permitAll()
+                        .requestMatchers("/assistant/ask", "/api/test/**", "/api/assistant/**").permitAll()
 
-                        .requestMatchers("/assistant/ask", "/api/test/**").permitAll()
-                        .requestMatchers("/api/assistant/**").permitAll()
-                        // 2. Admin only
-                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        // 1. Panel de Administración (Solo ADMIN)
+                        .requestMatchers("/users/**", "/admin/**", "/dev/**", "/api/notifications/dev/**").hasRole("ADMIN")
 
-                        .requestMatchers("/students/new", "/students/edit/**","/students/{id}", "/students/*/report-card",
-                                "/teachers/new", "/teachers/edit/**","/teachers/**",
+                        // 2. Gestión de Estudiantes, Profesores y Aulas (ADMIN crea/edita, ADMIN y TEACHER leen)
+                        // 2. Gestión de Estudiantes, Profesores y Aulas (ADMIN crea/edita, ADMIN y TEACHER leen)
+                        .requestMatchers("/students/new", "/students/edit/**", "/students/*/report-card",
+                                "/teachers/new", "/teachers/edit/**", "/teachers/**",
                                 "/classrooms/new", "/classrooms/edit/**", "/classrooms/delete/**")
                         .hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/students/**", "/teachers/**", "/classrooms/**")
-                        .hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/students/**", "/teachers/**", "/classrooms/**")
-                        .hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.POST, "/students/**", "/teachers/**", "/classrooms/**").hasRole("ADMIN") // <--- Corregido el '/' aquí
+                        .requestMatchers(HttpMethod.GET, "/students/**", "/teachers/**", "/classrooms/**").hasAnyRole("ADMIN", "TEACHER")
 
-                        // 3. Courses
-                        .requestMatchers("/courses/new", "/courses/edit/**").hasAnyRole("ADMIN", "TEACHER")
+                        // 3. Cursos y Exámenes (ADMIN y TEACHER gestionan, todos autenticados leen)
+                        .requestMatchers("/courses/new", "/courses/edit/**", "/courses/*/grades/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.POST, "/courses/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.GET, "/courses/**").authenticated()
-                        .requestMatchers("/courses/*/grades/**").hasAnyRole("ADMIN", "TEACHER")
-
-                        // 4. Enrollments
-                        .requestMatchers("/enrollments/new", "/enrollments/edit/**",
-                                "/enrollments/update/**", "/enrollments/delete/**")
-                        .hasAnyRole("ADMIN", "TEACHER")
-                        .requestMatchers(HttpMethod.POST, "/enrollments/**").hasAnyRole("ADMIN", "TEACHER")
-                        .requestMatchers(HttpMethod.GET, "/enrollments/**").authenticated()
-
-                        // Timetable
-                        .requestMatchers("/schedules/new", "/schedules/edit/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/schedules/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/schedules/**").authenticated()
-
-                        .requestMatchers("/dev/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/notifications/dev/**").hasRole("ADMIN")
-
-
-                        .requestMatchers("/parent/**").hasRole("PARENT")
-                        .requestMatchers("/dashboard").hasAnyRole("ADMIN", "TEACHER")
 
                         .requestMatchers(HttpMethod.GET, "/exams/*/paper/view", "/exams/*/paper/download").authenticated()
+                        .requestMatchers("/exams/**").hasAnyRole("ADMIN", "TEACHER")
+
+                        // 4. Quizzes (Estudiantes pueden realizarlos, Admin/Teacher gestionarlos)
                         .requestMatchers("/quizzes/*/take", "/quizzes/*/submit", "/quizzes/*/result").hasAnyRole("STUDENT", "ADMIN", "TEACHER")
                         .requestMatchers("/my-quizzes", "/quizzes/**").authenticated()
 
-                        .requestMatchers("/parent/**").hasAnyRole("PARENT", "ADMIN", "TEACHER")
-
-                        .requestMatchers(HttpMethod.POST, "/calendar/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/calendar/**").hasRole("ADMIN")
-                        .requestMatchers("/calendar/**").authenticated()
-
-                        // 5. Attendance
+                        // 5. Inscripciones y Asistencias
+                        .requestMatchers(HttpMethod.POST, "/enrollments/**").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers("/enrollments/**").authenticated()
                         .requestMatchers("/attendances/my", "/attendances/student/**").authenticated()
                         .requestMatchers("/attendances/**").hasAnyRole("ADMIN", "TEACHER")
                         .requestMatchers("/export/**").hasAnyRole("ADMIN", "TEACHER")
+
+                        // 6. Horarios / Timetable
+                        .requestMatchers("/schedules/new", "/schedules/edit/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/schedules/**").hasRole("ADMIN")
+                        .requestMatchers("/schedules/**").authenticated()
+
+                        // 7. Módulo de Padres (PARENT, ADMIN, TEACHER)
+                        .requestMatchers("/parent/**").hasAnyRole("PARENT", "ADMIN", "TEACHER")
+
+                        // 8. Pagos y Finanzas (Admin administra, Parent ve lo suyo)
+                        .requestMatchers("/admin/fees/**").hasRole("ADMIN")
+                        .requestMatchers("/parent/fees/**").hasAnyRole("PARENT", "ADMIN")
+
+                        // 9. Calendario (ADMIN edita/crea, todos autenticados leen)
+                        .requestMatchers(HttpMethod.POST, "/calendar/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/calendar/**").hasRole("ADMIN")
+                        .requestMatchers("/calendar/**").authenticated()
+                        // 10. Dashboard principal (ADMIN y TEACHER)
+                        .requestMatchers("/dashboard").hasAnyRole("ADMIN", "TEACHER")
+
+                        // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
@@ -96,6 +92,7 @@ public class SecurityConfig {
                             var roles = auth.getAuthorities().stream().map(a -> a.getAuthority()).toList();
                             boolean staff  = roles.contains("ROLE_ADMIN") || roles.contains("ROLE_TEACHER");
                             boolean parent = roles.contains("ROLE_PARENT");
+                            // Redirección inteligente según el rol al iniciar sesión
                             String target = staff ? "/dashboard" : parent ? "/parent" : "/enrollments";
                             res.sendRedirect(req.getContextPath() + target);
                         })
