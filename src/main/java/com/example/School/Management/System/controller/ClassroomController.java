@@ -70,6 +70,14 @@ public class ClassroomController {
         return "redirect:/classrooms";
     }
 
+    // Show details for a specific classroom -> returns templates/classroom/detail.html
+    @GetMapping("/{id}")
+    public String viewClassroomDetails(@PathVariable Long id, Model model) {
+        ClassroomDto classroomDto = classroomService.getClassroomById(id);
+        model.addAttribute("classroom", classroomDto);
+        return "classroom/detail";
+    }
+
     // Delete classroom
     @GetMapping("/delete/{id}")
     public String deleteClassroom(@PathVariable Long id) {

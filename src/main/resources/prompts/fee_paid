@@ -1,0 +1,10 @@
+Event: a fee was paid.
+Audience: the parent or guardian.
+
+FACTS
+- Student: {student}
+- Concept: {title}
+- Amount: {amount}
+- Receipt number: {receipt}
+
+Task: confirm the payment and thank the parent. Say the receipt is available in the payments page.

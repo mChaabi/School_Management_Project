@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(#{classrooms.title}, ~{::main}, 'classrooms')}">
+<body>
+<main>
+  <div class="page-header">
+    <div>
+      <h1 th:text="${classroom.name}">Classroom Details</h1>
+      <div class="breadcrumb">Home / Classrooms / Details</div>
+    </div>
+    <div class="actions">
+      <a th:href="@{/classrooms/edit/{id}(id=${classroom.id})}" class="btn btn-primary" sec:authorize="hasRole('ADMIN')">
+        <i class="bi bi-pencil-fill"></i> <span th:text="#{btn.edit}">Edit</span>
+      </a>
+      <a th:href="@{/classrooms}" class="btn btn-light">
+        <i class="bi bi-arrow-left"></i> <span th:text="#{btn.back}">Back</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h3 class="mb-4"><i class="bi bi-door-open-fill text-primary"></i> <span th:text="${classroom.name}"></span></h3>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <p><strong><span th:text="#{table.capacity}">Capacity</span>:</strong>
+            <span class="badge badge-info" th:text="${classroom.capacity}">0</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

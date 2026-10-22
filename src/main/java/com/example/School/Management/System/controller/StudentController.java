@@ -14,11 +14,14 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/students")
@@ -121,8 +124,9 @@ public class StudentController {
     }
 
     @GetMapping("/{id}/report-card")
-    public ResponseEntity<byte[]> reportCard(@PathVariable Long id) {
+    public ResponseEntity<byte[]> reportCard(@PathVariable Long id, Authentication authentication) {
         byte[] pdf = reportCardPdfService.generate(id);
+        notificationService.onDocumentIssued(id, "report card", authentication.getName());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,

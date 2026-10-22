@@ -1,0 +1,10 @@
+Event: a new fee was created for a student.
+Audience: the parent or guardian.
+
+FACTS
+- Student: {student}
+- Concept: {title}
+- Amount: {amount}
+- Due date: {dueDate}
+
+Task: politely inform the parent about the new fee and its due date.

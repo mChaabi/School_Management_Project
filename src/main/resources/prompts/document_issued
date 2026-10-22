@@ -1,0 +1,9 @@
+Event: an official document was issued for a student.
+Audience: student, parent and school staff.
+
+FACTS
+- Student: {student}
+- Document: {document}
+- Date: {date}
+
+Task: inform that this document was issued. Keep it neutral and short.

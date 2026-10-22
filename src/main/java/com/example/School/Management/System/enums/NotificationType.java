@@ -16,7 +16,13 @@ public enum NotificationType {
     TEACHER_CREATED("👨‍🏫", "bi-person-workspace", "success", "New teacher",    "New teacher added: {teacher} ({specialization})."),
     COURSE_CREATED("📚", "bi-journal-bookmark-fill","warning","New course",     "New course created: {course}, taught by {teacher}."),
     CLASSROOM_CLOSED("🔒", "bi-door-closed-fill",  "danger",  "Classroom closed","Classroom {classroom} has been closed."),
-    SCHEDULE_CHANGED("📅", "bi-calendar-week-fill","info",    "Timetable change","Timetable {action}: {course} in {classroom}, {day} {time}.");
+    SCHEDULE_CHANGED("📅", "bi-calendar-week-fill","info",    "Timetable change","Timetable {action}: {course} in {classroom}, {day} {time}."),
+    DOCUMENT_ISSUED("🖨️", "bi-printer-fill",       "info",    "Document issued", "{document} for {student} was issued on {date}."),
+    IMPORT_COMPLETED("📥", "bi-upload",            "primary", "Import finished", "Student import finished: {created} of {total} created, {failed} failed."),
+    SCHOOL_EVENT( "🗓️", "bi-calendar-event-fill",  "warning", "School calendar", "{kind}: {title} ({dates})."),
+    FEE_CREATED(  "💳", "bi-cash-coin",            "warning", "New fee",        "New fee for {student}: {title}, {amount}, due {dueDate}."),
+    FEE_PAID(     "🧾", "bi-receipt",              "success", "Payment received","Payment received for {student}: {title}, {amount}. Receipt {receipt}."),
+    FEE_OVERDUE(  "⚠️", "bi-exclamation-triangle-fill","danger","Payment overdue","Fee overdue for {student}: {title}, {amount}, was due {dueDate}.");
 
     private final String emoji;
     private final String bellIcon;

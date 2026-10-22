@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,8 +32,9 @@ public class FeeService {
     private final StudentAccessService access;
 
     /** Devuelve cuántas cuotas se crearon. Los mensajes de error son claves i18n. */
+    /** Devuelve cuántas cuotas se crearon. Los mensajes de error son claves i18n. */
     @Transactional
-    public int create(FeeForm f) {
+    public List<Fee> create(FeeForm f) {
         boolean hasStudent = f.studentId() != null;
         boolean hasRoom = f.classroomId() != null;
         if (hasStudent == hasRoom) throw new IllegalArgumentException("fees.error.target");
@@ -44,16 +46,23 @@ public class FeeService {
         if (targets.isEmpty()) throw new IllegalArgumentException("fees.error.noStudents");
 
         String title = f.title().trim();
-        int created = 0;
+        List<Fee> createdList = new ArrayList<>(); // Lista para guardar las cuotas creadas
+
         for (Student s : targets) {
             if (feeRepo.existsByStudentIdAndTitleAndStatusNot(s.getId(), title, FeeStatus.CANCELLED)) continue;
-            feeRepo.save(Fee.builder()
-                    .student(s).title(title)
+
+            Fee savedFee = feeRepo.save(Fee.builder()
+                    .student(s)
+                    .title(title)
                     .amount(f.amount().setScale(2, RoundingMode.HALF_UP))
-                    .dueDate(f.dueDate()).status(FeeStatus.PENDING).build());
-            created++;
+                    .dueDate(f.dueDate())
+                    .status(FeeStatus.PENDING)
+                    .build());
+
+            createdList.add(savedFee); // Añadimos cada cuota guardada a la lista
         }
-        return created;
+
+        return createdList; // Retornamos la lista completa
     }
 
     @Transactional

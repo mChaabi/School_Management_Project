@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -38,6 +40,9 @@ public class NotificationService {
 
     @Value("${app.notifications.language:English}")
     private String language;
+
+    @Value("${school.currency:MAD}")
+    private String currency;
 
     // =====================================================================
     //  CORE: one method that every event goes through
@@ -164,6 +169,78 @@ public class NotificationService {
         });
     }
 
+    /** Report card or student profile issued. The person who did it is not notified. */
+    @Async
+    public void onDocumentIssued(Long studentId, String document, String actor) {
+        safely(() -> {
+            Student s = studentRepo.findForNotification(studentId).orElseThrow();
+            LocalDate today = LocalDate.now();
+            List<User> to = audience(s).stream()
+                    .filter(u -> !u.getUsername().equals(actor))
+                    .toList();
+            notify(NotificationType.DOCUMENT_ISSUED,
+                    facts("student", name(s), "document", document, "date", today.format(DATE)),
+                    to, null,                                        // sin enlace: cada rol tiene su página
+                    "DOC:" + document.replace(' ', '_') + ":" + studentId + ":" + today);  // 1 por día
+        });
+    }
+
+    /** One summary for the whole import, never one per student. */
+    @Async
+    public void onStudentsImported(int total, int created, int failed, String actor) {
+        safely(() -> notify(NotificationType.IMPORT_COMPLETED,
+                facts("total", String.valueOf(total), "created", String.valueOf(created),
+                        "failed", String.valueOf(failed), "by", actor),
+                staff(), "/students", null));
+    }
+
+    /** Holiday or event added to the calendar. Pass plain values: the DB transaction may not be committed yet. */
+    @Async
+    public void onSchoolEvent(Long eventId, String type, String title,
+                              LocalDate start, LocalDate end, String description) {
+        safely(() -> {
+            String dates = start.equals(end)
+                    ? start.format(DATE)
+                    : start.format(DATE) + " - " + end.format(DATE);
+            notify(NotificationType.SCHOOL_EVENT,
+                    facts("kind", "HOLIDAY".equals(type) ? "Holiday" : "Event",
+                            "title", title, "dates", dates, "description", description),
+                    everyone(), "/calendar", "SCHOOL_EVENT:" + eventId);
+        });
+    }
+
+    @Async
+    public void onFeeCreated(Long feeId, Long studentId, String title, BigDecimal amount, LocalDate dueDate) {
+        safely(() -> {
+            Student s = studentRepo.findForNotification(studentId).orElseThrow();
+            notify(NotificationType.FEE_CREATED,
+                    facts("student", name(s), "title", title, "amount", money(amount),
+                            "dueDate", dueDate.format(DATE)),
+                    parentOf(s), "/parent/fees", "FEE_NEW:" + feeId);
+        });
+    }
+
+    @Async
+    public void onFeePaid(Long feeId, Long studentId, String title, BigDecimal amount, String receipt) {
+        safely(() -> {
+            Student s = studentRepo.findForNotification(studentId).orElseThrow();
+            notify(NotificationType.FEE_PAID,
+                    facts("student", name(s), "title", title, "amount", money(amount), "receipt", receipt),
+                    parentOf(s), "/parent/fees", "FEE_PAID:" + feeId);
+        });
+    }
+
+    @Async
+    public void onFeeOverdue(Long feeId, Long studentId, String title, BigDecimal amount, LocalDate dueDate) {
+        safely(() -> {
+            Student s = studentRepo.findForNotification(studentId).orElseThrow();
+            notify(NotificationType.FEE_OVERDUE,
+                    facts("student", name(s), "title", title, "amount", money(amount),
+                            "dueDate", dueDate.format(DATE)),
+                    parentOf(s), "/parent/fees", "FEE_OVERDUE:" + feeId);   // un solo aviso por cuota
+        });
+    }
+
     /** Call it BEFORE the students are moved or the classroom is removed. */
     @Async
     public void onClassroomClosed(Long classroomId, String classroomName) {
@@ -247,5 +324,22 @@ public class NotificationService {
     private void safely(Runnable r) {
         try { r.run(); }
         catch (Exception e) { log.error("❌ [NOTIFY] failed: {}", e.getMessage(), e); }
+    }
+
+    /** Every active account: admins, teachers, students and parents. */
+    private List<User> everyone() {
+        return Stream.of(Role.values())
+                .flatMap(r -> userRepo.findByRole(r).stream())
+                .filter(User::isEnabled)
+                .toList();
+    }
+
+    /** Fees are private: only the parent, never teachers. */
+    private List<User> parentOf(Student s) {
+        return s.getParent() == null ? List.of() : List.of(s.getParent());
+    }
+
+    private String money(BigDecimal amount) {
+        return amount.setScale(2, RoundingMode.HALF_UP).toPlainString() + " " + currency;
     }
 }

@@ -203,6 +203,16 @@
             });
         })();
     </script>
+    <script th:inline="javascript">
+        (function () {
+            let sent = false;                                   // una sola vez por carga de página
+            window.addEventListener('beforeprint', function () {
+                if (sent) return;
+                sent = true;
+                fetch(/*[[@{/admin/student-360/{id}/printed(id=${p.id})}]]*/ '', { method: 'POST', keepalive: true });
+            });
+        })();
+    </script>
 </main>
 </body>
 </html>

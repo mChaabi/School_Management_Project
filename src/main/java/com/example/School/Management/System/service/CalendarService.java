@@ -78,12 +78,10 @@ public class CalendarService {
     }
 
     @Transactional
-    public void createEvent(SchoolEventForm f) {
+    public SchoolEvent createEvent(SchoolEventForm f) {          // antes: void
         LocalDate end = f.endDate() != null ? f.endDate() : f.startDate();
-        if (end.isBefore(f.startDate())) {
-            throw new IllegalArgumentException("End date before start date");
-        }
-        eventRepo.save(SchoolEvent.builder()
+        if (end.isBefore(f.startDate())) throw new IllegalArgumentException("End date before start date");
+        return eventRepo.save(SchoolEvent.builder()
                 .title(f.title().trim()).description(f.description())
                 .type(f.type()).startDate(f.startDate()).endDate(end).build());
     }

@@ -45,4 +45,8 @@ public interface FeeRepository extends JpaRepository<Fee, Long> {
     BigDecimal sumOverdue(@Param("status") FeeStatus status, @Param("today") LocalDate today);
 
     boolean existsByStudentIdAndTitleAndStatusNot(Long studentId, String title, FeeStatus status);
+
+    // FeeRepository
+    @Query("select f from Fee f join fetch f.student where f.status = :status and f.dueDate < :today")
+    List<Fee> findOverdue(@Param("status") FeeStatus status, @Param("today") LocalDate today);
 }

@@ -1,0 +1,10 @@
+Event: a fee is past its due date and still unpaid.
+Audience: the parent or guardian.
+
+FACTS
+- Student: {student}
+- Concept: {title}
+- Amount: {amount}
+- Due date: {dueDate}
+
+Task: send a polite, non-accusatory reminder. Do not threaten or mention penalties.

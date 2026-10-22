@@ -1,12 +1,14 @@
 package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.FeeForm;
+import com.example.School.Management.System.entity.Fee;
 import com.example.School.Management.System.enums.FeeStatus;
 import com.example.School.Management.System.enums.PaymentMethod;
 import com.example.School.Management.System.exception.ResourceNotFoundException;
 import com.example.School.Management.System.repository.ClassroomRepository;
 import com.example.School.Management.System.repository.StudentRepository;
 import com.example.School.Management.System.service.FeeService;
+import com.example.School.Management.System.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin/fees")
@@ -28,6 +31,7 @@ public class AdminFeeController {
     private final FeeService feeService;
     private final StudentRepository studentRepo;
     private final ClassroomRepository classroomRepo;
+    private final NotificationService notifications;
 
     @GetMapping
     public String list(@RequestParam(required = false) FeeStatus status,
@@ -54,11 +58,22 @@ public class AdminFeeController {
                          Model model, RedirectAttributes redirect) {
         if (!result.hasErrors()) {
             try {
-                int created = feeService.create(form);
-                if (created == 0) {
+                // Ahora feeService.create devuelve List<Fee> según la guía de tu imagen
+                List<Fee> created = feeService.create(form);
+
+                if (created.isEmpty()) {
                     result.reject("fees.error.duplicates", "fees.error.duplicates");
                 } else {
-                    redirect.addFlashAttribute("created", created);
+                    // Dispara la notificación para cada cuota creada (NUEVO)
+                    created.forEach(f -> notifications.onFeeCreated(
+                            f.getId(),
+                            f.getStudent().getId(),
+                            f.getTitle(),
+                            f.getAmount(),
+                            f.getDueDate()
+                    ));
+
+                    redirect.addFlashAttribute("created", created.size());
                     return "redirect:/admin/fees";
                 }
             } catch (IllegalArgumentException | ResourceNotFoundException ex) {

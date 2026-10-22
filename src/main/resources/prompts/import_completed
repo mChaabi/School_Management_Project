@@ -1,0 +1,10 @@
+Event: a bulk import of students finished.
+Audience: school staff.
+
+FACTS
+- Rows read: {total}
+- Students created: {created}
+- Rows with errors: {failed}
+- Done by: {by}
+
+Task: summarize the result. If there are errors, say they should be reviewed in the import report.

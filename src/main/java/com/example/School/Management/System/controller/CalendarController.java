@@ -2,7 +2,9 @@ package com.example.School.Management.System.controller;
 
 import com.example.School.Management.System.dto.CalendarEventDto;
 import com.example.School.Management.System.dto.SchoolEventForm;
+import com.example.School.Management.System.entity.SchoolEvent;
 import com.example.School.Management.System.service.CalendarService;
+import com.example.School.Management.System.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +24,7 @@ import java.util.List;
 public class CalendarController {
 
     private final CalendarService service;
+    private final NotificationService notifications;
 
     @GetMapping
     public String page() {
@@ -41,7 +44,9 @@ public class CalendarController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> create(@Valid @RequestBody SchoolEventForm form) {
         try {
-            service.createEvent(form);
+            SchoolEvent e = service.createEvent(form);
+            notifications.onSchoolEvent(e.getId(), e.getType().name(), e.getTitle(),
+                    e.getStartDate(), e.getEndDate(), e.getDescription());   // NUEVO
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().build();

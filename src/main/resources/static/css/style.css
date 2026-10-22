@@ -824,3 +824,23 @@ label.qz-choice:hover{background:#eef2ff;border-color:#a5b4fc}
 }
 
 .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.table-wrap table { min-width: 640px; }
+
+html, body { max-width: 100%; overflow-x: hidden; }
+main, .content, .main-content { min-width: 0; max-width: 100%; }
+.card { max-width: 100%; }
+
+@media (max-width: 768px) {
+    .topbar { padding: 0 12px; gap: 8px; }
+    .topbar .page-title { font-size: 1rem; }
+    .lang-switch a { padding: 4px 6px; font-size: 11px; }
+    .user-name { display: none; }          /* deja solo el avatar */
+    .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .page-header .btn { width: 100%; }
+    .stats { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+}
