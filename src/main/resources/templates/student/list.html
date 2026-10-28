@@ -71,7 +71,7 @@
                                th:href="@{/students/edit/{id}(id=${s.id})}" class="btn btn-icon edit" th:title="#{title.edit}">
                                 <i class="bi bi-pencil-fill"></i></a>
                             <form sec:authorize="hasRole('ADMIN')"
-                                  th:action="@{/students/delete/{id}(id=${s.id})}" method="post"
+                                  th:action="@{/students/delete/{id}(id=${s.id})}"
                                   th:attr="data-confirm=#{students.delete.confirm}">
                                 <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                                     <i class="bi bi-trash-fill"></i></button>

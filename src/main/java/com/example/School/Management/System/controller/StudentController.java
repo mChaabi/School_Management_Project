@@ -72,14 +72,19 @@ public class StudentController {
     }
 
     // Handle create submission
+    // Handle create submission
     @PostMapping
     public String createStudent(@Valid @ModelAttribute("studentDto") StudentDto studentDto,
-                                BindingResult result, Model model) {
+                                BindingResult result, Model model, Principal principal) { // <-- 1. Añade Principal
         if (!result.hasErrors()) {
             try {
                 var saved = studentService.createStudent(studentDto);
+
+                // 2. Obtiene el username actual y pásalo como tercer argumento
+                String username = (principal != null) ? principal.getName() : "admin";
                 notificationService.onStudentCreated(saved.id(),
-                        saved.firstName() + " " + saved.lastName(), null);
+                        saved.firstName() + " " + saved.lastName(), username);
+
                 return "redirect:/students";
             } catch (FieldValidationException e) {
                 result.addError(new FieldError("studentDto", e.getField(), e.getMessage()));

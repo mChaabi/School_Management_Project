@@ -87,7 +87,9 @@ public class AdminFeeController {
     @PostMapping("/{id}/pay")
     public String pay(@PathVariable Long id, @RequestParam PaymentMethod method, RedirectAttributes redirect) {
         try {
-            feeService.markPaid(id, method);
+            Fee fee = feeService.markPaid(id, method);
+            notifications.onFeePaid(fee.getId(), fee.getStudent().getId(),
+                    fee.getTitle(), fee.getAmount(), fee.getReceiptNumber());
         } catch (IllegalStateException ex) {
             redirect.addFlashAttribute("error", ex.getMessage());
         }

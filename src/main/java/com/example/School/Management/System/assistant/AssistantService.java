@@ -46,6 +46,9 @@ public class AssistantService {
         String error = null;
         for (int attempt = 0; attempt < 2 && result == null; attempt++) {
             try {
+                raw = raw.replaceAll("(?is)^```(?:sql)?\\s*", "")
+                        .replaceAll("(?is)\\s*```$", "")
+                        .trim();
                 sql = guard.check(raw);
                 result = runner.run(sql);
             } catch (SqlRejectedException e) {

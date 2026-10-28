@@ -5,4 +5,4 @@ FACTS
 - Student: {student}
 - Classroom: {classroom}
 
-Task: announce the new student. Mention the classroom only if it is provided; otherwise say the classroom is still to be assigned.
+Task: announce that a new student has been created. Keep it short, professional and clear.

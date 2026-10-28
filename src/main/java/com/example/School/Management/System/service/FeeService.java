@@ -66,7 +66,7 @@ public class FeeService {
     }
 
     @Transactional
-    public void markPaid(Long id, PaymentMethod method) {
+    public Fee markPaid(Long id, PaymentMethod method) {
         Fee fee = feeRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Fee not found: " + id));
         if (fee.getStatus() != FeeStatus.PENDING) throw new IllegalStateException("fees.error.notPending");
 
@@ -74,7 +74,7 @@ public class FeeService {
         fee.setMethod(method);
         fee.setPaidDate(LocalDate.now());
         fee.setReceiptNumber(String.format("R-%d-%06d", LocalDate.now().getYear(), fee.getId()));
-    }
+        return feeRepo.save(fee);  }
 
     @Transactional
     public void cancel(Long id) {

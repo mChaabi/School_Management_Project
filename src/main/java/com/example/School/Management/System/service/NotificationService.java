@@ -12,7 +12,6 @@ import com.example.School.Management.System.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -59,11 +58,11 @@ public class NotificationService {
             unique.keySet().removeIf(id -> repo.existsByRecipientIdAndDedupKey(id, dedupKey));
         }
         if (unique.isEmpty()) {
-            log.info("🔕 [NOTIFY] {} {} - nobody to notify (or already sent)", type.getEmoji(), type);
+            log.info("🔕 [NOTIFY] {} {} nobody to notify (or already sent)", type.getEmoji(), type);
             return 0;
         }
 
-        // 3. text: AI first, fallback template second (no DB transaction is open during the HTTP call)
+        // 3. text: AI first, fallback template second
         String system = prompts.render(prompts.load("system"), Map.of("language", language));
         String userPrompt = prompts.render(prompts.load(type.promptName()), facts);
         Optional<String> aiText = ai.complete(system, userPrompt).map(this::clean).filter(t -> !t.isBlank());
@@ -86,11 +85,9 @@ public class NotificationService {
     }
 
     // =====================================================================
-    //  EVENTS (called from your other services / controllers in Part B)
+    //  EVENTS (Execution synchronous for instant display)
     // =====================================================================
 
-    /** Absence or late arrival. Other statuses are ignored. */
-    @Async
     public void onAttendance(Long studentId, LocalDate date, AttendanceStatus status, String remark) {
         if (status == null || date == null) return;
         NotificationType type = switch (status) {
@@ -113,7 +110,6 @@ public class NotificationService {
         });
     }
 
-    @Async
     public void onGradeAdded(Long studentId, Long courseId, Double grade) {
         if (grade == null) return;
         safely(() -> {
@@ -124,11 +120,10 @@ public class NotificationService {
                             "grade", String.format(Locale.ROOT, "%.2f", grade),
                             "teacher", teacherName(c)),
                     audience(s), "/enrollments",
-                    "GRADE:" + studentId + ":" + courseId + ":" + grade);   // a changed grade notifies again
+                    "GRADE:" + studentId + ":" + courseId + ":" + grade);
         });
     }
 
-    @Async
     public void onEnrollment(Long studentId, Long courseId) {
         safely(() -> {
             Student s = studentRepo.findForNotification(studentId).orElseThrow();
@@ -141,21 +136,18 @@ public class NotificationService {
         });
     }
 
-    @Async
     public void onStudentCreated(Long studentId, String fullName, String classroomName) {
         safely(() -> notify(NotificationType.STUDENT_CREATED,
                 facts("student", fullName, "classroom", classroomName),
                 staff(), "/students/" + studentId, "STUDENT_NEW:" + studentId));
     }
 
-    @Async
     public void onTeacherCreated(Long teacherId, String fullName, String specialization) {
         safely(() -> notify(NotificationType.TEACHER_CREATED,
                 facts("teacher", fullName, "specialization", specialization),
                 staff(), "/teachers/" + teacherId, "TEACHER_NEW:" + teacherId));
     }
 
-    @Async
     public void onCourseCreated(Long courseId) {
         safely(() -> {
             Course c = courseRepo.findForNotification(courseId).orElseThrow();
@@ -169,8 +161,6 @@ public class NotificationService {
         });
     }
 
-    /** Report card or student profile issued. The person who did it is not notified. */
-    @Async
     public void onDocumentIssued(Long studentId, String document, String actor) {
         safely(() -> {
             Student s = studentRepo.findForNotification(studentId).orElseThrow();
@@ -180,13 +170,11 @@ public class NotificationService {
                     .toList();
             notify(NotificationType.DOCUMENT_ISSUED,
                     facts("student", name(s), "document", document, "date", today.format(DATE)),
-                    to, null,                                        // sin enlace: cada rol tiene su página
-                    "DOC:" + document.replace(' ', '_') + ":" + studentId + ":" + today);  // 1 por día
+                    to, null,
+                    "DOC:" + document.replace(' ', '_') + ":" + studentId + ":" + today);
         });
     }
 
-    /** One summary for the whole import, never one per student. */
-    @Async
     public void onStudentsImported(int total, int created, int failed, String actor) {
         safely(() -> notify(NotificationType.IMPORT_COMPLETED,
                 facts("total", String.valueOf(total), "created", String.valueOf(created),
@@ -194,9 +182,6 @@ public class NotificationService {
                 staff(), "/students", null));
     }
 
-    /** Holiday or event added to the calendar. Pass plain values: the DB transaction may not be committed yet. */
-    /** Holiday, event or exam added to the calendar. Pass plain values: the DB transaction may not be committed yet. */
-    @Async
     public void onSchoolEvent(Long eventId, String type, String title,
                               LocalDate start, LocalDate end, String description) {
         safely(() -> {
@@ -204,7 +189,6 @@ public class NotificationService {
                     ? start.format(DATE)
                     : start.format(DATE) + " - " + end.format(DATE);
 
-            // Determinar el nombre legible del tipo para el prompt de la IA
             String kindLabel = switch (type) {
                 case "HOLIDAY" -> "Holiday";
                 case "EXAM" -> "Exam";
@@ -218,40 +202,40 @@ public class NotificationService {
         });
     }
 
-    @Async
+    // ---------- FEES (admin + parent receive them) ----------
+
     public void onFeeCreated(Long feeId, Long studentId, String title, BigDecimal amount, LocalDate dueDate) {
         safely(() -> {
             Student s = studentRepo.findForNotification(studentId).orElseThrow();
             notify(NotificationType.FEE_CREATED,
                     facts("student", name(s), "title", title, "amount", money(amount),
                             "dueDate", dueDate.format(DATE)),
-                    parentOf(s), "/parent/fees", "FEE_NEW:" + feeId);
+                    feeAudience(s), "/parent/fees", "FEE_NEW:" + feeId);
         });
     }
 
-    @Async
     public void onFeePaid(Long feeId, Long studentId, String title, BigDecimal amount, String receipt) {
         safely(() -> {
             Student s = studentRepo.findForNotification(studentId).orElseThrow();
             notify(NotificationType.FEE_PAID,
-                    facts("student", name(s), "title", title, "amount", money(amount), "receipt", receipt),
-                    parentOf(s), "/parent/fees", "FEE_PAID:" + feeId);
+                    facts("student", name(s), "title", title, "amount", money(amount),
+                            "receipt", receipt != null ? receipt : "-"),
+                    feeAudience(s), "/parent/fees", "FEE_PAID:" + feeId);
         });
     }
 
-    @Async
     public void onFeeOverdue(Long feeId, Long studentId, String title, BigDecimal amount, LocalDate dueDate) {
         safely(() -> {
             Student s = studentRepo.findForNotification(studentId).orElseThrow();
             notify(NotificationType.FEE_OVERDUE,
                     facts("student", name(s), "title", title, "amount", money(amount),
                             "dueDate", dueDate.format(DATE)),
-                    parentOf(s), "/parent/fees", "FEE_OVERDUE:" + feeId);   // un solo aviso por cuota
+                    feeAudience(s), "/parent/fees", "FEE_OVERDUE:" + feeId);
         });
     }
 
-    /** Call it BEFORE the students are moved or the classroom is removed. */
-    @Async
+    // ---------- CLASSROOM / SCHEDULE ----------
+
     public void onClassroomClosed(Long classroomId, String classroomName) {
         safely(() -> {
             List<Student> students = studentRepo.findByClassroomForNotification(classroomId);
@@ -263,13 +247,11 @@ public class NotificationService {
         });
     }
 
-    /** action = "added" | "updated" | "cancelled" */
-    @Async
     public void onScheduleChanged(Long courseId, Long classroomId, String classroomName,
                                   String action, String day, String time) {
         safely(() -> {
             Course c = courseRepo.findForNotification(courseId).orElseThrow();
-            List<User> to = new ArrayList<>(staff());          // <-- add this line
+            List<User> to = new ArrayList<>(staff());
             studentRepo.findByClassroomForNotification(classroomId).forEach(s -> to.addAll(audience(s)));
             if (c.getTeacher() != null) to.add(c.getTeacher().getUser());
             notify(NotificationType.SCHEDULE_CHANGED,
@@ -284,10 +266,16 @@ public class NotificationService {
     //  HELPERS
     // =====================================================================
 
-    /** Who gets student-related news: admins + the student + the parent (if they exist). */
     private List<User> audience(Student s) {
         List<User> list = new ArrayList<>(staff());
         if (s.getUser() != null)   list.add(s.getUser());
+        if (s.getParent() != null) list.add(s.getParent());
+        return list;
+    }
+
+    /** Fees: admins + the parent (the student does not need to see money matters). */
+    private List<User> feeAudience(Student s) {
+        List<User> list = new ArrayList<>(staff());
         if (s.getParent() != null) list.add(s.getParent());
         return list;
     }
@@ -296,7 +284,13 @@ public class NotificationService {
         return userRepo.findByRole(Role.ROLE_ADMIN);
     }
 
-    /** The only place that decides which name the AI sees (change to firstName for more privacy). */
+    private List<User> everyone() {
+        return Stream.of(Role.values())
+                .flatMap(r -> userRepo.findByRole(r).stream())
+                .filter(User::isEnabled)
+                .toList();
+    }
+
     private String name(Student s) {
         return s.getFirstName() + " " + s.getLastName();
     }
@@ -306,7 +300,6 @@ public class NotificationService {
                 : c.getTeacher().getFirstName() + " " + c.getTeacher().getLastName();
     }
 
-    /** Lessons the student's classroom has on that weekday, taken from the timetable. */
     private String lessonsOn(Student s, LocalDate date) {
         if (s.getClassroom() == null) return null;
         String lessons = scheduleRepo.findForGrid(s.getClassroom().getId(), null).stream()
@@ -329,23 +322,9 @@ public class NotificationService {
         return s.length() > 400 ? s.substring(0, 397) + "..." : s;
     }
 
-    /** A notification problem must never break the real action. */
     private void safely(Runnable r) {
         try { r.run(); }
         catch (Exception e) { log.error("❌ [NOTIFY] failed: {}", e.getMessage(), e); }
-    }
-
-    /** Every active account: admins, teachers, students and parents. */
-    private List<User> everyone() {
-        return Stream.of(Role.values())
-                .flatMap(r -> userRepo.findByRole(r).stream())
-                .filter(User::isEnabled)
-                .toList();
-    }
-
-    /** Fees are private: only the parent, never teachers. */
-    private List<User> parentOf(Student s) {
-        return s.getParent() == null ? List.of() : List.of(s.getParent());
     }
 
     private String money(BigDecimal amount) {

@@ -67,7 +67,7 @@
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
 
-                            <form th:action="@{/courses/delete/{id}(id=${c.id})}" method="post"
+                            <form th:action="@{/courses/delete/{id}(id=${c.id})}"
                                   th:attr="data-confirm=#{courses.delete.confirm}">
                                 <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                                     <i class="bi bi-trash-fill"></i>

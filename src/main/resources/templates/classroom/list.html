@@ -53,7 +53,7 @@
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
                             <form sec:authorize="hasRole('ADMIN')" th:action="@{/classrooms/delete/{id}(id=${classroom.id})}"
-                                  method="post" th:attr="data-confirm=#{classrooms.delete.confirm}">
+                                  th:attr="data-confirm=#{classrooms.delete.confirm}">
                                 <button type="submit" class="btn btn-icon delete" th:title="#{title.delete}">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
